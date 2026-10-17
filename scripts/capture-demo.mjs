@@ -10,6 +10,7 @@ import {
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
 import { spawn } from "node:child_process";
+import { WAREHOUSE } from "@ghost/shared";
 import { chromium } from "playwright";
 import { startWarehouse } from "../apps/server/dist/http.js";
 
@@ -98,6 +99,89 @@ try {
   monitor(page);
   await ready(page);
   await screenshot(page, "ghost-warehouse.png", { fullPage: true });
+  await page.locator(".scene").screenshot({
+    path: join(output, "ghost-overview-small.jpg"),
+    type: "jpeg",
+    quality: 52,
+  });
+  captures.push("ghost-overview-small.jpg");
+  await page.getByRole("button", { name: "Mission view", exact: true }).click();
+  await wait(1000);
+  await screenshot(page, "ghost-mission-bay.png", { fullPage: true });
+  await page
+    .getByRole("button", { name: "Reset warehouse view", exact: true })
+    .click();
+  await wait(1000);
+  // Verify reset after manual orbit while already in facility mode. Comparing
+  // small rendered images tolerates the rotor animation, but catches a no-op camera reset.
+  await wait(700);
+  const baseline = await page
+    .locator(".scene")
+    .screenshot({ type: "jpeg", quality: 65 });
+  const orbitArea = await page.locator(".scene").boundingBox();
+  await page.mouse.move(
+    orbitArea.x + orbitArea.width * 0.55,
+    orbitArea.y + orbitArea.height * 0.55,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    orbitArea.x + orbitArea.width * 0.55 + 120,
+    orbitArea.y + orbitArea.height * 0.55 + 40,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await wait(450);
+  const orbited = await page
+    .locator(".scene")
+    .screenshot({ type: "jpeg", quality: 65 });
+  await page
+    .getByRole("button", { name: "Reset warehouse view", exact: true })
+    .click();
+  await wait(1500);
+  const restored = await page
+    .locator(".scene")
+    .screenshot({ type: "jpeg", quality: 65 });
+  async function difference(first, second) {
+    return page.evaluate(
+      async ([a, b]) => {
+        async function pixels(source) {
+          const image = new Image();
+          image.src = "data:image/jpeg;base64," + source;
+          await image.decode();
+          const canvas = document.createElement("canvas");
+          canvas.width = canvas.height = 64;
+          const context = canvas.getContext("2d");
+          context.drawImage(image, 0, 0, 64, 64);
+          return context.getImageData(0, 0, 64, 64).data;
+        }
+        const [x, y] = await Promise.all([pixels(a), pixels(b)]);
+        let total = 0;
+        for (let i = 0; i < x.length; i++)
+          if (i % 4 !== 3) total += Math.abs(x[i] - y[i]);
+        return total / (64 * 64 * 3 * 255);
+      },
+      [first.toString("base64"), second.toString("base64")],
+    );
+  }
+  await Promise.all([
+    writeFile(join(output, "camera-baseline.jpg"), baseline),
+    writeFile(join(output, "camera-orbited.jpg"), orbited),
+    writeFile(join(output, "camera-restored.jpg"), restored),
+  ]);
+  const orbitDifference = await difference(baseline, orbited);
+  const resetDifference = await difference(baseline, restored);
+  console.log("Camera preset verification:", {
+    orbitDifference,
+    resetDifference,
+  });
+  assert.ok(
+    orbitDifference > 0.02,
+    "manual orbit changes the rendered facility view",
+  );
+  assert.ok(
+    resetDifference < 0.025,
+    `reset restores the overview after orbit (difference ${resetDifference})`,
+  );
   const sceneBounds = await page.locator(".scene").boundingBox();
   await page.getByRole("button", { name: "Run guided demo" }).click();
   const start = Date.now();
@@ -262,11 +346,13 @@ try {
   assert.deepEqual(errors, [], "no browser runtime or console errors");
   const report = {
     capturedAt: new Date().toISOString(),
+    facility: { ...WAREHOUSE, area: WAREHOUSE.width * WAREHOUSE.depth },
     viewport: { width: 1440, height: 1280 },
     mobile: { width: 390, height: 844 },
     mission: final.mission,
     durationSeconds: (frames.at(-1).at - start) / 1000,
     frameCount: frames.length,
+    cameraReset: { orbitDifference, resetDifference },
     manualRoverInspection: "Seal intact. Label verified. Cleared for dispatch.",
     browserErrors: errors,
     captures,

@@ -42,14 +42,16 @@ Node serves production static assets and the API on loopback port 3001. Developm
 | Arm / Atlas       | `preset` home/reach/drop, `grasp`, `place`              | Cargo within 2.8m; grasp checks gripper reach       |
 | Drone / Wisp      | `takeoff`, bounded 3D `move`, `inspect`, `land`, `stop` | Cargo within 9m; aerial inspect within 5m           |
 
-Warehouse floor bounds: X −9…9, Z −6…6. Airborne targets use Y 0.8…5. Ground heights and arm presets are fixed simulation conventions. Motion is linear at a body-specific speed, without collision avoidance or physics.
+Warehouse footprint: 64 × 44 m (2,816 m²), with 12 m clear flight height. Authoritative floor bounds: X −31…31, Z −33…9. Airborne targets use Y 0.8…12. Ground heights and arm presets are fixed simulation conventions. Motion is linear at a body-specific speed, without collision avoidance or physics.
 
 ## Interface
 
-Responsive operations console with distinct procedural machines, warehouse shelving and cargo, camera orbit/top/focus views, accessible fleet selection, possession countdown, coordinate and floor-pick controls, structured sensor output, mission checklist and live activity stream. A guided run, stop action and confirmed reset make the demo repeatable. Browser tokens survive reload via session storage; restart invalidates them. Fonts are self-hosted and there are no external scene assets.
+Responsive operations console with distinct procedural machines, 16 four-tier storage bays, six loading docks, a high-bay steel shell, overhead lights, mezzanine control room and cargo, camera facility/mission/top/focus views, accessible fleet selection, possession countdown, coordinate and floor-pick controls, structured sensor output, mission checklist and live activity stream. A guided run, stop action and confirmed reset make the demo repeatable. Browser tokens survive reload via session storage; restart invalidates them. Fonts are self-hosted and there are no external scene assets.
 
 ## Validation and limits
 
 Focused simulation tests cover leases, contention, schema validation, bounds, cancellation, sensor visibility and body behavior. Integration tests initialize real HTTP and stdio MCP clients, assert one shared authority and SSE snapshots, and run the full guided mission. React/JSDOM tests cover possession, movement, observations, body switching, stale snapshots and reconnection. CI runs strict typechecks, builds and tests.
 
 Actual WebGL rendering and desktop/mobile layouts are checked by a repeatable Chromium capture run. It records the complete mission and performs a rover inspection through touch-emulated controls. CI retains the screenshots, video, and machine-readable report. Physical device/GPU behavior and pinch gestures remain target-device QA. No real hardware, persistence, accounts, images, model provider, collision/path planning, public hosting or extra infrastructure has been added. Loopback Host/Origin checks and private-forward configuration support a trusted demo; this is not an authenticated public service.
+
+The facility overview frames the full industrial hall. Starting the guided mission or selecting a body moves into the central embodiment bay; camera changes ease between views and stop when the user takes over orbiting. Repeated storage and structural parts use instanced geometry so scene detail does not add hundreds of individual draw calls. Report pages load one small JPEG by default, with larger captures and video available on demand for mobile users.

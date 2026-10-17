@@ -2064,3 +2064,46 @@ dialog::backdrop {
   flex-shrink: 0;
   white-space: nowrap;
 }
+.scene-controls button[aria-pressed="true"] {
+  border-color: #baf7cf;
+  background: #345141;
+  color: #e1fae7;
+}
+.scene-view-label {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #b8d6d5;
+  text-align: center;
+  font: 9px var(--mono);
+  letter-spacing: 1.4px;
+  pointer-events: none;
+}
+.scene-view-label span {
+  display: block;
+  color: #688a91;
+  font-size: 8px;
+  margin-top: 7px;
+  letter-spacing: 0.7px;
+}
+.demo-phase {
+  top: 62px;
+}
+@media (max-width: 720px) {
+  .scene-view-label {
+    top: 51px;
+    width: 75%;
+    font-size: 8px;
+  }
+  .scene-view-label span {
+    font-size: 8px;
+    margin-top: 4px;
+  }
+  .demo-phase {
+    top: 93px;
+  }
+  .scene-coordinate {
+    max-width: 190px;
+  }
+}

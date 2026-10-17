@@ -95,7 +95,7 @@ test("typed commands, per-body capabilities, bounds and lease budget are enforce
     );
   }
   assert.throws(
-    () => sim.act(leaseId, { type: "move", x: 20, z: 0 }),
+    () => sim.act(leaseId, { type: "move", x: 32, z: 0 }),
     fails("OUT_OF_BOUNDS"),
   );
   assert.throws(
@@ -161,7 +161,7 @@ test("camera field of view, airborne drone, and arm cargo transfer", () => {
   sim.act(drone, { type: "takeoff" });
   advance(2000);
   assert.throws(
-    () => sim.act(drone, { type: "move", x: 1, z: 0, y: 9 }),
+    () => sim.act(drone, { type: "move", x: 1, z: 0, y: 13 }),
     fails("OUT_OF_BOUNDS"),
   );
   sim.act(drone, { type: "move", x: 1, z: -1.5, y: 3.4 });
@@ -203,4 +203,31 @@ test("reset invalidates leases and pending demo work cannot mutate the new world
   assert.equal(sim.snapshot().demo.running, false);
   assert.ok(sim.snapshot().bodies.every((b) => !b.lease));
   assert.ok(sim.snapshot().mission.every((s) => !s.complete));
+});
+
+test("expanded warehouse admits long floor and elevated flight routes within shared bounds", () => {
+  const { sim, advance } = setup();
+  assert.deepEqual(sim.discover().bounds, {
+    minX: -31,
+    maxX: 31,
+    minZ: -33,
+    maxZ: 9,
+    maxAltitude: 12,
+  });
+  const rover = sim.possess("rover-01", 120).leaseId;
+  sim.act(rover, { type: "move", x: -28, z: -30 });
+  advance(24000);
+  assert.deepEqual(sim.observe(rover).body.position, [-28, 0.45, -30]);
+  assert.throws(
+    () => sim.act(rover, { type: "move", x: 0, z: -34 }),
+    fails("OUT_OF_BOUNDS"),
+  );
+  const drone = sim.possess("drone-01", 120).leaseId;
+  sim.act(drone, { type: "takeoff" });
+  advance(2000);
+  sim.act(drone, { type: "move", x: 28, z: -30, y: 11 });
+  advance(23000);
+  assert.deepEqual(sim.observe(drone).body.position, [28, 11, -30]);
+  sim.release(rover);
+  sim.release(drone);
 });
