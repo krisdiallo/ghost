@@ -1,0 +1,54 @@
+{
+  "capturedAt": "2026-10-17T21:33:56.434Z",
+  "viewport": {
+    "width": 1440,
+    "height": 1280
+  },
+  "mobile": {
+    "width": 390,
+    "height": 844
+  },
+  "mission": [
+    {
+      "id": "camera",
+      "body": "camera",
+      "label": "Locate cargo with Sentinel",
+      "complete": true
+    },
+    {
+      "id": "rover",
+      "body": "rover",
+      "label": "Inspect the seal with Scout",
+      "complete": true
+    },
+    {
+      "id": "drone",
+      "body": "drone",
+      "label": "Survey from above with Wisp",
+      "complete": true
+    },
+    {
+      "id": "arm",
+      "body": "arm",
+      "label": "Stage cargo with Atlas",
+      "complete": true
+    }
+  ],
+  "durationSeconds": 17.205,
+  "frameCount": 38,
+  "manualRoverInspection": "Seal intact. Label verified. Cleared for dispatch.",
+  "browserErrors": [],
+  "captures": [
+    "ghost-warehouse.png",
+    "ghost-camera.png",
+    "ghost-rover.png",
+    "ghost-drone.png",
+    "ghost-arm.png",
+    "ghost-mission-complete.png",
+    "ghost-demo.mp4",
+    "ghost-demo.gif",
+    "ghost-mobile.png",
+    "ghost-mobile-controls.png",
+    "ghost-mobile-observation.png"
+  ]
+}

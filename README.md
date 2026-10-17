@@ -121,7 +121,9 @@ Do not expose this unauthenticated control API on a public port. Publishing the 
 
 Tests cover lease contention and expiry, invalid tokens, repeated release, bounds, malformed commands, action cancellation, completion, camera field of view, drone flight, arm transfer, reset/demo cancellation, revision ordering, HTTP/SSE, actual MCP clients over HTTP and stdio, and the full four-body guided mission. The UI test covers possession, movement, observations, body switching, stale snapshots and reconnection. GitHub Actions runs typechecks, builds and tests.
 
-**Verification limit:** UI interactions are tested in JSDOM, not a real WebGL browser. Actual 3D rendering, touch gestures, and visual layout still need a browser check on the target demo device. Vite's large Three.js bundle warning is non-fatal.
+**Visual progress:** `npm run capture` runs the actual app in headless Chromium with software WebGL, records the full four-body mission, captures desktop and mobile layouts, and performs a rover inspection through touch-emulated controls. Outputs go to `work/captures`; CI archives them as `ghost-visual-progress`. The [latest visual report](docs/progress/latest/README.md) includes selected screenshots and the demo video. Run `npx playwright install --with-deps chromium` and install FFmpeg if they are not available; `GHOST_BROWSER_PATH` can select a system Chromium executable.
+
+**Verification limit:** Desktop and mobile-emulated browser runs are verified; physical phone/GPU behavior and pinch gestures remain a target-device check. Vite's large Three.js bundle warning is non-fatal.
 
 ```text
 apps/server/       Simulation, MCP tools, stdio adapter, HTTP/SSE bridge

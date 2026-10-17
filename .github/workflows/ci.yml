@@ -14,3 +14,16 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      - name: Install visual test browser
+        run: npx playwright install --with-deps chromium
+      - name: Install video encoder
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Capture the warehouse and run the mobile mission
+        run: node scripts/capture-demo.mjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ghost-visual-progress
+          path: work/captures
+          if-no-files-found: warn
+          retention-days: 14

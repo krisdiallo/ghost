@@ -115,14 +115,14 @@ test(
       assert.match(document.body.textContent!, /YOU ARE IN CONTROL/);
       assert.equal(sim.snapshot().bodies[1]!.lease!.owner, "You · browser");
       const beforeMove = sim.snapshot();
-      await click("Move to point ↗");
+      await click("Move to point");
       assert.match(document.body.textContent!, /IN MOTION/);
       await act(async () => {
         now += 4500;
         sim.tick();
       });
       assert.match(document.body.textContent!, /move · completed/);
-      await click("Scan priority cargo ◎");
+      await click("Scan priority cargo");
       await click("Observation");
       assert.match(document.body.textContent!, /Seal intact/);
       assert.match(document.body.textContent!, /crate-07/);
@@ -155,7 +155,7 @@ test(
         "switching releases previous body",
       );
       assert.equal(sim.snapshot().bodies[0]!.lease!.owner, "You · browser");
-      await click("Release body ↗");
+      await click("Release body");
       assert.ok(sim.snapshot().bodies.every((b) => !b.lease));
       await act(async () => {
         stream.onerror?.();
