@@ -1,6 +1,6 @@
 # GHOST · visual progress
 
-Oct 17, 2026, 2:33 PM PT · actual app captures
+Oct 17, 2026, 2:36 PM PT · actual app captures
 
 **[Watch the complete 17-second mission](ghost-demo.mp4?raw=true)** · [Download MP4](ghost-demo.mp4?raw=true)
 

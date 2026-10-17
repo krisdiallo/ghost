@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-17T21:33:56.434Z",
+  "capturedAt": "2026-10-17T21:36:59.919Z",
   "viewport": {
     "width": 1440,
     "height": 1280
@@ -34,8 +34,8 @@
       "complete": true
     }
   ],
-  "durationSeconds": 17.205,
-  "frameCount": 38,
+  "durationSeconds": 17.337,
+  "frameCount": 25,
   "manualRoverInspection": "Seal intact. Label verified. Cleared for dispatch.",
   "browserErrors": [],
   "captures": [

@@ -469,7 +469,8 @@ function BodyMesh({
       <Text
         text={`${body.label.toUpperCase()}${body.lease ? " •" : ""}`}
         position={[
-          body.position[0],
+          body.position[0] +
+            (body.kind === "drone" ? -0.8 : body.kind === "arm" ? 0.5 : 0),
           body.position[1] + (body.kind === "arm" ? 3.2 : 1.7),
           body.position[2],
         ]}
