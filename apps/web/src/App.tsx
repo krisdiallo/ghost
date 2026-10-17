@@ -10,7 +10,7 @@ import type {
 } from "@ghost/shared";
 import { CAPABILITIES } from "@ghost/shared";
 import { request, RequestError, tool } from "./api";
-import { BodyIcon, Ghost } from "./icons";
+import { BodyIcon, Ghost, UIIcon } from "./icons";
 import { BODY_COLORS, Warehouse } from "./Warehouse";
 
 type Tokens = Record<string, { leaseId: string; expiresAt: number }>;
@@ -405,8 +405,7 @@ export function App() {
             className="quiet connect-button"
             onClick={() => setModal("connect")}
           >
-            <span aria-hidden="true">⌘</span> Connect an agent{" "}
-            <span aria-hidden="true">↗</span>
+            <UIIcon name="connect" /> Connect an agent <UIIcon name="arrow" />
           </button>
         </div>
       </header>
@@ -432,11 +431,11 @@ export function App() {
           >
             {snapshot?.demo.running ? (
               <>
-                <span aria-hidden="true">■</span> Stop demo
+                <UIIcon name="stop" /> Stop demo
               </>
             ) : (
               <>
-                <span aria-hidden="true">▶</span> Run guided demo
+                <UIIcon name="play" /> Run guided demo
               </>
             )}
           </button>
@@ -485,7 +484,7 @@ export function App() {
                 </div>
                 <div className="body-card-title">
                   <strong>{item.label}</strong>
-                  <span aria-hidden="true">↗</span>
+                  <UIIcon name="arrow" />
                 </div>
                 <span className="body-kind">{prettyKind[item.kind]}</span>
                 <div className={`body-status ${item.lease ? "possessed" : ""}`}>
@@ -570,7 +569,8 @@ export function App() {
             )}
             {completed === 4 && !snapshot?.demo.running && (
               <div className="mission-success">
-                <span>✓</span> Mission complete · cargo cleared for dispatch
+                <UIIcon name="check" /> Mission complete · cargo cleared for
+                dispatch
               </div>
             )}
             <div className="scene-controls">
@@ -582,7 +582,7 @@ export function App() {
                   setView((v) => v + (v % 2 ? 1 : 2));
                 }}
               >
-                ⌖
+                <UIIcon name="focus" size={18} />
               </button>
               <button
                 title="Top view"
@@ -592,7 +592,7 @@ export function App() {
                   setView((v) => v + 1);
                 }}
               >
-                ▱
+                <UIIcon name="top" size={18} />
               </button>
               <button
                 title="Focus selected body"
@@ -602,7 +602,7 @@ export function App() {
                   if (body) setFocus([...body.position]);
                 }}
               >
-                ◎
+                <UIIcon name="target" size={18} />
               </button>
             </div>
             <div className="scene-legend">
@@ -618,8 +618,11 @@ export function App() {
           </div>
           <div className="viewport-footer">
             <span>
-              <span className="compass">N ↗</span> Drag to orbit{" "}
-              <span className="dot-separator">·</span> Scroll to zoom
+              <span className="compass">
+                N <UIIcon name="arrow" size={10} />
+              </span>{" "}
+              Drag to orbit <span className="dot-separator">·</span> Scroll to
+              zoom
             </span>
             <span>
               SIMULATION AUTHORITY{" "}
@@ -737,7 +740,7 @@ export function App() {
                           disabled={!live || busy}
                           onClick={release}
                         >
-                          Release body <span aria-hidden="true">↗</span>
+                          Release body <UIIcon name="arrow" />
                         </button>
                       ) : (
                         <div className="leased-note">
@@ -819,14 +822,14 @@ export function App() {
                                 move(Number(targetX), Number(targetZ))
                               }
                             >
-                              Move to point <span>↗</span>
+                              Move to point <UIIcon name="arrow" />
                             </button>
                             <button
                               className={navigation ? "active" : ""}
                               disabled={body.kind === "drone" && !body.airborne}
                               onClick={() => setNavigation((v) => !v)}
                             >
-                              ⌖ Pick on floor
+                              <UIIcon name="focus" /> Pick on floor
                             </button>
                           </div>
                           <button
@@ -836,7 +839,7 @@ export function App() {
                               act({ type: "inspect", objectId: "crate-07" })
                             }
                           >
-                            Scan priority cargo <span>◎</span>
+                            Scan priority cargo <UIIcon name="target" />
                           </button>
                         </>
                       )}
@@ -874,7 +877,7 @@ export function App() {
                               })
                             }
                           >
-                            Aim camera <span>↗</span>
+                            Aim camera <UIIcon name="arrow" />
                           </button>
                           <button
                             className="full-button"
@@ -882,7 +885,7 @@ export function App() {
                               act({ type: "inspect", objectId: "crate-07" })
                             }
                           >
-                            Scan priority cargo <span>◎</span>
+                            Scan priority cargo <UIIcon name="target" />
                           </button>
                           <p className="control-note">
                             70° horizontal view · aim 63° / −13° toward Cargo
@@ -940,7 +943,7 @@ export function App() {
                         disabled={!owns || !live || busy}
                         onClick={() => act({ type: "stop" })}
                       >
-                        ■ Stop motion
+                        <UIIcon name="stop" /> Stop motion
                       </button>
                     )}
                     {observation?.inspection && (
@@ -969,7 +972,7 @@ export function App() {
                         <BodyIcon kind={body.kind} size={34} />
                         <p>Possess {body.label} to see through its sensors.</p>
                         <button onClick={() => setTab("control")}>
-                          Go to controls ↗
+                          Go to controls <UIIcon name="arrow" />
                         </button>
                       </div>
                     ) : (
@@ -998,7 +1001,7 @@ export function App() {
                             </small>
                             {object.condition && (
                               <div className="inspection-result">
-                                ✓ {object.condition}
+                                <UIIcon name="check" /> {object.condition}
                               </div>
                             )}
                           </div>
@@ -1058,7 +1061,7 @@ export function App() {
                 onClick={() => chooseBody(`${step.body}-01`)}
               >
                 <span className="step-number">
-                  {step.complete ? "✓" : `0${i + 1}`}
+                  {step.complete ? <UIIcon name="check" /> : `0${i + 1}`}
                 </span>
                 <span>
                   <strong>{["Locate", "Inspect", "Survey", "Stage"][i]}</strong>
@@ -1081,7 +1084,7 @@ export function App() {
               disabled={!live || busy}
               onClick={() => setModal("reset")}
             >
-              Reset warehouse ↻
+              Reset warehouse <UIIcon name="reset" />
             </button>
           </div>
         </div>
@@ -1242,7 +1245,7 @@ export function App() {
             collision physics.
           </p>
           <button className="primary" onClick={() => setModal(null)}>
-            Enter the warehouse ↗
+            Enter the warehouse <UIIcon name="arrow" />
           </button>
         </Modal>
       )}

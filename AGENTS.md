@@ -13,7 +13,8 @@ Read `README.md` for current functionality, `docs/design-plan.md` for the implem
 - MCP clients use `http://127.0.0.1:3001/mcp` or launch `node /workspace/ghost/apps/server/dist/index.js` directly after building. Do not launch through npm: stdout must contain only MCP messages.
 - The stdio adapter reuses the authority; if it starts an embedded authority, that authority lives only as long as the owning stdio client. Use the standalone server for stable multi-client demos.
 - No secrets, LLM provider, or external services are required. The guided demo is scripted, not an LLM agent.
-- UI interactions are tested in JSDOM. Actual WebGL appearance, touch behavior, and visual layout still require target-browser QA. Do not claim these were verified until they are.
+- UI interactions are tested in JSDOM and in real headless Chromium with software WebGL. `npm run capture` records the full mission, captures desktop/mobile screenshots, and runs a touch-emulated rover inspection. Physical phone/GPU behavior is a separate check.
+- The user is traveling on mobile: continuously integrate and merge passing changes without asking them to review PRs. Send visual progress reports with actual screenshots, short demo recordings, and concrete examples. Keep `docs/progress/latest` current with selected captures; CI archives every capture run. Do not substitute code-review links for visual reports.
 
 ## Boundaries
 

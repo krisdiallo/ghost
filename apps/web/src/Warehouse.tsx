@@ -97,28 +97,33 @@ function Text({
   width?: number;
   floor?: boolean;
 }) {
-  const texture = useMemo(() => {
+  const { texture, aspect } = useMemo(() => {
     const canvas = document.createElement("canvas");
-    canvas.width = 768;
-    canvas.height = 128;
+    const measure = canvas.getContext("2d")!;
+    measure.font = "600 64px monospace";
+    canvas.width = Math.ceil(measure.measureText(text).width + 36);
+    canvas.height = 100;
     const context = canvas.getContext("2d")!;
     context.fillStyle = color;
-    context.font = "600 58px monospace";
+    context.font = "600 64px monospace";
     context.textAlign = "center";
     context.textBaseline = "middle";
-    context.fillText(text, 384, 64);
-    return new CanvasTexture(canvas);
+    context.fillText(text, canvas.width / 2, canvas.height / 2);
+    return {
+      texture: new CanvasTexture(canvas),
+      aspect: canvas.width / canvas.height,
+    };
   }, [text, color]);
   useEffect(() => () => texture.dispose(), [texture]);
   if (floor)
     return (
       <mesh position={position} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[width, width / 6]} />
+        <planeGeometry args={[width, width / aspect]} />
         <meshBasicMaterial map={texture} transparent depthWrite={false} />
       </mesh>
     );
   return (
-    <sprite position={position} scale={[width, width / 6, 1]}>
+    <sprite position={position} scale={[width, width / aspect, 1]}>
       <spriteMaterial map={texture} transparent depthTest={false} />
     </sprite>
   );
@@ -464,7 +469,8 @@ function BodyMesh({
       <Text
         text={`${body.label.toUpperCase()}${body.lease ? " •" : ""}`}
         position={[
-          body.position[0],
+          body.position[0] +
+            (body.kind === "drone" ? -0.8 : body.kind === "arm" ? 0.5 : 0),
           body.position[1] + (body.kind === "arm" ? 3.2 : 1.7),
           body.position[2],
         ]}
@@ -642,9 +648,9 @@ function Controls({ focus, view }: { focus: Vec3 | null; view: number }) {
   }, [focus, camera, controls]);
   useEffect(() => {
     camera.position.set(
-      view % 2 ? 0.1 : 17,
-      view % 2 ? 23 : 17,
-      view % 2 ? 0.1 : 20,
+      view % 2 ? 0.1 : 15,
+      view % 2 ? 23 : 15,
+      view % 2 ? 0.1 : 18,
     );
     controls.target.set(0, 0, 0);
     controls.update();
@@ -694,7 +700,7 @@ export function Warehouse({
       <Canvas
         shadows
         dpr={[1, 1.6]}
-        camera={{ position: [17, 17, 20], fov: 42 }}
+        camera={{ position: [15, 15, 18], fov: 42 }}
         gl={{ antialias: true, alpha: false }}
         fallback={
           <div className="scene-fallback">

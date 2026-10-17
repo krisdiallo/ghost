@@ -66,3 +66,49 @@ export function BodyIcon({
     </svg>
   );
 }
+export function UIIcon({
+  name,
+  size = 14,
+}: {
+  name:
+    | "arrow"
+    | "play"
+    | "stop"
+    | "reset"
+    | "focus"
+    | "top"
+    | "target"
+    | "check"
+    | "connect";
+  size?: number;
+}) {
+  const paths = {
+    arrow: "M5 19 19 5M5 5h14v14",
+    play: "m8 5 12 7-12 7Z",
+    stop: "M6 6h12v12H6Z",
+    reset: "M4 10a8 8 0 1 1 0 5M4 4v6h6",
+    focus: "M12 2v4m0 12v4M2 12h4m12 0h4M7 7l10 10M7 17 17 7",
+    top: "m3 16 5-10h13l-5 10Z",
+    target:
+      "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18",
+    check: "m5 12 4 4L19 6",
+    connect:
+      "M9 9H6a3 3 0 1 1 3-3v12a3 3 0 1 1-3-3h12a3 3 0 1 1-3 3V6a3 3 0 1 1 3 3H9",
+  };
+  return (
+    <svg
+      className="ui-icon"
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill={name === "play" || name === "stop" ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d={paths[name]} />
+    </svg>
+  );
+}

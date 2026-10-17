@@ -2040,3 +2040,27 @@ dialog::backdrop {
   z-index: 20;
   box-shadow: 0 8px 25px #0004;
 }
+.ui-icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+.body-card-title > .ui-icon {
+  color: #88a890;
+  width: 11px;
+  height: 11px;
+}
+.text-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.scene-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.mission-count {
+  flex-shrink: 0;
+  white-space: nowrap;
+}

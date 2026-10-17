@@ -4,7 +4,7 @@
 
 1. Use Node 24; `npm ci`, `npm run check`, `npm test`.
 2. `npm start` serves the built demo at `http://127.0.0.1:3001` in the execution environment. `npm run dev` runs the editable UI at port 5173.
-3. Check **Systems live**. Select each machine, orbit the view, and verify the scene on the actual device. Tests do not validate GPU rendering.
+3. Check **Systems live**. Select each machine, orbit the view, and verify the scene on the actual device. The capture run checks software WebGL; physical GPU behavior still needs this device check.
 4. Use a private port forward when viewing from another device. Loopback on a phone points to the phone itself. Configure `GHOST_ORIGIN` and (only if needed) `GHOST_HOST` for the forwarding setup. The API has no public-user authentication.
 
 ## The 30-second pitch
@@ -49,3 +49,7 @@ Calls to `act` wrap the command: `{leaseId, command}`. `observe({leaseId})` repo
 ## Shutdown
 
 Ctrl+C on the standalone process. All state is in memory. A fresh start resets the warehouse. Use a standalone process for multi-client demos; an authority auto-started by a stdio client lives only as long as that owning client.
+
+## Visual progress
+
+`npm run progress` captures the actual warehouse, records the four-body mission, runs a touch-emulated rover inspection, and refreshes `docs/progress/latest`. CI independently captures each integrated change and retains the results for 14 days. Only publish reports from passing runs; never use concept images as evidence of working behavior.
