@@ -9,7 +9,10 @@ import {
 import type { ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import type { ThreeEvent } from "@react-three/fiber";
-import { CanvasTexture, Group, Quaternion, Vector3 } from "three";
+import { CanvasTexture, Group, Vector3 } from "three";
+import { Box, Cylinder, Beam, Text, Ring } from "./ScenePrimitives";
+import { IndustrialHall } from "./IndustrialHall";
+import { WAREHOUSE } from "@ghost/shared";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import type { Body, ResourceKind, Snapshot, Vec3 } from "@ghost/shared";
 
@@ -21,136 +24,6 @@ export const BODY_COLORS: Record<ResourceKind, string> = {
 };
 const metal = "#d9e3dc",
   dark = "#253b3b";
-function Box({
-  position = [0, 0, 0],
-  size,
-  color,
-  ...rest
-}: {
-  position?: Vec3;
-  size: Vec3;
-  color: string;
-  rotation?: Vec3;
-}) {
-  return (
-    <mesh position={position} castShadow receiveShadow {...rest}>
-      <boxGeometry args={size} />
-      <meshStandardMaterial color={color} roughness={0.65} metalness={0.12} />
-    </mesh>
-  );
-}
-function Cylinder({
-  position,
-  radius = 0.1,
-  height,
-  color,
-  rotation,
-}: {
-  position: Vec3;
-  radius?: number;
-  height: number;
-  color: string;
-  rotation?: Vec3;
-}) {
-  return (
-    <mesh position={position} rotation={rotation ?? [0, 0, 0]} castShadow>
-      <cylinderGeometry args={[radius, radius, height, 20]} />
-      <meshStandardMaterial color={color} roughness={0.5} metalness={0.25} />
-    </mesh>
-  );
-}
-function Beam({
-  from,
-  to,
-  width,
-  color,
-}: {
-  from: Vec3;
-  to: Vec3;
-  width: number;
-  color: string;
-}) {
-  const a = new Vector3(...from),
-    b = new Vector3(...to),
-    midpoint = a.clone().add(b).multiplyScalar(0.5);
-  const q = new Quaternion().setFromUnitVectors(
-    new Vector3(0, 1, 0),
-    b.clone().sub(a).normalize(),
-  );
-  return (
-    <mesh position={midpoint} quaternion={q} castShadow>
-      <boxGeometry args={[width, a.distanceTo(b), width]} />
-      <meshStandardMaterial color={color} roughness={0.5} metalness={0.15} />
-    </mesh>
-  );
-}
-function Text({
-  text,
-  position,
-  color = "#8ba6a0",
-  width = 3,
-  floor = false,
-}: {
-  text: string;
-  position: Vec3;
-  color?: string;
-  width?: number;
-  floor?: boolean;
-}) {
-  const { texture, aspect } = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    const measure = canvas.getContext("2d")!;
-    measure.font = "600 64px monospace";
-    canvas.width = Math.ceil(measure.measureText(text).width + 36);
-    canvas.height = 100;
-    const context = canvas.getContext("2d")!;
-    context.fillStyle = color;
-    context.font = "600 64px monospace";
-    context.textAlign = "center";
-    context.textBaseline = "middle";
-    context.fillText(text, canvas.width / 2, canvas.height / 2);
-    return {
-      texture: new CanvasTexture(canvas),
-      aspect: canvas.width / canvas.height,
-    };
-  }, [text, color]);
-  useEffect(() => () => texture.dispose(), [texture]);
-  if (floor)
-    return (
-      <mesh position={position} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[width, width / aspect]} />
-        <meshBasicMaterial map={texture} transparent depthWrite={false} />
-      </mesh>
-    );
-  return (
-    <sprite position={position} scale={[width, width / aspect, 1]}>
-      <spriteMaterial map={texture} transparent depthTest={false} />
-    </sprite>
-  );
-}
-function Ring({
-  position,
-  radius,
-  color,
-  opacity = 1,
-}: {
-  position: Vec3;
-  radius: number;
-  color: string;
-  opacity?: number;
-}) {
-  return (
-    <mesh position={position} rotation={[-Math.PI / 2, 0, 0]}>
-      <ringGeometry args={[radius - 0.035, radius, 64]} />
-      <meshBasicMaterial
-        color={color}
-        transparent
-        opacity={opacity}
-        depthWrite={false}
-      />
-    </mesh>
-  );
-}
 function Rover() {
   return (
     <>
@@ -495,41 +368,6 @@ function BodyMesh({
     </>
   );
 }
-function Rack({ position }: { position: Vec3 }) {
-  return (
-    <group position={position}>
-      {[-2, 2].flatMap((x) =>
-        [-0.6, 0.6].map((z) => (
-          <Box
-            key={`${x}/${z}`}
-            position={[x, 1.65, z]}
-            size={[0.1, 3.3, 0.1]}
-            color="#51645f"
-          />
-        )),
-      )}
-      {[0.2, 1.65, 3.1].map((y) => (
-        <group key={y}>
-          <Box position={[0, y, 0]} size={[4.2, 0.13, 1.4]} color="#9a7f55" />
-          {[-1.4, 0, 1.4].map((x, i) => (
-            <group key={x}>
-              <Box
-                position={[x, y + 0.5, 0]}
-                size={[1.05, 0.9, 1]}
-                color={i === 1 ? "#8d9c8d" : "#ac9976"}
-              />
-              <Box
-                position={[x, y + 0.5, 0.505]}
-                size={[0.06, 0.9, 0.015]}
-                color="#d1bd95"
-              />
-            </group>
-          ))}
-        </group>
-      ))}
-    </group>
-  );
-}
 function Floor({
   navigate,
 }: {
@@ -539,10 +377,11 @@ function Floor({
   return (
     <>
       <mesh
+        position={[0, 0, WAREHOUSE.centerZ]}
         receiveShadow
         rotation={[-Math.PI / 2, 0, 0]}
         onPointerMove={(e) => {
-          if (navigate) setPoint([e.point.x, 0.04, e.point.z]);
+          if (navigate) setPoint([e.point.x, 0.045, e.point.z]);
         }}
         onPointerOut={() => setPoint(null)}
         onClick={(e: ThreeEvent<MouseEvent>) => {
@@ -555,107 +394,138 @@ function Floor({
           }
         }}
       >
-        <planeGeometry args={[20, 14]} />
-        <meshStandardMaterial color="#61716b" roughness={0.92} />
+        <planeGeometry args={[WAREHOUSE.width, WAREHOUSE.depth]} />
+        <meshStandardMaterial color="#52626b" roughness={0.92} />
       </mesh>
-      <Box
-        position={[0, -0.22, 0]}
-        size={[20.15, 0.4, 14.15]}
-        color="#314740"
-      />
       <gridHelper
-        args={[20, 20, "#819289", "#6c7c73"]}
-        position={[0, 0.015, 0]}
-        scale={[1, 1, 0.7]}
+        args={[64, 32, "#687e83", "#5b7077"]}
+        position={[0, 0.012, WAREHOUSE.centerZ]}
+        scale={[1, 1, WAREHOUSE.depth / WAREHOUSE.width]}
       />
-      {[-1, 1].map((x) => (
-        <Box
-          key={x}
-          position={[x * 9.6, 0.02, 0]}
-          size={[0.05, 0.025, 13]}
-          color="#c3b97a"
+      <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[22, 14]} />
+        <meshStandardMaterial
+          color="#6c807d"
+          transparent
+          opacity={0.55}
+          roughness={0.9}
         />
-      ))}
-      {[-1, 1].map((z) => (
-        <Box
-          key={z}
-          position={[0, 0.02, z * 6.5]}
-          size={[19.2, 0.025, 0.05]}
-          color="#c3b97a"
-        />
-      ))}
-      <Box
-        position={[0, 0.025, 3.8]}
-        size={[17, 0.02, 0.045]}
-        color="#acb39a"
-      />
-      {Array.from({ length: 16 }, (_, i) => (
-        <Box
-          key={i}
-          position={[-8 + i, 0.03, 3.6]}
-          size={[0.4, 0.025, 0.05]}
-          color="#acb39a"
-        />
-      ))}
-      <mesh position={[6, 0.025, 2]} rotation={[-Math.PI / 2, 0, 0]}>
-        <planeGeometry args={[2.4, 2.6]} />
-        <meshBasicMaterial color="#a4ddbb" transparent opacity={0.18} />
       </mesh>
-      <Ring position={[6, 0.04, 2]} radius={1.1} color="#b8e3b7" />
+      {[-1, 1].flatMap((x) =>
+        [-1, 1].map((z) => (
+          <group key={`${x}/${z}`}>
+            <Box
+              position={[x * 10.2, 0.04, z * 6.8]}
+              size={[1.6, 0.025, 0.08]}
+              color="#bae1c9"
+            />
+            <Box
+              position={[x * 10.95, 0.04, z * 6.1]}
+              size={[0.08, 0.025, 1.5]}
+              color="#bae1c9"
+            />
+          </group>
+        )),
+      )}
+      <Text
+        text="EMBODIMENT BAY / 01"
+        position={[-1, 0.045, 5.6]}
+        floor
+        width={12}
+        color="#cae4d8"
+      />
+      <Text
+        text="LIVE INSPECTION"
+        position={[-3, 0.045, -5.8]}
+        floor
+        width={6}
+        color="#a9c8c0"
+      />
+      <mesh position={[6, 0.035, 2]} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[2.4, 2.6]} />
+        <meshBasicMaterial color="#a4ddbb" transparent opacity={0.22} />
+      </mesh>
+      <Ring position={[6, 0.05, 2]} radius={1.1} color="#c5efc3" />
       <Text
         text="DISPATCH"
-        position={[6, 0.05, 3.6]}
+        position={[6, 0.06, 3.6]}
         floor
         width={2.4}
         color="#d1e5c3"
       />
-      <Text
-        text="G H O S T  /  W - 0 1"
-        position={[-2, 0.04, 5.5]}
-        floor
-        width={7}
-        color="#b3c0af"
-      />
-      <Text text="STORAGE / A" position={[-4, 0.04, -3.1]} floor width={3} />
-      <Text text="INSPECTION" position={[1, 0.04, 2.5]} floor width={3} />
       {point && navigate && (
         <Ring position={point} radius={0.4} color="#d9ffe1" />
       )}
     </>
   );
 }
-function Controls({ focus, view }: { focus: Vec3 | null; view: number }) {
-  const { camera, gl } = useThree();
+export type WarehouseView = "facility" | "mission" | "top";
+function Controls({
+  focus,
+  view,
+}: {
+  focus: Vec3 | null;
+  view: WarehouseView;
+}) {
+  const { camera, gl, size } = useThree();
   const controls = useMemo(
     () => new OrbitControls(camera, gl.domElement),
     [camera, gl],
   );
+  const goal = useRef({
+    position: new Vector3(44, 38, 44),
+    target: new Vector3(0, 0, -12),
+    active: false,
+  });
   useEffect(() => {
     controls.enableDamping = true;
-    controls.maxPolarAngle = Math.PI / 2.18;
+    controls.maxPolarAngle = Math.PI / 2.12;
     controls.minDistance = 5;
-    controls.maxDistance = 34;
-    controls.target.set(0, 0, 0);
+    controls.maxDistance = 170;
+    controls.target.set(0, 0, -12);
     controls.update();
-    return () => controls.dispose();
+    const interrupt = () => {
+      goal.current.active = false;
+    };
+    controls.addEventListener("start", interrupt);
+    return () => {
+      controls.removeEventListener("start", interrupt);
+      controls.dispose();
+    };
   }, [controls]);
   useEffect(() => {
-    if (focus) {
-      controls.target.set(focus[0], 0.5, focus[2]);
-      camera.position.set(focus[0] + 7, 8, focus[2] + 8);
-      controls.update();
-    }
-  }, [focus, camera, controls]);
-  useEffect(() => {
-    camera.position.set(
-      view % 2 ? 0.1 : 15,
-      view % 2 ? 23 : 15,
-      view % 2 ? 0.1 : 18,
+    const aspect = size.width / Math.max(1, size.height);
+    const target = focus
+      ? new Vector3(focus[0], Math.max(0.8, focus[1]), focus[2])
+      : view === "mission"
+        ? new Vector3(0, 0.8, 0)
+        : new Vector3(0, 0, -12);
+    const offset = focus
+      ? new Vector3(10, 10, 12)
+      : view === "mission"
+        ? new Vector3(17, 14, 20)
+        : view === "top"
+          ? new Vector3(0.1, 90, 0.1)
+          : new Vector3(44, 38, 56);
+    offset.multiplyScalar(
+      Math.max(1, (view === "mission" || focus ? 1.1 : 1.32) / aspect),
     );
-    controls.target.set(0, 0, 0);
+    goal.current = {
+      position: target.clone().add(offset),
+      target,
+      active: true,
+    };
+  }, [view, focus, size.width, size.height]);
+  useFrame((_, delta) => {
+    if (goal.current.active) {
+      const alpha = 1 - Math.exp(-Math.min(delta, 0.1) * 5);
+      camera.position.lerp(goal.current.position, alpha);
+      controls.target.lerp(goal.current.target, alpha);
+      if (camera.position.distanceTo(goal.current.position) < 0.02)
+        goal.current.active = false;
+    }
     controls.update();
-  }, [view, camera, controls]);
-  useFrame(() => controls.update());
+  });
   return null;
 }
 class WebGLErrorBoundary extends Component<
@@ -693,14 +563,14 @@ export function Warehouse({
   onSelect: (id: string) => void;
   navigate: ((x: number, z: number) => void) | null;
   focus: Vec3 | null;
-  view: number;
+  view: WarehouseView;
 }) {
   return (
     <WebGLErrorBoundary>
       <Canvas
         shadows
         dpr={[1, 1.6]}
-        camera={{ position: [15, 15, 18], fov: 42 }}
+        camera={{ position: [44, 38, 44], fov: 42, far: 220 }}
         gl={{ antialias: true, alpha: false }}
         fallback={
           <div className="scene-fallback">
@@ -708,51 +578,25 @@ export function Warehouse({
           </div>
         }
       >
-        <color attach="background" args={["#142622"]} />
-        <fog attach="fog" args={["#142622", 32, 65]} />
-        <ambientLight intensity={1.6} />
-        <hemisphereLight args={["#ddf5eb", "#455044", 1.8]} />
+        <color attach="background" args={["#14232c"]} />
+        <fog attach="fog" args={["#14232c", 85, 170]} />
+        <ambientLight intensity={0.85} />
+        <hemisphereLight args={["#d7edf3", "#253340", 1.65]} />
         <directionalLight
-          position={[-5, 14, 7]}
-          intensity={3}
+          position={[-25, 45, 30]}
+          intensity={3.4}
+          color="#ffe4bf"
           castShadow
-          shadow-mapSize={[2048, 2048]}
-          shadow-camera-left={-15}
-          shadow-camera-right={15}
-          shadow-camera-top={15}
-          shadow-camera-bottom={-15}
+          shadow-mapSize={[1024, 1024]}
+          shadow-camera-left={-48}
+          shadow-camera-right={48}
+          shadow-camera-top={48}
+          shadow-camera-bottom={-48}
           shadow-bias={-0.0004}
         />
         <Suspense fallback={null}>
           <Floor navigate={navigate} />
-          <Rack position={[-3.4, 0, -5.4]} />
-          <Rack position={[3.4, 0, -5.4]} />
-          <Box
-            position={[-9.8, 0.6, -1.8]}
-            size={[0.18, 1.2, 9.8]}
-            color="#52665b"
-          />
-          <Box
-            position={[0, 0.45, -6.9]}
-            size={[20, 0.9, 0.15]}
-            color="#52665b"
-          />
-          {[-8, 8].map((x) => (
-            <group key={x}>
-              <Cylinder
-                position={[x, 0.4, 5.8]}
-                height={0.8}
-                radius={0.12}
-                color="#d7b97c"
-              />
-              <Cylinder
-                position={[x, 0.5, 5.8]}
-                height={0.16}
-                radius={0.13}
-                color={dark}
-              />
-            </group>
-          ))}
+          <IndustrialHall />
           {snapshot.objects.map((object) => (
             <group key={object.id} position={object.position}>
               <Box

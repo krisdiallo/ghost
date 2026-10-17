@@ -10,6 +10,7 @@ import {
 import { resolve, join } from "node:path";
 import { tmpdir } from "node:os";
 import { spawn } from "node:child_process";
+import { WAREHOUSE } from "@ghost/shared";
 import { chromium } from "playwright";
 import { startWarehouse } from "../apps/server/dist/http.js";
 
@@ -98,6 +99,21 @@ try {
   monitor(page);
   await ready(page);
   await screenshot(page, "ghost-warehouse.png", { fullPage: true });
+  await page
+    .locator(".scene")
+    .screenshot({
+      path: join(output, "ghost-overview-small.jpg"),
+      type: "jpeg",
+      quality: 52,
+    });
+  captures.push("ghost-overview-small.jpg");
+  await page.getByRole("button", { name: "Mission view", exact: true }).click();
+  await wait(1000);
+  await screenshot(page, "ghost-mission-bay.png", { fullPage: true });
+  await page
+    .getByRole("button", { name: "Reset warehouse view", exact: true })
+    .click();
+  await wait(1000);
   const sceneBounds = await page.locator(".scene").boundingBox();
   await page.getByRole("button", { name: "Run guided demo" }).click();
   const start = Date.now();
@@ -262,6 +278,7 @@ try {
   assert.deepEqual(errors, [], "no browser runtime or console errors");
   const report = {
     capturedAt: new Date().toISOString(),
+    facility: { ...WAREHOUSE, area: WAREHOUSE.width * WAREHOUSE.depth },
     viewport: { width: 1440, height: 1280 },
     mobile: { width: 390, height: 844 },
     mission: final.mission,

@@ -1,5 +1,12 @@
 {
-  "capturedAt": "2026-10-17T21:36:59.919Z",
+  "capturedAt": "2026-10-17T23:18:28.144Z",
+  "facility": {
+    "width": 64,
+    "depth": 44,
+    "centerZ": -12,
+    "clearHeight": 12,
+    "area": 2816
+  },
   "viewport": {
     "width": 1440,
     "height": 1280
@@ -34,12 +41,14 @@
       "complete": true
     }
   ],
-  "durationSeconds": 17.337,
-  "frameCount": 25,
+  "durationSeconds": 17.279,
+  "frameCount": 14,
   "manualRoverInspection": "Seal intact. Label verified. Cleared for dispatch.",
   "browserErrors": [],
   "captures": [
     "ghost-warehouse.png",
+    "ghost-overview-small.jpg",
+    "ghost-mission-bay.png",
     "ghost-camera.png",
     "ghost-rover.png",
     "ghost-drone.png",

@@ -17,7 +17,19 @@ export const DEMO_RESOURCES: ResourceDefinition[] = [
   { id: "arm-01", kind: "arm", label: "Atlas", position: [4, 0.5, 0] },
   { id: "drone-01", kind: "drone", label: "Wisp", position: [-4, 0.4, -3] },
 ];
-export const BOUNDS = { minX: -9, maxX: 9, minZ: -6, maxZ: 6, maxAltitude: 5 };
+export const WAREHOUSE = {
+  width: 64,
+  depth: 44,
+  centerZ: -12,
+  clearHeight: 12,
+};
+export const BOUNDS = {
+  minX: -31,
+  maxX: 31,
+  minZ: -33,
+  maxZ: 9,
+  maxAltitude: 12,
+};
 export const CAPABILITIES: Record<ResourceKind, string[]> = {
   camera: ["look", "inspect"],
   rover: ["move", "inspect", "stop"],

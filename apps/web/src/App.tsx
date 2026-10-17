@@ -8,10 +8,11 @@ import type {
   Snapshot,
   Vec3,
 } from "@ghost/shared";
-import { CAPABILITIES } from "@ghost/shared";
+import { BOUNDS, CAPABILITIES, WAREHOUSE } from "@ghost/shared";
 import { request, RequestError, tool } from "./api";
 import { BodyIcon, Ghost, UIIcon } from "./icons";
 import { BODY_COLORS, Warehouse } from "./Warehouse";
+import type { WarehouseView } from "./Warehouse";
 
 type Tokens = Record<string, { leaseId: string; expiresAt: number }>;
 const readTokens = (): Tokens => {
@@ -131,7 +132,7 @@ export function App() {
   const [pan, setPan] = useState("63");
   const [tilt, setTilt] = useState("-13");
   const [focus, setFocus] = useState<Vec3 | null>(null);
-  const [view, setView] = useState(0);
+  const [view, setView] = useState<WarehouseView>("facility");
   const [modal, setModal] = useState<"connect" | "help" | "reset" | null>(null);
   const lastSnapshot = useRef<Snapshot | null>(null);
   const instance = useRef<string | null>(null);
@@ -281,6 +282,8 @@ export function App() {
           ? "drone"
           : "arm";
     setSelected(`${kind}-01`);
+    setView("mission");
+    setFocus(null);
   }, [snapshot?.demo.phase, snapshot?.demo.running]);
   async function perform(work: () => Promise<void>) {
     if (busy) return;
@@ -366,6 +369,10 @@ export function App() {
   const chooseBody = (id: string) => {
     setSelected(id);
     setTab("control");
+    if (view === "facility") {
+      setFocus(null);
+      setView("mission");
+    }
   };
   return (
     <main className="app">
@@ -545,7 +552,11 @@ export function App() {
             )}
             <div className="scene-top">
               <span className="scene-coordinate">
-                W—01 <span>20 × 14 M</span>
+                W—01{" "}
+                <span>
+                  {WAREHOUSE.width} × {WAREHOUSE.depth} M /{" "}
+                  {WAREHOUSE.clearHeight} M HIGH BAY
+                </span>
               </span>
               <button
                 className="scene-button"
@@ -573,13 +584,28 @@ export function App() {
                 dispatch
               </div>
             )}
+            <div className="scene-view-label">
+              {focus
+                ? "BODY FOCUS"
+                : view === "facility"
+                  ? "FACILITY OVERVIEW"
+                  : view === "top"
+                    ? "FLOOR PLAN"
+                    : "EMBODIMENT BAY"}
+              <span>
+                {view === "facility" && !focus
+                  ? "2,816 M² · 16 STORAGE BAYS"
+                  : "LIVE WAREHOUSE / 01"}
+              </span>
+            </div>
             <div className="scene-controls">
               <button
-                title="Reset view"
+                title="Facility overview"
                 aria-label="Reset warehouse view"
+                aria-pressed={view === "facility" && !focus}
                 onClick={() => {
                   setFocus(null);
-                  setView((v) => v + (v % 2 ? 1 : 2));
+                  setView("facility");
                 }}
               >
                 <UIIcon name="focus" size={18} />
@@ -589,10 +615,21 @@ export function App() {
                 aria-label="Toggle top view"
                 onClick={() => {
                   setFocus(null);
-                  setView((v) => v + 1);
+                  setView((v) => (v === "top" ? "facility" : "top"));
                 }}
               >
                 <UIIcon name="top" size={18} />
+              </button>
+              <button
+                title="Mission view"
+                aria-label="Mission view"
+                aria-pressed={view === "mission" && !focus}
+                onClick={() => {
+                  setFocus(null);
+                  setView("mission");
+                }}
+              >
+                <BodyIcon kind="rover" size={18} />
               </button>
               <button
                 title="Focus selected body"
@@ -767,8 +804,8 @@ export function App() {
                               X
                               <input
                                 type="number"
-                                min="-9"
-                                max="9"
+                                min={BOUNDS.minX}
+                                max={BOUNDS.maxX}
                                 step="0.1"
                                 value={targetX}
                                 onChange={(e) => setTargetX(e.target.value)}
@@ -780,7 +817,7 @@ export function App() {
                                 <input
                                   type="number"
                                   min="0.8"
-                                  max="5"
+                                  max={BOUNDS.maxAltitude}
                                   step="0.1"
                                   value={altitude}
                                   onChange={(e) => setAltitude(e.target.value)}
@@ -791,8 +828,8 @@ export function App() {
                               Z
                               <input
                                 type="number"
-                                min="-6"
-                                max="6"
+                                min={BOUNDS.minZ}
+                                max={BOUNDS.maxZ}
                                 step="0.1"
                                 value={targetZ}
                                 onChange={(e) => setTargetZ(e.target.value)}

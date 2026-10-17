@@ -1,4 +1,4 @@
-import { readFile, mkdir, copyFile, writeFile } from "node:fs/promises";
+import { readFile, mkdir, copyFile, writeFile, stat } from "node:fs/promises";
 import { resolve, join } from "node:path";
 import assert from "node:assert/strict";
 const input = resolve(process.env.GHOST_CAPTURE_DIR ?? "work/captures");
@@ -25,61 +25,40 @@ const timestamp = new Intl.DateTimeFormat("en-US", {
   dateStyle: "medium",
   timeStyle: "short",
 }).format(new Date(report.capturedAt));
+const previewKB = Math.round(
+  (await stat(join(input, "ghost-overview-small.jpg"))).size / 1024,
+);
 await writeFile(
   join(destination, "README.md"),
   `# GHOST · visual progress
 
 ${timestamp} PT · actual app captures
 
-**[Watch the complete ${Math.round(report.durationSeconds)}-second mission](ghost-demo.mp4?raw=true)** · [Download MP4](ghost-demo.mp4?raw=true)
+## A much larger warehouse
 
-![Actual four-body mission](ghost-demo.gif)
+**64 × 44 m · 2,816 m² · 12 m clear height.** About ten times the previous floor area, with 16 four-tier storage bays, six loading docks, high roof trusses, industrial lighting, and a mezzanine control room.
 
-One ghost located Cargo 07 with Sentinel, inspected its seal with Scout, surveyed it with Wisp, and staged it for dispatch with Atlas. **4 / 4 steps passed; every lease was released.** This tour is scripted through the live control interface.
+![Actual warehouse overview — ${previewKB} KB](ghost-overview-small.jpg)
 
-A separate phone-sized browser run possessed Scout, drove to the inspection point, scanned Cargo 07, and returned: **“${report.manualRoverInspection}”** It then released the body. No browser runtime or console errors; no mobile horizontal overflow.
+This page loads only the lightweight ${previewKB} KB preview. Larger images and video below are optional downloads.
 
-## Warehouse
+- [Full warehouse screenshot](ghost-warehouse.png?raw=true)
+- [Close-up mission bay](ghost-mission-bay.png?raw=true)
+- [Watch/download the complete demo](ghost-demo.mp4?raw=true)
+- [Animated scene preview](ghost-demo.gif?raw=true)
+- [Mission completed — four passed steps](ghost-mission-complete.png?raw=true)
+- [Phone possession controls](ghost-mobile-controls.png?raw=true)
+- [Phone inspection result](ghost-mobile-observation.png?raw=true)
 
-![Live warehouse](ghost-warehouse.png)
+## What actually ran
 
-## Mission complete
+The guided camera → rover → drone → arm mission passed **4 / 4 steps**, releasing every lease. It is a scripted tour through the live command interface. The camera moves from the facility overview into the embodiment bay so each body remains visible.
 
-![Four completed steps and activity feed](ghost-mission-complete.png)
+A separate touch-emulated phone run possessed Scout, moved to the inspection point, scanned Cargo 07, and returned: **“${report.manualRoverInspection}”** It then released the body. No browser runtime/console errors and no mobile horizontal overflow.
 
-## Phone controls and observation
+The simulation now admits travel throughout the larger floor and flight up to 12 m. The boundary tests cover floor and elevated flight routes beyond the original demo area. Storage racks and architectural freight remain scenery; the three tagged crates are sensor objects.
 
-![Phone possession controls](ghost-mobile-controls.png)
-
-![Phone inspection result](ghost-mobile-observation.png)
-
-<details><summary>More actual mission snapshots</summary>
-
-Camera:
-
-![Sentinel scan](ghost-camera.png)
-
-Rover:
-
-![Scout inspection](ghost-rover.png)
-
-Drone:
-
-![Wisp survey](ghost-drone.png)
-
-Arm:
-
-![Atlas cargo transfer](ghost-arm.png)
-
-Full phone layout:
-
-![Complete phone layout](ghost-mobile.png)
-
-</details>
-
-These are real Chromium captures using software WebGL, plus a 390 × 844 touch-emulated browser. Physical phone GPU behavior and pinch gestures still need device testing. [Machine-readable run evidence](capture-report.json).
+These are real Chromium/software-WebGL captures, with a 390 × 844 touch-emulated browser. Physical-device GPU behavior and pinch gestures remain a device check. [Machine-readable run evidence](capture-report.json).
 `,
 );
-console.log(
-  "Updated docs/progress/latest with verified screenshots and the mission recording.",
-);
+console.log("Updated the lightweight visual report in docs/progress/latest.");
