@@ -2,17 +2,30 @@
   "name": "ghost",
   "version": "0.0.0",
   "private": true,
-  "description": "GHOST — Any agent. Any body.",
+  "description": "GHOST \u2014 Any agent. Any body.",
   "type": "module",
-  "workspaces": ["packages/shared", "apps/server", "apps/web"],
-  "engines": { "node": "^20.19.0 || >=22.12.0" },
+  "workspaces": [
+    "packages/shared",
+    "apps/server",
+    "apps/web"
+  ],
+  "engines": {
+    "node": ">=24.15.0 <25"
+  },
   "scripts": {
-    "dev": "npm run dev:web",
+    "dev": "npm run build -w @ghost/shared && node scripts/dev.mjs",
     "dev:web": "npm run build -w @ghost/shared && npm run dev -w @ghost/web",
     "dev:server": "npm run build -w @ghost/shared && npm run dev -w @ghost/server",
     "build": "npm run build --workspaces",
     "typecheck": "npm run build -w @ghost/shared && npm run typecheck --workspaces",
-    "check": "npm run typecheck && npm run build"
+    "check": "npm run typecheck && npm run build",
+    "start": "node apps/server/dist/index.js --serve",
+    "test": "npm run build && npm run test:server && npm run test:web",
+    "test:server": "node --import tsx --test apps/server/test/*.test.ts",
+    "test:web": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/test/*.test.tsx"
   },
-  "devDependencies": { "typescript": "^7.0.2" }
+  "devDependencies": {
+    "jsdom": "^30.1.3",
+    "typescript": "^7.0.2"
+  }
 }

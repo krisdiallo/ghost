@@ -1,77 +1,131 @@
-# ghost
+# GHOST
 
-**GHOST — Any agent. Any body.**
+**Any agent. Any body.**
 
-An MCP interface for agents to discover, temporarily possess, observe, control, and release simulated physical resources in an interactive Three.js warehouse.
+An MCP interface for agents to discover, possess, observe, control, and release simulated camera, rover, arm, and drone bodies in a live Three.js warehouse. Built for the YC hackathon.
 
-Built for the YC hackathon, October 2026. The agent is the ghost; the machine is its host.
+The agent is the ghost. The machine is its host.
 
-## Status
+## Run the warehouse
 
-This repository is a runnable scaffold, not a complete simulation.
-
-- React + Three.js preview with four selectable placeholder markers: camera, rover, robotic arm, and drone.
-- MCP server over stdio with a working `discover` tool returning a static catalog.
-- Shared TypeScript resource definitions, strict type checking, and an npm lockfile.
-- Possession, leases, observations, movement, and frontend/server synchronization are planned, not implemented.
-
-## Quick start
-
-Use Node 24 LTS (see `.nvmrc`) and npm. Node 20.19+ or 22.12+ also satisfy the toolchain requirements.
+Use **Node 24** (`.nvmrc`; 24.15+ required by the test tooling).
 
 ```sh
 npm ci
 npm run dev
 ```
 
-Open the local URL printed by Vite, normally http://127.0.0.1:5173. Select a resource with the sidebar buttons or its marker in the scene.
+This starts **both** the authoritative server on `http://127.0.0.1:3001` and the Vite UI on `http://127.0.0.1:5173`. The UI proxies API/MCP traffic to the server. No API keys, LLM provider, database, or external services are needed. Fonts and scene geometry are served locally.
 
-Run the MCP server separately:
+For a production build and a single process serving everything:
 
 ```sh
-npm run dev:server
+npm run build
+npm start
 ```
 
-It waits for an MCP client on stdin; it is not an HTTP endpoint. The frontend currently uses the same static catalog and does not connect to this process. No credentials or environment variables are required.
+Open `http://127.0.0.1:3001`. Build output is ignored by Git. These are executor-local addresses, not a published phone-accessible URL.
 
-## Connect an MCP client
+## Demo
 
-Build first with `npm run build`, then use the following configuration in a client that supports stdio MCP servers. Replace the path with your checkout's absolute path:
+Click **Run guided demo** for a repeatable, approximately 20-second scripted mission:
+
+1. Sentinel locates and scans Cargo 07.
+2. Scout drives to the crate and inspects its seal.
+3. Wisp takes off, surveys from above, then lands.
+4. Atlas grasps the crate and places it in dispatch.
+
+The ghost acquires and releases each body in turn. The script uses the same simulation command path as MCP and manual controls; it is not an LLM making decisions. Run it again to reset and replay. The demo refuses to start if any body is leased. If an external agent acquires a future mission body, the script reports contention and releases its own leases.
+
+To explore manually, choose a body and **Possess body**. Browser possession switches release your previous body. Use the control panel or pick a destination on the floor. **Observation** shows the sensor's visible objects, distances and inspection results. The browser remembers its tokens in session storage across reloads; they are never included in public snapshots or the activity stream. **Reset warehouse** asks before releasing every lease and restoring the scene.
+
+Drag to orbit, scroll/pinch to zoom; use top view or focus to navigate. Fleet buttons provide accessible selection. Controls stack on mobile. If WebGL fails, the control and telemetry panels remain usable.
+
+See [the demo playbook](docs/demo-playbook.md) for individual commands and recovery steps.
+
+## Connect any MCP agent
+
+Keep `npm run dev` or `npm start` running as the shared authority when using multiple clients.
+
+### Streamable HTTP
+
+Point an MCP client running in the same environment at:
+
+```text
+http://127.0.0.1:3001/mcp
+```
+
+Independent clients share one warehouse. The endpoint is stateless at the transport layer; leases are opaque capabilities and are held by the simulation, not by HTTP sessions.
+
+### Stdio
+
+After building, launch the entry point **directly**, not through npm:
 
 ```json
 {
   "mcpServers": {
     "ghost": {
       "command": "node",
-      "args": ["/absolute/path/to/ghost/apps/server/dist/index.js"]
+      "args": ["/workspace/ghost/apps/server/dist/index.js"]
     }
   }
 }
 ```
 
-Call `discover` with `{}`. It returns the four resource definitions with `mode: "scaffold"`; it does not claim they have live leases or availability. Launch the built entry point directly for client integration so npm's script output cannot interfere with stdio.
+The stdio adapter connects to the existing authority at port 3001. If none exists, it starts an embedded authority on that port. An embedded authority ends when that owning stdio client disconnects; use the standalone server for a stable shared demo. All diagnostics go to stderr; stdout contains MCP messages only.
 
-## Workspace
+| Tool       | Input                                 | Result                                                           |
+| ---------- | ------------------------------------- | ---------------------------------------------------------------- |
+| `discover` | `{ kind? }`                           | Live bodies, availability, capabilities, bounds and lease limits |
+| `possess`  | `{ resourceId, ttlSeconds?, owner? }` | Private `leaseId`, body and expiry                               |
+| `observe`  | `{ leaseId }`                         | Pose, action status, sensor-visible cargo, last inspection       |
+| `act`      | `{ leaseId, command }`                | Action ID/status/revision, inspection result when applicable     |
+| `release`  | `{ leaseId }`                         | Idempotent release; pending movement cancelled                   |
+
+Default TTL is 60 seconds, bounded to 5–300. Competing possession returns `RESOURCE_BUSY`. Expiry uses a monotonic clock and cancels movement. Observe and act require a valid lease. Commands are validated through strict per-command schemas on both HTTP and MCP paths. Motion returns `running`; poll `observe` for completion. Commands serialize per body. Work that would outlast its lease is rejected.
+
+## Model and boundaries
+
+- One server owns all positions, actions, objects, leases and mission progress in memory. Restart resets the world and invalidates tokens.
+- Browser snapshots and SSE use instance IDs and revisions. Reconnect receives a full snapshot; older revisions are ignored. Offline frames are marked stale and controls disabled.
+- Camera observations use orientation and field of view; rover and drone inspections enforce range. Observations are **structured simulation data**, not images.
+- Motion is deterministic and kinematic. There is no collision avoidance, path planning, rigid-body physics, or hardware integration. Shelves are scenery.
+- Arm presets are `home`, `reach`, and `drop`; grasping checks reach. Release/expiry cancels motion; suspended drones hold position and held cargo remains attached for the next valid lease.
+- The server is a **trusted local demo**, not a multi-tenant service. Lease IDs authorize control; display names are not authentication. Public spectator snapshots contain the whole scene. The loopback API has Origin/Host checks, payload limits and no wildcard CORS.
+
+## Cloud access
+
+The default listener is loopback-only. To use a platform-provided **private, authenticated** port forward, configure `GHOST_HOST` if needed and `GHOST_ORIGIN` to its exact browser origin. Host/Origin checks accept only the configured origin plus local development URLs. Example variables (substitute the platform's actual private URL):
 
 ```text
-apps/server/       MCP entry point; future simulation authority
-apps/web/          Vite + React + React Three Fiber warehouse preview
-packages/shared/  Resource types and static demo catalog
-docs/design-plan.md  Draft architecture, tool contract, and milestones
+GHOST_HOST=0.0.0.0
+GHOST_ORIGIN=https://your-private-forward.example
+GHOST_PORT=3001
 ```
 
-| Command | Purpose |
-| --- | --- |
-| `npm run dev` | Start the frontend |
-| `npm run dev:server` | Start the stdio MCP server |
-| `npm run typecheck` | Check all workspaces |
-| `npm run build` | Build shared package, server, and frontend in order |
-| `npm run check` | Run type checking and all builds |
+Do not expose this unauthenticated control API on a public port. Publishing the cloud environment does not itself publish the web app. No public tunnel or new hosting infrastructure is created here.
 
-Root development commands build the shared package first. After changing shared definitions, rerun its build or restart the development command. There is intentionally no task orchestrator or watch pipeline yet.
+## Development and validation
 
-## Next step
+| Command               | Purpose                                                  |
+| --------------------- | -------------------------------------------------------- |
+| `npm run dev`         | Shared authority + Vite UI                               |
+| `npm run dev:web`     | UI only, expects the authority running                   |
+| `npm run dev:server`  | Manual stdio development (can start authority)           |
+| `npm run build`       | Build shared, server, frontend                           |
+| `npm start`           | Serve built UI, API, SSE, and HTTP MCP on port 3001      |
+| `npm run check`       | Strict TypeScript checks and all builds                  |
+| `npm test`            | Build, simulation/integration tests, UI interaction test |
+| `npm run test:server` | Server tests; stdio integration expects built output     |
+| `npm run test:web`    | React interaction checks in JSDOM                        |
 
-Review the [draft design plan](docs/design-plan.md). Start with one complete rover possession cycle before expanding behavior to all four body types.
+Tests cover lease contention and expiry, invalid tokens, repeated release, bounds, malformed commands, action cancellation, completion, camera field of view, drone flight, arm transfer, reset/demo cancellation, revision ordering, HTTP/SSE, actual MCP clients over HTTP and stdio, and the full four-body guided mission. The UI test covers possession, movement, observations, body switching, stale snapshots and reconnection. GitHub Actions runs typechecks, builds and tests.
 
-Technical references: [MCP server guide](https://modelcontextprotocol.io/docs/develop/build-server), [Vite](https://vite.dev/guide/), and [React Three Fiber](https://r3f.docs.pmnd.rs/getting-started/introduction).
+**Verification limit:** UI interactions are tested in JSDOM, not a real WebGL browser. Actual 3D rendering, touch gestures, and visual layout still need a browser check on the target demo device. Vite's large Three.js bundle warning is non-fatal.
+
+```text
+apps/server/       Simulation, MCP tools, stdio adapter, HTTP/SSE bridge
+apps/web/          React console and procedural Three.js warehouse
+packages/shared/   Typed contracts and body definitions
+docs/              Design and demo playbook
+```

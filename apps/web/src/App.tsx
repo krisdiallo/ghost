@@ -1,41 +1,1276 @@
-import { useState } from "react";
-import { Canvas } from "@react-three/fiber";
-import { DEMO_RESOURCES } from "@ghost/shared";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import type { ReactNode } from "react";
+import type {
+  Body,
+  Command,
+  Observation,
+  Possession,
+  Snapshot,
+  Vec3,
+} from "@ghost/shared";
+import { CAPABILITIES } from "@ghost/shared";
+import { request, RequestError, tool } from "./api";
+import { BodyIcon, Ghost } from "./icons";
+import { BODY_COLORS, Warehouse } from "./Warehouse";
 
-export function App() {
-  const [selected, setSelected] = useState(DEMO_RESOURCES[0]!.id);
-  const resource = DEMO_RESOURCES.find((item) => item.id === selected)!;
-
+type Tokens = Record<string, { leaseId: string; expiresAt: number }>;
+const readTokens = (): Tokens => {
+  try {
+    const value = JSON.parse(sessionStorage.getItem("ghost-leases") ?? "{}");
+    if (!value || typeof value !== "object") return {};
+    return Object.fromEntries(
+      Object.entries(value).filter(
+        (entry): entry is [string, { leaseId: string; expiresAt: number }] => {
+          const token = entry[1] as {
+            leaseId?: unknown;
+            expiresAt?: unknown;
+          } | null;
+          return (
+            !!token &&
+            typeof token.leaseId === "string" &&
+            typeof token.expiresAt === "number" &&
+            Number.isFinite(token.expiresAt)
+          );
+        },
+      ),
+    );
+  } catch {
+    return {};
+  }
+};
+const prettyKind = {
+  camera: "Fixed camera",
+  rover: "Ground rover",
+  arm: "Robotic arm",
+  drone: "Aerial drone",
+};
+const bodyDetails = {
+  camera: "A new point of view.",
+  rover: "Intelligence on the move.",
+  arm: "Turn a decision into action.",
+  drone: "See the bigger picture.",
+};
+function Modal({
+  title,
+  children,
+  onClose,
+}: {
+  title: string;
+  children: ReactNode;
+  onClose: () => void;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  useEffect(() => {
+    const element = dialog.current!;
+    element.showModal();
+    return () => element.close();
+  }, []);
   return (
-    <main>
-      <header><span className="eyebrow">YC HACKATHON · SCAFFOLD</span><h1>ghost</h1><p>Any agent. Any body.</p></header>
-      <section className="workspace" aria-label="Warehouse preview">
-        <div className="scene" role="img" aria-label="Placeholder 3D warehouse with four resource markers; use the buttons to select a resource.">
-          <Canvas camera={{ position: [9, 9, 12], fov: 45 }}>
-            <color attach="background" args={["#151d29"]} />
-            <ambientLight intensity={1.5} />
-            <directionalLight position={[4, 8, 4]} intensity={3} />
-            <gridHelper args={[12, 12, "#4b6279", "#2a3a4a"]} />
-            {DEMO_RESOURCES.map((body) => (
-              <mesh key={body.id} position={body.position} onClick={(event) => { event.stopPropagation(); setSelected(body.id); }}>
-                <boxGeometry args={[1, body.kind === "arm" ? 1.6 : 0.6, 1]} />
-                <meshStandardMaterial color={selected === body.id ? "#a7f3d0" : "#728aa5"} />
-              </mesh>
-            ))}
-          </Canvas>
+    <dialog
+      ref={dialog}
+      aria-labelledby={titleId}
+      onCancel={onClose}
+      onClick={(e) => {
+        if (e.target === dialog.current) onClose();
+      }}
+    >
+      <div className="modal-content">
+        <div className="section-heading">
+          <h2 id={titleId}>{title}</h2>
+          <button
+            className="icon-button"
+            aria-label="Close dialog"
+            onClick={onClose}
+          >
+            ×
+          </button>
         </div>
-        <aside>
-          <h2>Available body types</h2>
-          <p className="muted">Static preview · server connection pending</p>
-          <div className="resources">
-            {DEMO_RESOURCES.map((body) => (
-              <button key={body.id} aria-pressed={selected === body.id} onClick={() => setSelected(body.id)}>{body.label}<small>{body.id}</small></button>
-            ))}
+        {children}
+      </div>
+    </dialog>
+  );
+}
+function Copy({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      className="copy"
+      onClick={() => {
+        void navigator.clipboard
+          ?.writeText(text)
+          .then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1800);
+          })
+          .catch(() => setCopied(false));
+      }}
+    >
+      {copied ? "Copied ✓" : "Copy"}
+    </button>
+  );
+}
+export function App() {
+  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
+  const [connection, setConnection] = useState<
+    "connecting" | "live" | "disconnected"
+  >("connecting");
+  const [selected, setSelected] = useState("rover-01");
+  const [tokens, setTokens] = useState<Tokens>(readTokens);
+  const [observation, setObservation] = useState<Observation | null>(null);
+  const [tab, setTab] = useState<"control" | "observe">("control");
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [ttl, setTtl] = useState(60);
+  const [time, setTime] = useState(Date.now());
+  const [clockOffset, setClockOffset] = useState(0);
+  const [navigation, setNavigation] = useState(false);
+  const [targetX, setTargetX] = useState("1");
+  const [targetZ, setTargetZ] = useState("1.4");
+  const [altitude, setAltitude] = useState("3.4");
+  const [pan, setPan] = useState("63");
+  const [tilt, setTilt] = useState("-13");
+  const [focus, setFocus] = useState<Vec3 | null>(null);
+  const [view, setView] = useState(0);
+  const [modal, setModal] = useState<"connect" | "help" | "reset" | null>(null);
+  const lastSnapshot = useRef<Snapshot | null>(null);
+  const instance = useRef<string | null>(null);
+  const currentSelection = useRef(selected);
+  currentSelection.current = selected;
+  const latestTokens = useRef(tokens);
+  latestTokens.current = tokens;
+  const report = useCallback(
+    (failure: unknown) =>
+      setError(
+        failure instanceof Error
+          ? failure.message
+          : "The command could not be completed.",
+      ),
+    [],
+  );
+  const forget = useCallback(
+    (id: string) =>
+      setTokens((previous) => {
+        const copy = { ...previous };
+        delete copy[id];
+        return copy;
+      }),
+    [],
+  );
+  useEffect(() => {
+    try {
+      sessionStorage.setItem("ghost-leases", JSON.stringify(tokens));
+    } catch {
+      /* Storage may be disabled; in-memory leases still work. */
+    }
+  }, [tokens]);
+  useEffect(() => {
+    let alive = true;
+    let receivedStream = false;
+    const accept = (next: Snapshot) => {
+      if (!alive) return;
+      if (
+        lastSnapshot.current?.instanceId === next.instanceId &&
+        (next.revision < lastSnapshot.current.revision ||
+          (next.revision === lastSnapshot.current.revision &&
+            next.at < lastSnapshot.current.at))
+      )
+        return;
+      if (instance.current && instance.current !== next.instanceId) {
+        setTokens({});
+        setObservation(null);
+        setError(
+          "The warehouse restarted. Your previous possession has ended.",
+        );
+      }
+      instance.current = next.instanceId;
+      lastSnapshot.current = next;
+      setClockOffset(next.at - Date.now());
+      setSnapshot(next);
+      setConnection("live");
+      for (const [id, token] of Object.entries(latestTokens.current)) {
+        if (
+          !next.bodies.find((b) => b.id === id)?.lease ||
+          token.expiresAt <= next.at
+        )
+          forget(id);
+      }
+    };
+    void request<Snapshot>("/api/snapshot")
+      .then((next) => {
+        if (!receivedStream) accept(next);
+      })
+      .catch(() => {
+        if (alive) setConnection("disconnected");
+      });
+    const stream = new EventSource("/api/events");
+    stream.onmessage = (event) => {
+      receivedStream = true;
+      try {
+        accept(JSON.parse(event.data));
+      } catch {
+        if (alive) setConnection("disconnected");
+      }
+    };
+    stream.onerror = () => {
+      if (alive) setConnection("disconnected");
+    };
+    const timer = setInterval(() => setTime(Date.now()), 250);
+    return () => {
+      alive = false;
+      stream.close();
+      clearInterval(timer);
+    };
+  }, [forget]);
+  const body = snapshot?.bodies.find((b) => b.id === selected);
+  const token = tokens[selected];
+  const owns = !!token && !!body?.lease && token.expiresAt > time + clockOffset;
+  const live = connection === "live";
+  const running = body?.action?.status === "running";
+  const canAct = live && owns && !busy && !running;
+  const remaining = Math.max(
+    0,
+    Math.ceil(((body?.lease?.expiresAt ?? 0) - time - clockOffset) / 1000),
+  );
+  const completed = snapshot?.mission.filter((s) => s.complete).length ?? 0;
+  useEffect(() => {
+    setNavigation(false);
+    setObservation(null);
+  }, [selected]);
+  useEffect(() => {
+    if (!token || !owns || !live) {
+      setObservation(null);
+      return;
+    }
+    let active = true;
+    const observe = () => {
+      void tool<Observation>("observe", { leaseId: token.leaseId })
+        .then((value) => {
+          if (active)
+            setObservation((previous) =>
+              !previous || value.revision >= previous.revision
+                ? value
+                : previous,
+            );
+        })
+        .catch((failure) => {
+          if (
+            active &&
+            failure instanceof RequestError &&
+            ["INVALID_LEASE", "LEASE_EXPIRED", "LEASE_RELEASED"].includes(
+              failure.code,
+            )
+          )
+            forget(selected);
+        });
+    };
+    observe();
+    const timer = setInterval(observe, 800);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [token?.leaseId, owns, live, selected, forget]);
+  useEffect(() => {
+    if (!snapshot?.demo.running) return;
+    const kind = snapshot.demo.phase.startsWith("01")
+      ? "camera"
+      : snapshot.demo.phase.startsWith("02")
+        ? "rover"
+        : snapshot.demo.phase.startsWith("03")
+          ? "drone"
+          : "arm";
+    setSelected(`${kind}-01`);
+  }, [snapshot?.demo.phase, snapshot?.demo.running]);
+  async function perform(work: () => Promise<void>) {
+    if (busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      await work();
+    } catch (failure) {
+      report(failure);
+    } finally {
+      setBusy(false);
+    }
+  }
+  const act = (command: Command) => {
+    if (!token) return;
+    void perform(async () => {
+      await tool("act", { leaseId: token.leaseId, command });
+      const next = await tool<Observation>("observe", {
+        leaseId: token.leaseId,
+      });
+      if (currentSelection.current === selected)
+        setObservation((previous) =>
+          !previous || next.revision >= previous.revision ? next : previous,
+        );
+    });
+  };
+  const possess = () => {
+    void perform(async () => {
+      for (const [id, other] of Object.entries(tokens))
+        if (id !== selected) {
+          try {
+            await tool("release", { leaseId: other.leaseId });
+          } catch (failure) {
+            if (
+              !(failure instanceof RequestError) ||
+              !["INVALID_LEASE", "LEASE_EXPIRED", "LEASE_RELEASED"].includes(
+                failure.code,
+              )
+            )
+              throw failure;
+          }
+          forget(id);
+        }
+      const result = await tool<Possession>("possess", {
+        resourceId: selected,
+        ttlSeconds: ttl,
+        owner: "You · browser",
+      });
+      setTokens((previous) => ({
+        ...previous,
+        [selected]: { leaseId: result.leaseId, expiresAt: result.expiresAt },
+      }));
+    });
+  };
+  const release = () => {
+    if (token)
+      void perform(async () => {
+        await tool("release", { leaseId: token.leaseId });
+        forget(selected);
+        setNavigation(false);
+      });
+  };
+  const move = (x: number, z: number) => {
+    setNavigation(false);
+    setTargetX(String(x));
+    setTargetZ(String(z));
+    act({
+      type: "move",
+      x,
+      z,
+      ...(body?.kind === "drone" ? { y: Number(altitude) } : {}),
+    });
+  };
+  const demo = () => {
+    void perform(async () => {
+      await request(
+        `/api/demo/${snapshot?.demo.running ? "stop" : "start"}`,
+        {},
+      );
+      setNavigation(false);
+    });
+  };
+  const chooseBody = (id: string) => {
+    setSelected(id);
+    setTab("control");
+  };
+  return (
+    <main className="app">
+      <header className="topbar">
+        <a className="brand" href="/" aria-label="GHOST home">
+          <Ghost size={29} />
+          <span>
+            GHOST<span className="brand-dot">®</span>
+          </span>
+        </a>
+        <span className="brand-tagline">
+          Any agent.
+          <br />
+          Any body.
+        </span>
+        <div className="topbar-divider" />
+        <span className="environment-name">
+          <span className="tiny-square" />
+          WAREHOUSE / 01
+        </span>
+        <div className="topbar-actions">
+          <span className={`connection ${connection}`} role="status">
+            <i />
+            {connection === "live"
+              ? "Systems live"
+              : connection === "connecting"
+                ? "Connecting"
+                : "Disconnected"}
+          </span>
+          <button
+            className="quiet help-button"
+            onClick={() => setModal("help")}
+          >
+            Quick start
+          </button>
+          <button
+            className="quiet connect-button"
+            onClick={() => setModal("connect")}
+          >
+            <span aria-hidden="true">⌘</span> Connect an agent{" "}
+            <span aria-hidden="true">↗</span>
+          </button>
+        </div>
+      </header>
+      <section className="page-heading">
+        <div>
+          <div className="eyebrow">
+            <span className="accent-line" />
+            SIMULATED EMBODIMENT / LIVE SANDBOX
           </div>
-          <p aria-live="polite">Selected: <strong>{resource.label}</strong></p>
-          <p className="muted">Possession, observation, and controls come next.</p>
+          <h1>
+            Intelligence, <span>embodied.</span>
+          </h1>
+          <p>One ghost. Four bodies. A warehouse of possibilities.</p>
+        </div>
+        <div className="heading-actions">
+          <div className="demo-caption">
+            MEET YOUR NEXT BODY<span>Four bodies · one scripted mission</span>
+          </div>
+          <button
+            className={`primary demo-button ${snapshot?.demo.running ? "stop-demo" : ""}`}
+            disabled={!live || busy}
+            onClick={demo}
+          >
+            {snapshot?.demo.running ? (
+              <>
+                <span aria-hidden="true">■</span> Stop demo
+              </>
+            ) : (
+              <>
+                <span aria-hidden="true">▶</span> Run guided demo
+              </>
+            )}
+          </button>
+        </div>
+      </section>
+      {error && (
+        <div className="notice error" role="alert">
+          <span>{error}</span>
+          <button aria-label="Dismiss error" onClick={() => setError(null)}>
+            ×
+          </button>
+        </div>
+      )}
+      {!live && (
+        <div className="notice" role="status">
+          {snapshot
+            ? "Connection interrupted. Showing the last known state. Controls will resume after reconnection."
+            : "Connecting to the warehouse authority… Start the project with npm run dev if this takes more than a moment."}
+        </div>
+      )}
+      <section className="operations" aria-label="Warehouse operations">
+        <aside className="fleet panel">
+          <div className="section-heading">
+            <h2>Available bodies</h2>
+            <span className="count">04</span>
+          </div>
+          <p className="section-description">Choose a host. Make it yours.</p>
+          <div className="fleet-list" role="group" aria-label="Select a body">
+            {snapshot?.bodies.map((item, index) => (
+              <button
+                key={item.id}
+                className={`body-card ${selected === item.id ? "selected" : ""}`}
+                style={
+                  {
+                    "--body-color": BODY_COLORS[item.kind],
+                  } as React.CSSProperties
+                }
+                aria-pressed={selected === item.id}
+                onClick={() => chooseBody(item.id)}
+              >
+                <div className="body-card-top">
+                  <span className="body-symbol">
+                    <BodyIcon kind={item.kind} />
+                  </span>
+                  <span className="body-number">0{index + 1}</span>
+                </div>
+                <div className="body-card-title">
+                  <strong>{item.label}</strong>
+                  <span aria-hidden="true">↗</span>
+                </div>
+                <span className="body-kind">{prettyKind[item.kind]}</span>
+                <div className={`body-status ${item.lease ? "possessed" : ""}`}>
+                  <i />
+                  {item.lease
+                    ? item.action?.status === "running"
+                      ? "In motion"
+                      : "Possessed"
+                    : "Available"}
+                  <span>{item.lease ? "LEASED" : "READY"}</span>
+                </div>
+              </button>
+            )) ?? <div className="fleet-skeleton">Awaiting live registry…</div>}
+          </div>
+          <div className="fleet-footer">
+            <span className="small-ghost">
+              <Ghost size={18} />
+            </span>
+            <p>
+              The intelligence is yours.
+              <br />
+              <strong>The body is temporary.</strong>
+            </p>
+          </div>
+        </aside>
+        <div className="viewport panel">
+          <div className="viewport-toolbar">
+            <div>
+              <span className="live-indicator" />
+              <strong>Warehouse 01</strong>
+              <span className="muted toolbar-extra">
+                / Digital warehouse · simulation
+              </span>
+            </div>
+            <span className="viewport-badge">
+              {live ? "LIVE TWIN" : "OFFLINE"}
+            </span>
+          </div>
+          <div
+            className={`scene ${navigation ? "navigating" : ""}`}
+            aria-label="Interactive 3D warehouse. Drag to orbit, pinch or scroll to zoom. Use fleet buttons to select bodies."
+          >
+            {snapshot ? (
+              <Warehouse
+                snapshot={snapshot}
+                selected={selected}
+                onSelect={chooseBody}
+                navigate={navigation && canAct ? move : null}
+                focus={focus}
+                view={view}
+              />
+            ) : (
+              <div className="scene-loading">
+                <Ghost size={48} />
+                <p>Preparing your next body</p>
+                <span>Connecting to Warehouse 01</span>
+              </div>
+            )}
+            <div className="scene-top">
+              <span className="scene-coordinate">
+                W—01 <span>20 × 14 M</span>
+              </span>
+              <button
+                className="scene-button"
+                onClick={() => setModal("help")}
+                aria-label="Warehouse help"
+              >
+                ?
+              </button>
+            </div>
+            {snapshot?.demo.running && (
+              <div className="demo-phase" role="status">
+                <Ghost size={20} />
+                <span>{snapshot.demo.phase}</span>
+              </div>
+            )}
+            {navigation && (
+              <div className="navigation-hint" role="status">
+                Click the floor to set a destination{" "}
+                <button onClick={() => setNavigation(false)}>Cancel</button>
+              </div>
+            )}
+            {completed === 4 && !snapshot?.demo.running && (
+              <div className="mission-success">
+                <span>✓</span> Mission complete · cargo cleared for dispatch
+              </div>
+            )}
+            <div className="scene-controls">
+              <button
+                title="Reset view"
+                aria-label="Reset warehouse view"
+                onClick={() => {
+                  setFocus(null);
+                  setView((v) => v + (v % 2 ? 1 : 2));
+                }}
+              >
+                ⌖
+              </button>
+              <button
+                title="Top view"
+                aria-label="Toggle top view"
+                onClick={() => {
+                  setFocus(null);
+                  setView((v) => v + 1);
+                }}
+              >
+                ▱
+              </button>
+              <button
+                title="Focus selected body"
+                aria-label="Focus selected body"
+                disabled={!body}
+                onClick={() => {
+                  if (body) setFocus([...body.position]);
+                }}
+              >
+                ◎
+              </button>
+            </div>
+            <div className="scene-legend">
+              <span>
+                <i className="legend-selected" />
+                Selected
+              </span>
+              <span>
+                <i className="legend-leased" />
+                Possessed
+              </span>
+            </div>
+          </div>
+          <div className="viewport-footer">
+            <span>
+              <span className="compass">N ↗</span> Drag to orbit{" "}
+              <span className="dot-separator">·</span> Scroll to zoom
+            </span>
+            <span>
+              SIMULATION AUTHORITY{" "}
+              <i className={live ? "online-dot" : "offline-dot"} />
+              <span className="revision">
+                R{snapshot?.revision.toString().padStart(4, "0") ?? "0000"}
+              </span>
+            </span>
+          </div>
+        </div>
+        <aside className="inspector panel" aria-label="Selected body controls">
+          {body ? (
+            <>
+              <div className="inspector-title">
+                <div
+                  className="inspector-icon"
+                  style={{ color: BODY_COLORS[body.kind] }}
+                >
+                  <BodyIcon kind={body.kind} size={28} />
+                </div>
+                <span className="eyebrow">
+                  BODY / {body.kind.toUpperCase()}
+                </span>
+                <h2>
+                  {body.label}
+                  <span className={body.lease ? "online-dot" : "neutral-dot"} />
+                </h2>
+                <p>{bodyDetails[body.kind]}</p>
+              </div>
+              <div className="inspector-tabs">
+                <button
+                  aria-pressed={tab === "control"}
+                  onClick={() => setTab("control")}
+                >
+                  Control
+                </button>
+                <button
+                  aria-pressed={tab === "observe"}
+                  onClick={() => setTab("observe")}
+                >
+                  Observation {owns && <span className="tab-dot" />}
+                </button>
+              </div>
+              <div className="inspector-content">
+                <div className="position-label">
+                  POSITION <span>METERS / XYZ</span>
+                </div>
+                <div className="position-values">
+                  {body.position.map((value, i) => (
+                    <div key={i}>
+                      <span>{["X", "Y", "Z"][i]}</span>
+                      <strong>{value.toFixed(2)}</strong>
+                    </div>
+                  ))}
+                </div>
+                {tab === "control" ? (
+                  <>
+                    <div className={`lease-box ${owns ? "owned" : ""}`}>
+                      <div>
+                        <span>
+                          {owns
+                            ? "YOU ARE IN CONTROL"
+                            : body.lease
+                              ? "CURRENTLY POSSESSED"
+                              : "READY FOR POSSESSION"}
+                        </span>
+                        {body.lease ? (
+                          <strong>{remaining}s</strong>
+                        ) : (
+                          <Ghost size={20} />
+                        )}
+                      </div>
+                      <p>
+                        {owns
+                          ? "Your ghost is connected to this body."
+                          : body.lease
+                            ? body.lease.owner
+                            : "Acquire an exclusive lease to begin."}
+                      </p>
+                      {body.lease && (
+                        <div className="lease-progress">
+                          <i
+                            style={{
+                              width: `${Math.min(100, (remaining / 60) * 100)}%`,
+                            }}
+                          />
+                        </div>
+                      )}
+                      {!body.lease ? (
+                        <div className="possession-row">
+                          <label className="sr-only" htmlFor="lease-duration">
+                            Lease duration
+                          </label>
+                          <select
+                            id="lease-duration"
+                            value={ttl}
+                            onChange={(e) => setTtl(Number(e.target.value))}
+                          >
+                            <option value={60}>60 sec</option>
+                            <option value={120}>120 sec</option>
+                            <option value={300}>300 sec</option>
+                          </select>
+                          <button
+                            className="primary"
+                            disabled={!live || busy || !!snapshot?.demo.running}
+                            onClick={possess}
+                          >
+                            <Ghost size={17} />
+                            {busy ? "Connecting…" : "Possess body"}
+                          </button>
+                        </div>
+                      ) : owns ? (
+                        <button
+                          className="release-button"
+                          disabled={!live || busy}
+                          onClick={release}
+                        >
+                          Release body <span aria-hidden="true">↗</span>
+                        </button>
+                      ) : (
+                        <div className="leased-note">
+                          This body will become available when released or when
+                          its lease expires.
+                        </div>
+                      )}
+                    </div>
+                    <div className="command-header">
+                      <h3>Body controls</h3>
+                      <span>
+                        {running
+                          ? "IN MOTION"
+                          : owns
+                            ? "CONNECTED"
+                            : "LEASE REQUIRED"}
+                      </span>
+                    </div>
+                    <fieldset className="body-controls" disabled={!canAct}>
+                      {(body.kind === "rover" || body.kind === "drone") && (
+                        <>
+                          <div className="coordinate-inputs">
+                            <label>
+                              X
+                              <input
+                                type="number"
+                                min="-9"
+                                max="9"
+                                step="0.1"
+                                value={targetX}
+                                onChange={(e) => setTargetX(e.target.value)}
+                              />
+                            </label>
+                            {body.kind === "drone" && (
+                              <label>
+                                Y
+                                <input
+                                  type="number"
+                                  min="0.8"
+                                  max="5"
+                                  step="0.1"
+                                  value={altitude}
+                                  onChange={(e) => setAltitude(e.target.value)}
+                                />
+                              </label>
+                            )}
+                            <label>
+                              Z
+                              <input
+                                type="number"
+                                min="-6"
+                                max="6"
+                                step="0.1"
+                                value={targetZ}
+                                onChange={(e) => setTargetZ(e.target.value)}
+                              />
+                            </label>
+                          </div>
+                          {body.kind === "drone" && (
+                            <div className="button-pair">
+                              <button
+                                disabled={body.airborne}
+                                onClick={() => act({ type: "takeoff" })}
+                              >
+                                ↑ Take off
+                              </button>
+                              <button
+                                disabled={!body.airborne}
+                                onClick={() => act({ type: "land" })}
+                              >
+                                ↓ Land
+                              </button>
+                            </div>
+                          )}
+                          <div className="button-pair">
+                            <button
+                              disabled={body.kind === "drone" && !body.airborne}
+                              onClick={() =>
+                                move(Number(targetX), Number(targetZ))
+                              }
+                            >
+                              Move to point <span>↗</span>
+                            </button>
+                            <button
+                              className={navigation ? "active" : ""}
+                              disabled={body.kind === "drone" && !body.airborne}
+                              onClick={() => setNavigation((v) => !v)}
+                            >
+                              ⌖ Pick on floor
+                            </button>
+                          </div>
+                          <button
+                            className="full-button"
+                            disabled={body.kind === "drone" && !body.airborne}
+                            onClick={() =>
+                              act({ type: "inspect", objectId: "crate-07" })
+                            }
+                          >
+                            Scan priority cargo <span>◎</span>
+                          </button>
+                        </>
+                      )}
+                      {body.kind === "camera" && (
+                        <>
+                          <div className="coordinate-inputs">
+                            <label>
+                              Pan °
+                              <input
+                                type="number"
+                                min="-180"
+                                max="180"
+                                value={pan}
+                                onChange={(e) => setPan(e.target.value)}
+                              />
+                            </label>
+                            <label>
+                              Tilt °
+                              <input
+                                type="number"
+                                min="-80"
+                                max="30"
+                                value={tilt}
+                                onChange={(e) => setTilt(e.target.value)}
+                              />
+                            </label>
+                          </div>
+                          <button
+                            className="full-button"
+                            onClick={() =>
+                              act({
+                                type: "look",
+                                pan: Number(pan),
+                                tilt: Number(tilt),
+                              })
+                            }
+                          >
+                            Aim camera <span>↗</span>
+                          </button>
+                          <button
+                            className="full-button"
+                            onClick={() =>
+                              act({ type: "inspect", objectId: "crate-07" })
+                            }
+                          >
+                            Scan priority cargo <span>◎</span>
+                          </button>
+                          <p className="control-note">
+                            70° horizontal view · aim 63° / −13° toward Cargo
+                            07.
+                          </p>
+                        </>
+                      )}
+                      {body.kind === "arm" && (
+                        <>
+                          <div className="preset-buttons">
+                            {(["home", "reach", "drop"] as const).map(
+                              (preset) => (
+                                <button
+                                  aria-pressed={body.preset === preset}
+                                  key={preset}
+                                  onClick={() =>
+                                    act({ type: "preset", preset })
+                                  }
+                                >
+                                  {preset === "drop"
+                                    ? "Dispatch"
+                                    : preset[0]!.toUpperCase() +
+                                      preset.slice(1)}
+                                </button>
+                              ),
+                            )}
+                          </div>
+                          <div className="button-pair">
+                            <button
+                              disabled={!!body.heldObjectId}
+                              onClick={() =>
+                                act({ type: "grasp", objectId: "crate-07" })
+                              }
+                            >
+                              Grasp cargo
+                            </button>
+                            <button
+                              disabled={!body.heldObjectId}
+                              onClick={() => act({ type: "place" })}
+                            >
+                              Place cargo
+                            </button>
+                          </div>
+                          <p className="control-note">
+                            Reach → grasp → dispatch → place.
+                            <br />
+                            Gripper: {body.heldObjectId ?? "empty"}
+                          </p>
+                        </>
+                      )}
+                    </fieldset>
+                    {running && (
+                      <button
+                        className="full-button stop-motion"
+                        disabled={!owns || !live || busy}
+                        onClick={() => act({ type: "stop" })}
+                      >
+                        ■ Stop motion
+                      </button>
+                    )}
+                    {observation?.inspection && (
+                      <div className="inspection-result">
+                        <strong>
+                          SCAN / {observation.inspection.objectId}
+                        </strong>
+                        <p>{observation.inspection.condition}</p>
+                      </div>
+                    )}
+                    <div className="action-state">
+                      <i className={running ? "online-dot" : "neutral-dot"} />
+                      {body.action
+                        ? `${body.action.type} · ${body.action.status}`
+                        : "No commands issued"}
+                    </div>
+                  </>
+                ) : (
+                  <div className="observation-panel">
+                    <div className="command-header">
+                      <h3>Sensor output</h3>
+                      <span>STRUCTURED</span>
+                    </div>
+                    {!owns ? (
+                      <div className="empty-observation">
+                        <BodyIcon kind={body.kind} size={34} />
+                        <p>Possess {body.label} to see through its sensors.</p>
+                        <button onClick={() => setTab("control")}>
+                          Go to controls ↗
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="sensor-summary">
+                          <span>VISIBLE OBJECTS</span>
+                          <strong>{observation?.objects.length ?? "—"}</strong>
+                        </div>
+                        {observation?.objects.length === 0 && (
+                          <p className="control-note">
+                            No cargo in sensor range. Move closer or adjust the
+                            camera.
+                          </p>
+                        )}
+                        {observation?.objects.map((object) => (
+                          <div className="observed-object" key={object.id}>
+                            <strong>
+                              {object.id}
+                              <span>{object.distance} m</span>
+                            </strong>
+                            <p>{object.label}</p>
+                            <small>
+                              {object.position
+                                .map((v) => v.toFixed(1))
+                                .join(" / ")}
+                            </small>
+                            {object.condition && (
+                              <div className="inspection-result">
+                                ✓ {object.condition}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        {observation?.inspection && (
+                          <div className="inspection-result">
+                            <strong>
+                              LAST INSPECTION /{" "}
+                              {observation.inspection.objectId}
+                            </strong>
+                            <p>{observation.inspection.condition}</p>
+                          </div>
+                        )}
+                        <p className="control-note">
+                          Authoritative simulation data. Updates every 0.8s.
+                          Images are not generated.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="inspector-footer">
+                MCP READY
+                <span>{CAPABILITIES[body.kind].length} CAPABILITIES</span>
+              </div>
+            </>
+          ) : (
+            <div className="empty-inspector">
+              Waiting for the body registry…
+            </div>
+          )}
         </aside>
       </section>
+      <section className="bottom-grid">
+        <div className="mission-panel panel">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">THE FIRST MISSION</span>
+              <h2>One ghost. Four perspectives.</h2>
+            </div>
+            <span
+              className={`mission-count ${completed === 4 ? "complete" : ""}`}
+            >
+              {completed}
+              <span>/ 04</span>
+            </span>
+          </div>
+          <p className="mission-description">
+            Find, inspect, verify, and stage Cargo 07 for dispatch.
+          </p>
+          <div className="mission-steps">
+            {snapshot?.mission.map((step, i) => (
+              <button
+                key={step.id}
+                className={step.complete ? "complete" : ""}
+                onClick={() => chooseBody(`${step.body}-01`)}
+              >
+                <span className="step-number">
+                  {step.complete ? "✓" : `0${i + 1}`}
+                </span>
+                <span>
+                  <strong>{["Locate", "Inspect", "Survey", "Stage"][i]}</strong>
+                  <small>{step.label}</small>
+                </span>
+              </button>
+            ))}
+          </div>
+          <div className="mission-bottom">
+            <span>
+              {snapshot?.demo.running
+                ? snapshot.demo.phase
+                : (snapshot?.demo.error ??
+                  (completed === 4
+                    ? "All checks passed. Cargo ready for dispatch."
+                    : "Run the guided demo, or take control and explore."))}
+            </span>
+            <button
+              className="text-button"
+              disabled={!live || busy}
+              onClick={() => setModal("reset")}
+            >
+              Reset warehouse ↻
+            </button>
+          </div>
+        </div>
+        <div className="activity-panel panel">
+          <div className="section-heading">
+            <h2>
+              Activity stream <span className="stream-label">LIVE</span>
+            </h2>
+            <span className="eyebrow">
+              {snapshot?.activity.length ?? 0} EVENTS
+            </span>
+          </div>
+          <div
+            className="activity-list"
+            role="log"
+            aria-label="Warehouse activity"
+          >
+            {snapshot?.activity.length ? (
+              snapshot.activity.slice(0, 30).map((item) => (
+                <div className={`activity-item ${item.kind}`} key={item.id}>
+                  <span className="activity-dot" />
+                  <time>
+                    {new Date(item.at).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                      second: "2-digit",
+                      hour12: false,
+                    })}
+                  </time>
+                  <p>{item.message}</p>
+                </div>
+              ))
+            ) : (
+              <div className="empty-activity">
+                <span>⌁</span>
+                <p>
+                  Every possession leaves a trace.
+                  <br />
+                  <strong>Your first move starts the story.</strong>
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+      <footer className="page-footer">
+        <span>
+          <Ghost size={15} /> GHOST{" "}
+          <span className="footer-tagline">Any agent. Any body.</span>
+        </span>
+        <span>
+          BUILT FOR AGENTS. MADE VISIBLE TO HUMANS.
+          <span className="footer-simulation">
+            SIMULATED ENVIRONMENT / V0.1
+          </span>
+        </span>
+      </footer>
+      {modal === "connect" && (
+        <Modal title="Bring your own ghost." onClose={() => setModal(null)}>
+          <p>
+            Connect any MCP agent to this warehouse. Browser controls and agents
+            share one authoritative world.
+          </p>
+          <h3>Streamable HTTP</h3>
+          <p className="control-note">
+            For an agent running in this cloud environment:
+          </p>
+          <div className="code-block">
+            <code>http://127.0.0.1:3001/mcp</code>
+            <Copy text="http://127.0.0.1:3001/mcp" />
+          </div>
+          <h3>Stdio client configuration</h3>
+          <div className="code-block">
+            <pre>
+              {JSON.stringify(
+                {
+                  mcpServers: {
+                    ghost: {
+                      command: "node",
+                      args: ["/workspace/ghost/apps/server/dist/index.js"],
+                    },
+                  },
+                },
+                null,
+                2,
+              )}
+            </pre>
+            <Copy
+              text={JSON.stringify(
+                {
+                  mcpServers: {
+                    ghost: {
+                      command: "node",
+                      args: ["/workspace/ghost/apps/server/dist/index.js"],
+                    },
+                  },
+                },
+                null,
+                2,
+              )}
+            />
+          </div>
+          <div className="tool-chain">
+            discover <span>→</span> possess <span>→</span> observe{" "}
+            <span>→</span> act <span>→</span> release
+          </div>
+          <p className="control-note">
+            Build first with npm run build. Leases are private capabilities.
+            This is a trusted, loopback-only simulation. Remote access needs a
+            private port forward; no public endpoint is enabled.
+          </p>
+        </Modal>
+      )}
+      {modal === "help" && (
+        <Modal
+          title="A body for every intention."
+          onClose={() => setModal(null)}
+        >
+          <p>
+            GHOST lets an agent temporarily inhabit a simulated machine. The
+            guided mission is a scripted tour through the same live controls.
+            You can also explore on your own.
+          </p>
+          <ol className="help-steps">
+            <li>
+              <strong>Select a body</strong>
+              <p>
+                Choose Sentinel, Scout, Atlas, or Wisp in the fleet. Selection
+                lets you inspect its live state.
+              </p>
+            </li>
+            <li>
+              <strong>Possess it</strong>
+              <p>
+                Acquire a timed, exclusive lease. The next body you possess
+                releases your previous one.
+              </p>
+            </li>
+            <li>
+              <strong>Observe and act</strong>
+              <p>
+                Use the controls or pick a destination on the floor. The
+                Observation tab shows sensor-visible cargo and inspection
+                results.
+              </p>
+            </li>
+            <li>
+              <strong>Leave it for the next ghost</strong>
+              <p>
+                Release your body or let its lease expire. Pending movement
+                stops immediately.
+              </p>
+            </li>
+          </ol>
+          <p className="control-note">
+            3D: drag to orbit, scroll or pinch to zoom. The top-view and focus
+            buttons help you navigate. All motion is kinematic; there is no
+            collision physics.
+          </p>
+          <button className="primary" onClick={() => setModal(null)}>
+            Enter the warehouse ↗
+          </button>
+        </Modal>
+      )}
+      {modal === "reset" && (
+        <Modal title="Reset the warehouse?" onClose={() => setModal(null)}>
+          <p>
+            This stops the demo, releases every body including agent leases, and
+            returns cargo and machines to their starting positions.
+          </p>
+          <div className="modal-actions">
+            <button onClick={() => setModal(null)}>Keep exploring</button>
+            <button
+              className="primary"
+              disabled={busy}
+              onClick={() => {
+                void perform(async () => {
+                  await request("/api/reset", {});
+                  setTokens({});
+                  setObservation(null);
+                  setModal(null);
+                });
+              }}
+            >
+              Reset warehouse
+            </button>
+          </div>
+        </Modal>
+      )}
     </main>
   );
 }
