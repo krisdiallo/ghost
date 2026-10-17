@@ -1,0 +1,18 @@
+{
+  "name": "ghost",
+  "version": "0.0.0",
+  "private": true,
+  "description": "GHOST — Any agent. Any body.",
+  "type": "module",
+  "workspaces": ["packages/shared", "apps/server", "apps/web"],
+  "engines": { "node": "^20.19.0 || >=22.12.0" },
+  "scripts": {
+    "dev": "npm run dev:web",
+    "dev:web": "npm run build -w @ghost/shared && npm run dev -w @ghost/web",
+    "dev:server": "npm run build -w @ghost/shared && npm run dev -w @ghost/server",
+    "build": "npm run build --workspaces",
+    "typecheck": "npm run build -w @ghost/shared && npm run typecheck --workspaces",
+    "check": "npm run typecheck && npm run build"
+  },
+  "devDependencies": { "typescript": "^7.0.2" }
+}
