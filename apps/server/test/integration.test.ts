@@ -194,7 +194,7 @@ test(
 
 test(
   "guided four-body mission completes and can be reset for another run",
-  { timeout: 40000 },
+  { timeout: 140000 },
   async () => {
     const warehouse = await startWarehouse(0);
     try {
@@ -220,6 +220,16 @@ test(
         false,
       );
       assert.deepEqual(snapshot.objects[0]!.position, [6, 0.55, 2]);
+      assert.ok(
+        snapshot.objects
+          .find((o) => o.id === "crate-12")!
+          .inspectedBy.includes("rover-01"),
+      );
+      assert.ok(
+        snapshot.objects
+          .find((o) => o.id === "crate-18")!
+          .inspectedBy.includes("drone-01"),
+      );
       warehouse.sim.reset();
       assert.ok(warehouse.sim.snapshot().mission.every((s) => !s.complete));
       warehouse.sim.startDemo();

@@ -4,7 +4,7 @@ Status: implemented in the cloud checkout. This supersedes the initial scaffold 
 
 ## Outcome
 
-One agent can discover, lease, observe, control and release four simulated body types. The browser renders the same server-owned warehouse state. The guided mission locates a crate with a camera, inspects it using a rover, surveys it with a drone, and transfers it to dispatch using an arm. The guided path is scripted; an external MCP client supplies real agent reasoning.
+One agent can discover, lease, observe, control and release four simulated body types. The browser renders the same server-owned warehouse state. The guided mission locates Cargo 07 with a camera, sends the rover down the west aisle to inspect Cargo 12, and flies the drone above the racks to scan Cargo 18 at the north loading docks. Both return to verify Cargo 07 before the arm transfers it to dispatch. The guided path is scripted; an external MCP client supplies real agent reasoning.
 
 ## Architecture
 
@@ -54,4 +54,4 @@ Focused simulation tests cover leases, contention, schema validation, bounds, ca
 
 Actual WebGL rendering and desktop/mobile layouts are checked by a repeatable Chromium capture run. It records the complete mission and performs a rover inspection through touch-emulated controls. CI retains the screenshots, video, and machine-readable report. Physical device/GPU behavior and pinch gestures remain target-device QA. No real hardware, persistence, accounts, images, model provider, collision/path planning, public hosting or extra infrastructure has been added. Loopback Host/Origin checks and private-forward configuration support a trusted demo; this is not an authenticated public service.
 
-The facility overview frames the full industrial hall. Starting the guided mission or selecting a body moves into the central embodiment bay; camera changes ease between views and stop when the user takes over orbiting. Repeated storage and structural parts use instanced geometry so scene detail does not add hundreds of individual draw calls. Report pages load one small JPEG by default, with larger captures and video available on demand for mobile users.
+The facility overview frames the full industrial hall. Starting the guided mission or selecting a body frames that body at its actual location. Follow mode tracks translation while preserving the viewing angle. Visible Orbit/Pan and zoom buttons support mouse and touch controls; two fingers pan and zoom. A whole-warehouse map supplies destinations and fleet positions. Immersive mode fills the viewport while retaining a compact possession/action dock, fleet switcher, map, and tour controls. Preset transitions stop when the user takes over the camera. Repeated storage and structural parts use instanced geometry so scene detail does not add hundreds of individual draw calls. Report pages load one small JPEG by default, with larger captures and video available on demand for mobile users.

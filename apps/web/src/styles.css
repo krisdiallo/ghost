@@ -2107,3 +2107,308 @@ dialog::backdrop {
     max-width: 190px;
   }
 }
+
+/* The warehouse can occupy the entire window without losing live body controls. */
+.viewport-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.immersive-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  font-size: 11px;
+  color: #dbf0df;
+  background: #293e39;
+  border: 1px solid #4a6657;
+  border-radius: 5px;
+  min-height: 36px;
+}
+.scene-controls {
+  display: grid;
+  grid-template-columns: repeat(3, 36px);
+  gap: 5px;
+  bottom: 15px;
+  right: 15px;
+  padding: 6px;
+  border: 1px solid #56706680;
+  border-radius: 9px;
+  background: #13282cce;
+  backdrop-filter: blur(8px);
+}
+.scene-controls button {
+  width: 36px;
+  height: 36px;
+}
+.scene-legend {
+  bottom: 164px;
+}
+.warehouse-map {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  width: 196px;
+  padding: 9px;
+  border: 1px solid #66867b66;
+  background: #10252be8;
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  color: #c3d9ce;
+}
+.map-heading {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 7px;
+  font: 8px var(--mono);
+  letter-spacing: 1px;
+}
+.warehouse-map svg {
+  display: block;
+  width: 100%;
+  touch-action: none;
+}
+.can-navigate svg {
+  cursor: crosshair;
+}
+.map-caption {
+  display: block;
+  margin-top: 6px;
+  font: 8px var(--mono);
+  color: #91b1a3;
+}
+.map-body {
+  cursor: pointer;
+}
+.map-body:focus {
+  outline: none;
+  stroke: white;
+}
+.destination-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.destination-grid button {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  gap: 4px;
+  text-align: left;
+  font-size: 10px;
+  padding: 9px;
+}
+.destination-grid button span {
+  font: 9px var(--mono);
+  color: #88a397;
+}
+.immersive .viewport {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  border: 0;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+  background: #13252c;
+}
+.immersive .viewport-toolbar {
+  flex-shrink: 0;
+}
+.immersive .scene {
+  height: auto;
+  min-height: 0;
+  flex: 1;
+}
+.immersive .viewport-footer {
+  flex-shrink: 0;
+}
+.immersive-fleet {
+  position: absolute;
+  top: 66px;
+  left: 16px;
+  display: flex;
+  gap: 5px;
+}
+.immersive-fleet button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 11px;
+  background: #132b30dc;
+  border: 1px solid #5c7b6c;
+  border-radius: 5px;
+  color: #c3d8cd;
+}
+.immersive-fleet button[aria-pressed="true"] {
+  background: #365849;
+  border-color: #bdedd0;
+}
+.pilot-dock {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 290px;
+  padding: 12px 15px;
+  border: 1px solid #8bc5a780;
+  background: #10272ce8;
+  backdrop-filter: blur(12px);
+  border-radius: 10px;
+  box-shadow: 0 10px 40px #0005;
+}
+.pilot-dock strong {
+  display: block;
+  font: 18px var(--display);
+  color: #dff6e6;
+}
+.pilot-dock span {
+  display: block;
+  margin-top: 4px;
+  font: 9px var(--mono);
+  color: #aac8b7;
+}
+.pilot-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+}
+.pilot-actions button {
+  flex: 1;
+  white-space: nowrap;
+  font-size: 11px;
+  padding: 8px;
+  border: 1px solid #6b927e;
+  border-radius: 5px;
+  color: #d7efde;
+  background: #315044;
+  min-height: 40px;
+}
+.immersive .scene-legend {
+  display: none;
+}
+.immersive .notice {
+  z-index: 60;
+}
+@media (max-width: 720px) {
+  .viewport-actions {
+    gap: 7px;
+  }
+  .viewport-badge {
+    display: none;
+  }
+  .immersive-toggle {
+    min-height: 44px;
+  }
+  .scene-controls {
+    grid-template-columns: repeat(3, 40px);
+    gap: 4px;
+    bottom: 12px;
+    right: 10px;
+    padding: 5px;
+  }
+  .scene-controls button {
+    width: 40px;
+    height: 40px;
+  }
+  .warehouse-map {
+    width: 156px;
+    left: 10px;
+    bottom: 12px;
+    padding: 7px;
+  }
+  .map-heading,
+  .map-caption {
+    font-size: 7px;
+    letter-spacing: 0.3px;
+  }
+  .scene-legend {
+    display: none;
+  }
+  .immersive-fleet {
+    top: 94px;
+    left: 10px;
+    right: 10px;
+    gap: 4px;
+  }
+  .immersive-fleet button {
+    flex: 1;
+    justify-content: center;
+    padding: 9px 5px;
+    font-size: 10px;
+    min-height: 44px;
+  }
+  .pilot-dock {
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    transform: none;
+    min-width: 0;
+    padding: 10px;
+  }
+  .pilot-dock strong {
+    font-size: 16px;
+  }
+  .pilot-actions button {
+    min-height: 44px;
+    font-size: 10px;
+    padding: 6px;
+  }
+  .immersive .warehouse-map,
+  .immersive .scene-controls {
+    bottom: 140px;
+  }
+  .immersive .demo-phase {
+    top: 151px;
+  }
+  .immersive .navigation-hint {
+    top: 150px;
+  }
+  .immersive .viewport-footer .revision {
+    display: none;
+  }
+}
+.pilot-actions {
+  flex-wrap: wrap;
+}
+.pilot-actions button {
+  flex-basis: 25%;
+}
+.pilot-result {
+  max-width: 430px;
+  margin: 9px 0 0;
+  font-size: 10px;
+  line-height: 1.4;
+  color: #c3e8cd;
+}
+@media (max-width: 720px) {
+  .immersive .warehouse-map,
+  .immersive .scene-controls {
+    bottom: 190px;
+  }
+  .immersive .pilot-dock {
+    min-height: 155px;
+  }
+  .immersive .viewport-toolbar .toolbar-extra {
+    display: none;
+  }
+  .immersive .viewport-toolbar strong {
+    font-size: 12px;
+  }
+}
+.scene-view-label {
+  padding: 7px 12px;
+  border-radius: 5px;
+  background: #10272cdb;
+  color: #d6f0e0;
+}
+.scene-controls button:has(.camera-tool-label) {
+  flex-direction: column;
+  gap: 1px;
+}
+.camera-tool-label {
+  font-size: 8px;
+  line-height: 9px;
+}

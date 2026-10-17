@@ -9,7 +9,7 @@ import {
 import type { ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import type { ThreeEvent } from "@react-three/fiber";
-import { CanvasTexture, Group, Vector3 } from "three";
+import { CanvasTexture, Group, Vector3, MOUSE, TOUCH } from "three";
 import { Box, Cylinder, Beam, Text, Ring } from "./ScenePrimitives";
 import { IndustrialHall } from "./IndustrialHall";
 import { WAREHOUSE } from "@ghost/shared";
@@ -295,6 +295,7 @@ function BodyMesh({
         ref={group}
         position={initialPosition.current}
         onClick={(e) => {
+          if (e.delta > 5) return;
           e.stopPropagation();
           onSelect(body.id);
         }}
@@ -464,7 +465,15 @@ function Controls({
   focus,
   view,
   reset,
+  mode,
+  zoom,
+  follow,
+  followId,
 }: {
+  followId: string | null;
+  mode: "orbit" | "pan";
+  zoom: { id: number; factor: number };
+  follow: Vec3 | null;
   focus: Vec3 | null;
   view: WarehouseView;
   reset: number;
@@ -479,10 +488,20 @@ function Controls({
     target: new Vector3(0, 0, -12),
     active: false,
   });
+  const followed = useRef<Vector3 | null>(null);
+  useEffect(() => {
+    followed.current = null;
+  }, [followId]);
+  useEffect(() => {
+    controls.mouseButtons.LEFT = mode === "pan" ? MOUSE.PAN : MOUSE.ROTATE;
+    controls.mouseButtons.RIGHT = mode === "pan" ? MOUSE.ROTATE : MOUSE.PAN;
+    controls.touches.ONE = mode === "pan" ? TOUCH.PAN : TOUCH.ROTATE;
+    controls.touches.TWO = TOUCH.DOLLY_PAN;
+  }, [controls, mode]);
   useEffect(() => {
     controls.enableDamping = true;
     controls.maxPolarAngle = Math.PI / 2.12;
-    controls.minDistance = 5;
+    controls.minDistance = 3;
     controls.maxDistance = 170;
     controls.target.set(0, 0, -12);
     controls.update();
@@ -501,13 +520,14 @@ function Controls({
     controls.update();
     controls.enableDamping = true;
     const aspect = size.width / Math.max(1, size.height);
-    const target = focus
-      ? new Vector3(focus[0], Math.max(0.8, focus[1]), focus[2])
+    const origin = follow ?? focus;
+    const target = origin
+      ? new Vector3(origin[0], Math.max(0.8, origin[1]), origin[2])
       : view === "mission"
         ? new Vector3(0, 0.8, 0)
         : new Vector3(0, 0, -12);
     const offset = focus
-      ? new Vector3(10, 10, 12)
+      ? new Vector3(0, 14, 17)
       : view === "mission"
         ? new Vector3(17, 14, 20)
         : view === "top"
@@ -522,7 +542,31 @@ function Controls({
       active: true,
     };
   }, [view, focus, reset, size.width, size.height]);
+  useEffect(() => {
+    if (!zoom.id) return;
+    controls.enableDamping = false;
+    controls.update();
+    controls.enableDamping = true;
+    const offset = camera.position.clone().sub(controls.target);
+    offset.setLength(Math.max(3, Math.min(170, offset.length() * zoom.factor)));
+    goal.current = {
+      position: controls.target.clone().add(offset),
+      target: controls.target.clone(),
+      active: true,
+    };
+  }, [zoom.id, camera, controls]);
   useFrame((_, delta) => {
+    if (follow) {
+      const next = new Vector3(follow[0], Math.max(0.8, follow[1]), follow[2]);
+      if (followed.current) {
+        const shift = next.clone().sub(followed.current);
+        camera.position.add(shift);
+        controls.target.add(shift);
+        goal.current.position.add(shift);
+        goal.current.target.add(shift);
+      }
+      followed.current = next;
+    } else followed.current = null;
     if (goal.current.active) {
       const alpha = 1 - Math.exp(-delta * 5);
       camera.position.lerp(goal.current.position, alpha);
@@ -570,6 +614,9 @@ export function Warehouse({
   focus,
   view,
   reset = 0,
+  mode = "orbit",
+  zoom = { id: 0, factor: 1 },
+  follow = false,
 }: {
   snapshot: Snapshot;
   selected: string;
@@ -578,6 +625,9 @@ export function Warehouse({
   focus: Vec3 | null;
   view: WarehouseView;
   reset?: number;
+  mode?: "orbit" | "pan";
+  zoom?: { id: number; factor: number };
+  follow?: boolean;
 }) {
   return (
     <WebGLErrorBoundary>
@@ -651,7 +701,20 @@ export function Warehouse({
             />
           ))}
         </Suspense>
-        <Controls focus={focus} view={view} reset={reset} />
+        <Controls
+          focus={focus}
+          view={view}
+          reset={reset}
+          mode={mode}
+          zoom={zoom}
+          followId={follow ? selected : null}
+          follow={
+            follow
+              ? (snapshot.bodies.find((b) => b.id === selected)?.position ??
+                null)
+              : null
+          }
+        />
       </Canvas>
     </WebGLErrorBoundary>
   );

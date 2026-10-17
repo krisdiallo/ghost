@@ -85,7 +85,7 @@ export class Simulation {
       {
         id: "crate-12",
         label: "Storage cargo · 12",
-        position: [-6, 0.55, -0.5],
+        position: [-8.4, 0.55, -18],
         condition: "Surface abrasion on north face. Seal intact.",
         heldBy: null,
         inspectedBy: [],
@@ -93,7 +93,7 @@ export class Simulation {
       {
         id: "crate-18",
         label: "Storage cargo · 18",
-        position: [6, 0.55, -4],
+        position: [8.4, 0.55, -30],
         condition: "Seal intact. Awaiting inventory scan.",
         heldBy: null,
         inspectedBy: [],
@@ -629,13 +629,28 @@ export class Simulation {
       phase("01 / Sentinel · locating priority cargo");
       await act("camera", { type: "look", pan: 63, tilt: -13 });
       await act("camera", { type: "inspect", objectId: "crate-07" });
+      await delay(2500); // Give the opening possession time to read in the live tour.
       release("camera");
-      phase("02 / Scout · approaching the inspection point");
+      phase("02 / Scout · outbound to storage aisle B");
+      await act("rover", { type: "move", x: -10, z: 3 });
+      await act("rover", { type: "move", x: -10, z: -18 });
+      phase("02 / Scout · inspecting storage cargo 12");
+      await act("rover", { type: "inspect", objectId: "crate-12" });
+      phase("02 / Scout · returning through the west aisle");
+      await act("rover", { type: "move", x: -10, z: 3 });
       await act("rover", { type: "move", x: 1, z: 1.4 });
       await act("rover", { type: "inspect", objectId: "crate-07" });
       release("rover");
-      phase("03 / Wisp · aerial verification");
+      phase("03 / Wisp · climbing above the storage racks");
       await act("drone", { type: "takeoff" });
+      await act("drone", { type: "move", x: -4, z: -3, y: 9 });
+      phase("03 / Wisp · north loading dock survey");
+      await act("drone", { type: "move", x: 10, z: -30, y: 9 });
+      await act("drone", { type: "move", x: 10, z: -30, y: 4.5 });
+      await act("drone", { type: "inspect", objectId: "crate-18" });
+      phase("03 / Wisp · returning above the racks");
+      await act("drone", { type: "move", x: 10, z: -30, y: 9 });
+      await act("drone", { type: "move", x: 1, z: -1.5, y: 9 });
       await act("drone", { type: "move", x: 1, z: -1.5, y: 3.4 });
       await act("drone", { type: "inspect", objectId: "crate-07" });
       await act("drone", { type: "land" });
