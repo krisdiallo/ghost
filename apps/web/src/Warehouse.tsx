@@ -463,9 +463,11 @@ export type WarehouseView = "facility" | "mission" | "top";
 function Controls({
   focus,
   view,
+  reset,
 }: {
   focus: Vec3 | null;
   view: WarehouseView;
+  reset: number;
 }) {
   const { camera, gl, size } = useThree();
   const controls = useMemo(
@@ -494,6 +496,10 @@ function Controls({
     };
   }, [controls]);
   useEffect(() => {
+    // Clear residual drag damping before applying a named camera preset.
+    controls.enableDamping = false;
+    controls.update();
+    controls.enableDamping = true;
     const aspect = size.width / Math.max(1, size.height);
     const target = focus
       ? new Vector3(focus[0], Math.max(0.8, focus[1]), focus[2])
@@ -515,14 +521,20 @@ function Controls({
       target,
       active: true,
     };
-  }, [view, focus, size.width, size.height]);
+  }, [view, focus, reset, size.width, size.height]);
   useFrame((_, delta) => {
     if (goal.current.active) {
-      const alpha = 1 - Math.exp(-Math.min(delta, 0.1) * 5);
+      const alpha = 1 - Math.exp(-delta * 5);
       camera.position.lerp(goal.current.position, alpha);
       controls.target.lerp(goal.current.target, alpha);
-      if (camera.position.distanceTo(goal.current.position) < 0.02)
+      if (
+        camera.position.distanceTo(goal.current.position) < 0.02 &&
+        controls.target.distanceTo(goal.current.target) < 0.02
+      ) {
+        camera.position.copy(goal.current.position);
+        controls.target.copy(goal.current.target);
         goal.current.active = false;
+      }
     }
     controls.update();
   });
@@ -557,6 +569,7 @@ export function Warehouse({
   navigate,
   focus,
   view,
+  reset = 0,
 }: {
   snapshot: Snapshot;
   selected: string;
@@ -564,6 +577,7 @@ export function Warehouse({
   navigate: ((x: number, z: number) => void) | null;
   focus: Vec3 | null;
   view: WarehouseView;
+  reset?: number;
 }) {
   return (
     <WebGLErrorBoundary>
@@ -637,7 +651,7 @@ export function Warehouse({
             />
           ))}
         </Suspense>
-        <Controls focus={focus} view={view} />
+        <Controls focus={focus} view={view} reset={reset} />
       </Canvas>
     </WebGLErrorBoundary>
   );

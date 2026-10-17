@@ -133,6 +133,7 @@ export function App() {
   const [tilt, setTilt] = useState("-13");
   const [focus, setFocus] = useState<Vec3 | null>(null);
   const [view, setView] = useState<WarehouseView>("facility");
+  const [cameraReset, setCameraReset] = useState(0);
   const [modal, setModal] = useState<"connect" | "help" | "reset" | null>(null);
   const lastSnapshot = useRef<Snapshot | null>(null);
   const instance = useRef<string | null>(null);
@@ -542,6 +543,7 @@ export function App() {
                 navigate={navigation && canAct ? move : null}
                 focus={focus}
                 view={view}
+                reset={cameraReset}
               />
             ) : (
               <div className="scene-loading">
@@ -606,6 +608,7 @@ export function App() {
                 onClick={() => {
                   setFocus(null);
                   setView("facility");
+                  setCameraReset((value) => value + 1);
                 }}
               >
                 <UIIcon name="focus" size={18} />
@@ -627,6 +630,7 @@ export function App() {
                 onClick={() => {
                   setFocus(null);
                   setView("mission");
+                  setCameraReset((value) => value + 1);
                 }}
               >
                 <BodyIcon kind="rover" size={18} />

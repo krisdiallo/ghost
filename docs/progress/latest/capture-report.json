@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-17T23:18:28.144Z",
+  "capturedAt": "2026-10-17T23:27:04.395Z",
   "facility": {
     "width": 64,
     "depth": 44,
@@ -41,8 +41,12 @@
       "complete": true
     }
   ],
-  "durationSeconds": 17.279,
-  "frameCount": 14,
+  "durationSeconds": 16.799,
+  "frameCount": 15,
+  "cameraReset": {
+    "orbitDifference": 0.09334469464869281,
+    "resetDifference": 0.000022339665032679737
+  },
   "manualRoverInspection": "Seal intact. Label verified. Cleared for dispatch.",
   "browserErrors": [],
   "captures": [

@@ -1,6 +1,6 @@
 # GHOST · visual progress
 
-Oct 17, 2026, 4:18 PM PT · actual app captures
+Oct 17, 2026, 4:27 PM PT · actual app captures
 
 ## A much larger warehouse
 
@@ -22,7 +22,7 @@ This page loads only the lightweight 40 KB preview. Larger images and video belo
 
 The guided camera → rover → drone → arm mission passed **4 / 4 steps**, releasing every lease. It is a scripted tour through the live command interface. The camera moves from the facility overview into the embodiment bay so each body remains visible.
 
-A separate touch-emulated phone run possessed Scout, moved to the inspection point, scanned Cargo 07, and returned: **“Seal intact. Label verified. Cleared for dispatch.”** It then released the body. No browser runtime/console errors and no mobile horizontal overflow.
+A separate touch-emulated phone run possessed Scout, moved to the inspection point, scanned Cargo 07, and returned: **“Seal intact. Label verified. Cleared for dispatch.”** It then released the body. No browser runtime/console errors and no mobile horizontal overflow. A rendered-image check also verifies that manual orbit changes the view and reset restores the facility overview.
 
 The simulation now admits travel throughout the larger floor and flight up to 12 m. The boundary tests cover floor and elevated flight routes beyond the original demo area. Storage racks and architectural freight remain scenery; the three tagged crates are sensor objects.
 
