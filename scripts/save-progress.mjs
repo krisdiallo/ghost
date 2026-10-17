@@ -1,6 +1,8 @@
 import { readFile, mkdir, copyFile, writeFile, stat } from "node:fs/promises";
 import { resolve, join } from "node:path";
 import assert from "node:assert/strict";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 const input = resolve(process.env.GHOST_CAPTURE_DIR ?? "work/captures");
 const destination = resolve("docs/progress/latest");
 const report = JSON.parse(
@@ -20,13 +22,26 @@ for (const name of [...report.captures, "capture-report.json"]) {
   assert.equal(name, name.split("/").at(-1));
   await copyFile(join(input, name), join(destination, name));
 }
+// A resized real aisle capture keeps the default report useful on limited service.
+await promisify(execFile)("ffmpeg", [
+  "-loglevel",
+  "error",
+  "-y",
+  "-i",
+  join(input, "ghost-rover-aisle.png"),
+  "-vf",
+  "scale=720:-1",
+  "-q:v",
+  "8",
+  join(destination, "ghost-navigation-small.jpg"),
+]);
 const timestamp = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/Los_Angeles",
   dateStyle: "medium",
   timeStyle: "short",
 }).format(new Date(report.capturedAt));
 const previewKB = Math.round(
-  (await stat(join(input, "ghost-overview-small.jpg"))).size / 1024,
+  (await stat(join(destination, "ghost-navigation-small.jpg"))).size / 1024,
 );
 await writeFile(
   join(destination, "README.md"),
@@ -38,7 +53,7 @@ ${timestamp} PT · actual app captures
 
 **64 × 44 m · 2,816 m² · 12 m clear height.** Scout now travels down the west storage aisle to Z −18. Wisp flies above the racks at 9 m and surveys the loading docks at Z −30. The camera follows the moving body through the hall.
 
-![Actual warehouse overview — ${previewKB} KB](ghost-overview-small.jpg)
+![Actual Scout traversal in the storage aisle — ${previewKB} KB](ghost-navigation-small.jpg)
 
 This page loads only the lightweight ${previewKB} KB preview. Larger images and video below are optional downloads.
 

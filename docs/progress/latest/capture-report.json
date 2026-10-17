@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-17T23:27:04.395Z",
+  "capturedAt": "2026-10-17T23:52:40.380Z",
   "facility": {
     "width": 64,
     "depth": 44,
@@ -41,11 +41,22 @@
       "complete": true
     }
   ],
-  "durationSeconds": 16.799,
-  "frameCount": 15,
+  "durationSeconds": 84.696,
+  "frameCount": 27,
   "cameraReset": {
-    "orbitDifference": 0.09334469464869281,
-    "resetDifference": 0.000022339665032679737
+    "orbitDifference": 0.09067733864379085,
+    "resetDifference": 0.00002967984068627451
+  },
+  "cameraTools": {
+    "panDifference": 0.08664534824346405,
+    "zoomDifference": 0.1253759446486928,
+    "touchDifference": 0.07583167381535948,
+    "immersive": true
+  },
+  "warehouseTravel": {
+    "roverFarthestZ": -17.554837067233628,
+    "droneFarthestZ": -30,
+    "droneMaxY": 9
   },
   "manualRoverInspection": "Seal intact. Label verified. Cleared for dispatch.",
   "browserErrors": [],
@@ -53,15 +64,19 @@
     "ghost-warehouse.png",
     "ghost-overview-small.jpg",
     "ghost-mission-bay.png",
+    "ghost-immersive.png",
     "ghost-camera.png",
     "ghost-rover.png",
+    "ghost-rover-aisle.png",
     "ghost-drone.png",
+    "ghost-drone-docks.png",
     "ghost-arm.png",
     "ghost-mission-complete.png",
     "ghost-demo.mp4",
     "ghost-demo.gif",
     "ghost-mobile.png",
     "ghost-mobile-controls.png",
+    "ghost-mobile-immersive.png",
     "ghost-mobile-observation.png"
   ]
 }
