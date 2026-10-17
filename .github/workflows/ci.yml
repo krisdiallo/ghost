@@ -1,10 +1,14 @@
 name: Check
 on: [push, pull_request]
+concurrency:
+  group: ghost-check-${{ github.ref }}
+  cancel-in-progress: true
 permissions:
   contents: read
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -123,8 +123,8 @@ try {
         "ghost-rover.png",
         state.mission[1].complete && !state.mission[2].complete,
       ],
-      ["ghost-drone.png", drone.airborne && drone.action?.type === "move"],
-      ["ghost-arm.png", arm.heldObjectId && arm.preset === "drop"],
+      ["ghost-drone.png", drone.airborne && drone.position[1] > 1],
+      ["ghost-arm.png", arm.lease?.owner === "Ghost · guided demo"],
     ];
     for (const [name, condition] of candidates)
       if (condition && !milestones.has(name)) {
