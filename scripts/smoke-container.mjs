@@ -117,7 +117,7 @@ try {
     clientInfo: { name: "container-smoke", version: "1.0" },
   });
   assert.equal(initialized.serverInfo.name, "ghost");
-  assert.equal((await rpc("tools/list", {})).tools.length, 5);
+  assert.equal((await rpc("tools/list", {})).tools.length, 16);
   const discover = await rpc("tools/call", { name: "discover", arguments: {} });
   assert.equal(discover.structuredContent.resources.length, 4);
   const possession = await rpc("tools/call", {
@@ -147,7 +147,7 @@ try {
   assert.equal(observation.structuredContent.frame.resourceId, "rover-01");
   await rpc("tools/call", { name: "release", arguments: { leaseId } });
   console.log(
-    "Container passed: protected console/API, MCP initialization, five tools, shared rover possession, actual Chromium sensor image and release.",
+    "Container passed: protected console/API, MCP initialization, sixteen tools, shared rover possession, actual Chromium sensor image and release.",
   );
 } finally {
   await docker("rm", "--force", name).catch(() => {});

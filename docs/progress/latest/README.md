@@ -1,9 +1,9 @@
 # GHOST · latest visual progress
 
-[Navigation realism: blocked routes, occluded sensing, drone gimbal and a fresh agent mission](../navigation/README.md)
+[Warehouse experiment lab: isolated candidates, workflows and actual MCP trials](../experiments/README.md)
 
-![Actual drone sensor frame — 29 KB](../navigation/validation/drone-side.jpg)
+![Actual experiment lab — 39 KB](../experiments/preview.jpg)
 
-[Short scripted navigation/gimbal recording — 102 KB](../navigation/validation/navigation-check-4x.mp4?raw=true). The report includes the independent agent recording, original MCP trace and remaining gaps.
+[Short UI demo, 2×](../experiments/validation/experiment-lab-2x.mp4?raw=true) · [Phone](../experiments/validation/lab-mobile-preview.jpg) · [Independent agent evidence](../experiments/README.md#independent-agent-designed-trial)
 
-Earlier: [Shared survey experiment](../survey/README.md) · [Initial incomplete agent run](../agent/README.md) · [MCP Apps and cameras](../vision/README.md).
+Earlier: [Navigation realism](../navigation/README.md) · [Shared survey](../survey/README.md) · [MCP Apps and cameras](../vision/README.md).

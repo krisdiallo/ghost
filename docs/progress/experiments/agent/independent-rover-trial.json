@@ -1,0 +1,5046 @@
+{
+  "experiment": "Independent rover inspection speed trial",
+  "authorship": {
+    "workflow": "Chosen by the evaluator from disclosed operator scenario geometry and cargo.",
+    "device": "Temporary trial-rover, scale 1, telemetry range 4 m, inspection range 2.3 m. Only configured speed changes from 1.8 to 3 m/s.",
+    "templatesUsed": false,
+    "sourcesRead": [
+      "Actual MCP schemas from tools:true",
+      "Own sandbox_* and experiment_* returned tool results",
+      "Own returned sensor JPEGs"
+    ]
+  },
+  "baselineDefinition": {
+    "version": 1,
+    "name": "Independent rover inspection speed trial",
+    "obstacles": [
+      {
+        "id": "rack-1",
+        "label": "Storage bay 1",
+        "kind": "rack",
+        "min": [
+          -28.8,
+          0,
+          -28.23
+        ],
+        "max": [
+          -21.2,
+          8.05,
+          -25.77
+        ]
+      },
+      {
+        "id": "rack-2",
+        "label": "Storage bay 2",
+        "kind": "rack",
+        "min": [
+          -18.8,
+          0,
+          -28.23
+        ],
+        "max": [
+          -11.2,
+          8.05,
+          -25.77
+        ]
+      },
+      {
+        "id": "rack-3",
+        "label": "Storage bay 3",
+        "kind": "rack",
+        "min": [
+          -8.8,
+          0,
+          -28.23
+        ],
+        "max": [
+          -1.2000000000000002,
+          8.05,
+          -25.77
+        ]
+      },
+      {
+        "id": "rack-4",
+        "label": "Storage bay 4",
+        "kind": "rack",
+        "min": [
+          1.2000000000000002,
+          0,
+          -28.23
+        ],
+        "max": [
+          8.8,
+          8.05,
+          -25.77
+        ]
+      },
+      {
+        "id": "rack-5",
+        "label": "Storage bay 5",
+        "kind": "rack",
+        "min": [
+          11.2,
+          0,
+          -28.23
+        ],
+        "max": [
+          18.8,
+          8.05,
+          -25.77
+        ]
+      },
+      {
+        "id": "rack-6",
+        "label": "Storage bay 6",
+        "kind": "rack",
+        "min": [
+          21.2,
+          0,
+          -28.23
+        ],
+        "max": [
+          28.8,
+          8.05,
+          -25.77
+        ]
+      },
+      {
+        "id": "rack-7",
+        "label": "Storage bay 7",
+        "kind": "rack",
+        "min": [
+          -28.8,
+          0,
+          -17.23
+        ],
+        "max": [
+          -21.2,
+          8.05,
+          -14.77
+        ]
+      },
+      {
+        "id": "rack-8",
+        "label": "Storage bay 8",
+        "kind": "rack",
+        "min": [
+          -18.8,
+          0,
+          -17.23
+        ],
+        "max": [
+          -11.2,
+          8.05,
+          -14.77
+        ]
+      },
+      {
+        "id": "rack-9",
+        "label": "Storage bay 9",
+        "kind": "rack",
+        "min": [
+          -8.8,
+          0,
+          -17.23
+        ],
+        "max": [
+          -1.2000000000000002,
+          8.05,
+          -14.77
+        ]
+      },
+      {
+        "id": "rack-10",
+        "label": "Storage bay 10",
+        "kind": "rack",
+        "min": [
+          1.2000000000000002,
+          0,
+          -17.23
+        ],
+        "max": [
+          8.8,
+          8.05,
+          -14.77
+        ]
+      },
+      {
+        "id": "rack-11",
+        "label": "Storage bay 11",
+        "kind": "rack",
+        "min": [
+          11.2,
+          0,
+          -17.23
+        ],
+        "max": [
+          18.8,
+          8.05,
+          -14.77
+        ]
+      },
+      {
+        "id": "rack-12",
+        "label": "Storage bay 12",
+        "kind": "rack",
+        "min": [
+          21.2,
+          0,
+          -17.23
+        ],
+        "max": [
+          28.8,
+          8.05,
+          -14.77
+        ]
+      },
+      {
+        "id": "rack-13",
+        "label": "Storage bay 13",
+        "kind": "rack",
+        "min": [
+          -28.8,
+          0,
+          -6.23
+        ],
+        "max": [
+          -21.2,
+          8.05,
+          -3.77
+        ]
+      },
+      {
+        "id": "rack-14",
+        "label": "Storage bay 14",
+        "kind": "rack",
+        "min": [
+          -18.8,
+          0,
+          -6.23
+        ],
+        "max": [
+          -11.2,
+          8.05,
+          -3.77
+        ]
+      },
+      {
+        "id": "rack-15",
+        "label": "Storage bay 15",
+        "kind": "rack",
+        "min": [
+          11.2,
+          0,
+          -6.23
+        ],
+        "max": [
+          18.8,
+          8.05,
+          -3.77
+        ]
+      },
+      {
+        "id": "rack-16",
+        "label": "Storage bay 16",
+        "kind": "rack",
+        "min": [
+          21.2,
+          0,
+          -6.23
+        ],
+        "max": [
+          28.8,
+          8.05,
+          -3.77
+        ]
+      },
+      {
+        "id": "freight-1",
+        "label": "Freight stack 1",
+        "kind": "freight",
+        "min": [
+          -27.4,
+          0,
+          1.75
+        ],
+        "max": [
+          -24.6,
+          1.75,
+          4.25
+        ]
+      },
+      {
+        "id": "freight-2",
+        "label": "Freight stack 2",
+        "kind": "freight",
+        "min": [
+          -27.4,
+          0,
+          5.05
+        ],
+        "max": [
+          -24.6,
+          1.75,
+          7.55
+        ]
+      },
+      {
+        "id": "freight-3",
+        "label": "Freight stack 3",
+        "kind": "freight",
+        "min": [
+          -23.4,
+          0,
+          1.75
+        ],
+        "max": [
+          -20.6,
+          1.75,
+          4.25
+        ]
+      },
+      {
+        "id": "freight-4",
+        "label": "Freight stack 4",
+        "kind": "freight",
+        "min": [
+          -23.4,
+          0,
+          5.05
+        ],
+        "max": [
+          -20.6,
+          1.75,
+          7.55
+        ]
+      },
+      {
+        "id": "freight-5",
+        "label": "Freight stack 5",
+        "kind": "freight",
+        "min": [
+          19.6,
+          0,
+          1.75
+        ],
+        "max": [
+          22.4,
+          1.75,
+          4.25
+        ]
+      },
+      {
+        "id": "freight-6",
+        "label": "Freight stack 6",
+        "kind": "freight",
+        "min": [
+          19.6,
+          0,
+          5.05
+        ],
+        "max": [
+          22.4,
+          1.75,
+          7.55
+        ]
+      },
+      {
+        "id": "freight-7",
+        "label": "Freight stack 7",
+        "kind": "freight",
+        "min": [
+          23.6,
+          0,
+          1.75
+        ],
+        "max": [
+          26.4,
+          1.75,
+          4.25
+        ]
+      },
+      {
+        "id": "freight-8",
+        "label": "Freight stack 8",
+        "kind": "freight",
+        "min": [
+          23.6,
+          0,
+          5.05
+        ],
+        "max": [
+          26.4,
+          1.75,
+          7.55
+        ]
+      },
+      {
+        "id": "column-1",
+        "label": "Column 1",
+        "kind": "column",
+        "min": [
+          -31.2,
+          0,
+          -31.2
+        ],
+        "max": [
+          -30.8,
+          14.4,
+          -30.8
+        ]
+      },
+      {
+        "id": "column-base-1",
+        "label": "Column base 1",
+        "kind": "column",
+        "min": [
+          -31.45,
+          0,
+          -31.45
+        ],
+        "max": [
+          -30.55,
+          0.7,
+          -30.55
+        ]
+      },
+      {
+        "id": "column-2",
+        "label": "Column 2",
+        "kind": "column",
+        "min": [
+          -31.2,
+          0,
+          -19.2
+        ],
+        "max": [
+          -30.8,
+          14.4,
+          -18.8
+        ]
+      },
+      {
+        "id": "column-base-2",
+        "label": "Column base 2",
+        "kind": "column",
+        "min": [
+          -31.45,
+          0,
+          -19.45
+        ],
+        "max": [
+          -30.55,
+          0.7,
+          -18.55
+        ]
+      },
+      {
+        "id": "column-3",
+        "label": "Column 3",
+        "kind": "column",
+        "min": [
+          -31.2,
+          0,
+          -7.2
+        ],
+        "max": [
+          -30.8,
+          14.4,
+          -6.8
+        ]
+      },
+      {
+        "id": "column-base-3",
+        "label": "Column base 3",
+        "kind": "column",
+        "min": [
+          -31.45,
+          0,
+          -7.45
+        ],
+        "max": [
+          -30.55,
+          0.7,
+          -6.55
+        ]
+      },
+      {
+        "id": "column-4",
+        "label": "Column 4",
+        "kind": "column",
+        "min": [
+          -31.2,
+          0,
+          7.8
+        ],
+        "max": [
+          -30.8,
+          14.4,
+          8.2
+        ]
+      },
+      {
+        "id": "column-base-4",
+        "label": "Column base 4",
+        "kind": "column",
+        "min": [
+          -31.45,
+          0,
+          7.55
+        ],
+        "max": [
+          -30.55,
+          0.7,
+          8.45
+        ]
+      },
+      {
+        "id": "column-5",
+        "label": "Column 5",
+        "kind": "column",
+        "min": [
+          30.8,
+          0,
+          -31.2
+        ],
+        "max": [
+          31.2,
+          14.4,
+          -30.8
+        ]
+      },
+      {
+        "id": "column-base-5",
+        "label": "Column base 5",
+        "kind": "column",
+        "min": [
+          30.55,
+          0,
+          -31.45
+        ],
+        "max": [
+          31.45,
+          0.7,
+          -30.55
+        ]
+      },
+      {
+        "id": "column-6",
+        "label": "Column 6",
+        "kind": "column",
+        "min": [
+          30.8,
+          0,
+          -19.2
+        ],
+        "max": [
+          31.2,
+          14.4,
+          -18.8
+        ]
+      },
+      {
+        "id": "column-base-6",
+        "label": "Column base 6",
+        "kind": "column",
+        "min": [
+          30.55,
+          0,
+          -19.45
+        ],
+        "max": [
+          31.45,
+          0.7,
+          -18.55
+        ]
+      },
+      {
+        "id": "column-7",
+        "label": "Column 7",
+        "kind": "column",
+        "min": [
+          30.8,
+          0,
+          -7.2
+        ],
+        "max": [
+          31.2,
+          14.4,
+          -6.8
+        ]
+      },
+      {
+        "id": "column-base-7",
+        "label": "Column base 7",
+        "kind": "column",
+        "min": [
+          30.55,
+          0,
+          -7.45
+        ],
+        "max": [
+          31.45,
+          0.7,
+          -6.55
+        ]
+      },
+      {
+        "id": "column-8",
+        "label": "Column 8",
+        "kind": "column",
+        "min": [
+          30.8,
+          0,
+          7.8
+        ],
+        "max": [
+          31.2,
+          14.4,
+          8.2
+        ]
+      },
+      {
+        "id": "column-base-8",
+        "label": "Column base 8",
+        "kind": "column",
+        "min": [
+          30.55,
+          0,
+          7.55
+        ],
+        "max": [
+          31.45,
+          0.7,
+          8.45
+        ]
+      },
+      {
+        "id": "north-wall",
+        "label": "North wall and closed loading doors",
+        "kind": "wall",
+        "min": [
+          -32,
+          0,
+          -34.050000000000004
+        ],
+        "max": [
+          32,
+          14.4,
+          -33.35
+        ]
+      },
+      {
+        "id": "west-wall",
+        "label": "West wall",
+        "kind": "wall",
+        "min": [
+          -32.025,
+          0,
+          -34
+        ],
+        "max": [
+          -31.775,
+          13.4,
+          10
+        ]
+      },
+      {
+        "id": "east-wall",
+        "label": "East low wall",
+        "kind": "wall",
+        "min": [
+          31.799999999999997,
+          0,
+          -34
+        ],
+        "max": [
+          32,
+          1.3,
+          10
+        ]
+      },
+      {
+        "id": "mezzanine-floor",
+        "label": "Mezzanine platform",
+        "kind": "mezzanine",
+        "min": [
+          -31.25,
+          5.825,
+          -33.4
+        ],
+        "max": [
+          -18.75,
+          6.175,
+          -26
+        ]
+      },
+      {
+        "id": "control-booth",
+        "label": "Control booth",
+        "kind": "mezzanine",
+        "min": [
+          -30.5,
+          6.15,
+          -33.1
+        ],
+        "max": [
+          -19.5,
+          9.25,
+          -27.1
+        ]
+      },
+      {
+        "id": "control-roof",
+        "label": "Control booth roof",
+        "kind": "mezzanine",
+        "min": [
+          -30.75,
+          9.31,
+          -33.25
+        ],
+        "max": [
+          -19.25,
+          9.49,
+          -26.950000000000003
+        ]
+      },
+      {
+        "id": "stairs",
+        "label": "Mezzanine stairs",
+        "kind": "mezzanine",
+        "min": [
+          -30.5,
+          0,
+          -26.400000000000002
+        ],
+        "max": [
+          -28.1,
+          6.1,
+          -17.8
+        ]
+      }
+    ],
+    "devices": [
+      {
+        "id": "camera-01",
+        "kind": "camera",
+        "label": "Sentinel",
+        "position": [
+          -30.2,
+          10,
+          8
+        ],
+        "heading": 0,
+        "pan": 104,
+        "tilt": -16,
+        "airborne": false,
+        "profile": {
+          "scale": 1,
+          "speed": 0,
+          "telemetryRange": 45,
+          "inspectRange": 45,
+          "payloadKg": null
+        }
+      },
+      {
+        "id": "rover-01",
+        "kind": "rover",
+        "label": "Scout",
+        "position": [
+          -6,
+          0.45,
+          3
+        ],
+        "heading": 3.141592653589793,
+        "pan": 0,
+        "tilt": 0,
+        "airborne": false,
+        "profile": {
+          "scale": 1,
+          "speed": 1.8,
+          "telemetryRange": 4,
+          "inspectRange": 2.3,
+          "payloadKg": null
+        }
+      },
+      {
+        "id": "arm-01",
+        "kind": "arm",
+        "label": "Atlas",
+        "position": [
+          4,
+          0.5,
+          0
+        ],
+        "heading": 0,
+        "pan": 0,
+        "tilt": 0,
+        "airborne": false,
+        "profile": {
+          "scale": 1,
+          "speed": 0,
+          "telemetryRange": 2.8,
+          "inspectRange": null,
+          "payloadKg": 5
+        }
+      },
+      {
+        "id": "drone-01",
+        "kind": "drone",
+        "label": "Wisp",
+        "position": [
+          -4,
+          0.4,
+          -3
+        ],
+        "heading": 3.141592653589793,
+        "pan": 180,
+        "tilt": -35,
+        "airborne": false,
+        "profile": {
+          "scale": 1,
+          "speed": 2.4,
+          "telemetryRange": 9,
+          "inspectRange": 5,
+          "payloadKg": null
+        }
+      },
+      {
+        "id": "trial-rover",
+        "kind": "rover",
+        "label": "Temporary inspection rover",
+        "position": [
+          -6,
+          0.45,
+          3
+        ],
+        "heading": 3.141592653589793,
+        "pan": 0,
+        "tilt": 0,
+        "airborne": false,
+        "profile": {
+          "scale": 1,
+          "speed": 1.8,
+          "telemetryRange": 4,
+          "inspectRange": 2.3,
+          "payloadKg": null
+        }
+      }
+    ],
+    "cargo": [
+      {
+        "id": "crate-07",
+        "label": "Priority cargo · 07",
+        "position": [
+          2,
+          0.55,
+          0
+        ],
+        "condition": "Seal intact. Label verified. Cleared for dispatch.",
+        "massKg": 1
+      },
+      {
+        "id": "crate-12",
+        "label": "Storage cargo · 12",
+        "position": [
+          -8.4,
+          0.55,
+          -18
+        ],
+        "condition": "Surface abrasion on north face. Seal intact.",
+        "massKg": 1
+      },
+      {
+        "id": "crate-18",
+        "label": "Storage cargo · 18",
+        "position": [
+          8.4,
+          0.55,
+          -30
+        ],
+        "condition": "Seal intact. Awaiting inventory scan.",
+        "massKg": 1
+      }
+    ],
+    "workflow": {
+      "name": "Three-cargo inspection loop via center aisle",
+      "actors": {
+        "inspector": "trial-rover"
+      },
+      "steps": [
+        {
+          "actor": "inspector",
+          "label": "Approach priority cargo",
+          "command": {
+            "type": "move",
+            "x": 0,
+            "z": 0
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Inspect priority cargo",
+          "dwellSeconds": 2,
+          "command": {
+            "type": "inspect",
+            "objectId": "crate-07"
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Follow center aisle",
+          "command": {
+            "type": "move",
+            "x": 0,
+            "z": -20
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "West storage approach",
+          "command": {
+            "type": "move",
+            "x": -8,
+            "z": -20
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Inspect west cargo",
+          "dwellSeconds": 2,
+          "command": {
+            "type": "inspect",
+            "objectId": "crate-12"
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Return to center aisle",
+          "command": {
+            "type": "move",
+            "x": 0,
+            "z": -20
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Follow center to north aisle",
+          "command": {
+            "type": "move",
+            "x": 0,
+            "z": -30
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "East storage approach",
+          "command": {
+            "type": "move",
+            "x": 8,
+            "z": -30
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Inspect east cargo",
+          "dwellSeconds": 2,
+          "command": {
+            "type": "inspect",
+            "objectId": "crate-18"
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Return from east cargo",
+          "command": {
+            "type": "move",
+            "x": 0,
+            "z": -30
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Return down center aisle",
+          "command": {
+            "type": "move",
+            "x": 0,
+            "z": 3
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Return to staging",
+          "command": {
+            "type": "move",
+            "x": -6,
+            "z": 3
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Stop safely",
+          "command": {
+            "type": "stop"
+          }
+        }
+      ],
+      "stopOnError": true,
+      "maxSimulatedSeconds": 120,
+      "requireSafeEnd": true
+    }
+  },
+  "candidateDefinition": {
+    "version": 1,
+    "name": "Independent rover inspection speed trial",
+    "obstacles": [
+      {
+        "id": "rack-1",
+        "label": "Storage bay 1",
+        "kind": "rack",
+        "min": [
+          -28.8,
+          0,
+          -28.23
+        ],
+        "max": [
+          -21.2,
+          8.05,
+          -25.77
+        ]
+      },
+      {
+        "id": "rack-2",
+        "label": "Storage bay 2",
+        "kind": "rack",
+        "min": [
+          -18.8,
+          0,
+          -28.23
+        ],
+        "max": [
+          -11.2,
+          8.05,
+          -25.77
+        ]
+      },
+      {
+        "id": "rack-3",
+        "label": "Storage bay 3",
+        "kind": "rack",
+        "min": [
+          -8.8,
+          0,
+          -28.23
+        ],
+        "max": [
+          -1.2000000000000002,
+          8.05,
+          -25.77
+        ]
+      },
+      {
+        "id": "rack-4",
+        "label": "Storage bay 4",
+        "kind": "rack",
+        "min": [
+          1.2000000000000002,
+          0,
+          -28.23
+        ],
+        "max": [
+          8.8,
+          8.05,
+          -25.77
+        ]
+      },
+      {
+        "id": "rack-5",
+        "label": "Storage bay 5",
+        "kind": "rack",
+        "min": [
+          11.2,
+          0,
+          -28.23
+        ],
+        "max": [
+          18.8,
+          8.05,
+          -25.77
+        ]
+      },
+      {
+        "id": "rack-6",
+        "label": "Storage bay 6",
+        "kind": "rack",
+        "min": [
+          21.2,
+          0,
+          -28.23
+        ],
+        "max": [
+          28.8,
+          8.05,
+          -25.77
+        ]
+      },
+      {
+        "id": "rack-7",
+        "label": "Storage bay 7",
+        "kind": "rack",
+        "min": [
+          -28.8,
+          0,
+          -17.23
+        ],
+        "max": [
+          -21.2,
+          8.05,
+          -14.77
+        ]
+      },
+      {
+        "id": "rack-8",
+        "label": "Storage bay 8",
+        "kind": "rack",
+        "min": [
+          -18.8,
+          0,
+          -17.23
+        ],
+        "max": [
+          -11.2,
+          8.05,
+          -14.77
+        ]
+      },
+      {
+        "id": "rack-9",
+        "label": "Storage bay 9",
+        "kind": "rack",
+        "min": [
+          -8.8,
+          0,
+          -17.23
+        ],
+        "max": [
+          -1.2000000000000002,
+          8.05,
+          -14.77
+        ]
+      },
+      {
+        "id": "rack-10",
+        "label": "Storage bay 10",
+        "kind": "rack",
+        "min": [
+          1.2000000000000002,
+          0,
+          -17.23
+        ],
+        "max": [
+          8.8,
+          8.05,
+          -14.77
+        ]
+      },
+      {
+        "id": "rack-11",
+        "label": "Storage bay 11",
+        "kind": "rack",
+        "min": [
+          11.2,
+          0,
+          -17.23
+        ],
+        "max": [
+          18.8,
+          8.05,
+          -14.77
+        ]
+      },
+      {
+        "id": "rack-12",
+        "label": "Storage bay 12",
+        "kind": "rack",
+        "min": [
+          21.2,
+          0,
+          -17.23
+        ],
+        "max": [
+          28.8,
+          8.05,
+          -14.77
+        ]
+      },
+      {
+        "id": "rack-13",
+        "label": "Storage bay 13",
+        "kind": "rack",
+        "min": [
+          -28.8,
+          0,
+          -6.23
+        ],
+        "max": [
+          -21.2,
+          8.05,
+          -3.77
+        ]
+      },
+      {
+        "id": "rack-14",
+        "label": "Storage bay 14",
+        "kind": "rack",
+        "min": [
+          -18.8,
+          0,
+          -6.23
+        ],
+        "max": [
+          -11.2,
+          8.05,
+          -3.77
+        ]
+      },
+      {
+        "id": "rack-15",
+        "label": "Storage bay 15",
+        "kind": "rack",
+        "min": [
+          11.2,
+          0,
+          -6.23
+        ],
+        "max": [
+          18.8,
+          8.05,
+          -3.77
+        ]
+      },
+      {
+        "id": "rack-16",
+        "label": "Storage bay 16",
+        "kind": "rack",
+        "min": [
+          21.2,
+          0,
+          -6.23
+        ],
+        "max": [
+          28.8,
+          8.05,
+          -3.77
+        ]
+      },
+      {
+        "id": "freight-1",
+        "label": "Freight stack 1",
+        "kind": "freight",
+        "min": [
+          -27.4,
+          0,
+          1.75
+        ],
+        "max": [
+          -24.6,
+          1.75,
+          4.25
+        ]
+      },
+      {
+        "id": "freight-2",
+        "label": "Freight stack 2",
+        "kind": "freight",
+        "min": [
+          -27.4,
+          0,
+          5.05
+        ],
+        "max": [
+          -24.6,
+          1.75,
+          7.55
+        ]
+      },
+      {
+        "id": "freight-3",
+        "label": "Freight stack 3",
+        "kind": "freight",
+        "min": [
+          -23.4,
+          0,
+          1.75
+        ],
+        "max": [
+          -20.6,
+          1.75,
+          4.25
+        ]
+      },
+      {
+        "id": "freight-4",
+        "label": "Freight stack 4",
+        "kind": "freight",
+        "min": [
+          -23.4,
+          0,
+          5.05
+        ],
+        "max": [
+          -20.6,
+          1.75,
+          7.55
+        ]
+      },
+      {
+        "id": "freight-5",
+        "label": "Freight stack 5",
+        "kind": "freight",
+        "min": [
+          19.6,
+          0,
+          1.75
+        ],
+        "max": [
+          22.4,
+          1.75,
+          4.25
+        ]
+      },
+      {
+        "id": "freight-6",
+        "label": "Freight stack 6",
+        "kind": "freight",
+        "min": [
+          19.6,
+          0,
+          5.05
+        ],
+        "max": [
+          22.4,
+          1.75,
+          7.55
+        ]
+      },
+      {
+        "id": "freight-7",
+        "label": "Freight stack 7",
+        "kind": "freight",
+        "min": [
+          23.6,
+          0,
+          1.75
+        ],
+        "max": [
+          26.4,
+          1.75,
+          4.25
+        ]
+      },
+      {
+        "id": "freight-8",
+        "label": "Freight stack 8",
+        "kind": "freight",
+        "min": [
+          23.6,
+          0,
+          5.05
+        ],
+        "max": [
+          26.4,
+          1.75,
+          7.55
+        ]
+      },
+      {
+        "id": "column-1",
+        "label": "Column 1",
+        "kind": "column",
+        "min": [
+          -31.2,
+          0,
+          -31.2
+        ],
+        "max": [
+          -30.8,
+          14.4,
+          -30.8
+        ]
+      },
+      {
+        "id": "column-base-1",
+        "label": "Column base 1",
+        "kind": "column",
+        "min": [
+          -31.45,
+          0,
+          -31.45
+        ],
+        "max": [
+          -30.55,
+          0.7,
+          -30.55
+        ]
+      },
+      {
+        "id": "column-2",
+        "label": "Column 2",
+        "kind": "column",
+        "min": [
+          -31.2,
+          0,
+          -19.2
+        ],
+        "max": [
+          -30.8,
+          14.4,
+          -18.8
+        ]
+      },
+      {
+        "id": "column-base-2",
+        "label": "Column base 2",
+        "kind": "column",
+        "min": [
+          -31.45,
+          0,
+          -19.45
+        ],
+        "max": [
+          -30.55,
+          0.7,
+          -18.55
+        ]
+      },
+      {
+        "id": "column-3",
+        "label": "Column 3",
+        "kind": "column",
+        "min": [
+          -31.2,
+          0,
+          -7.2
+        ],
+        "max": [
+          -30.8,
+          14.4,
+          -6.8
+        ]
+      },
+      {
+        "id": "column-base-3",
+        "label": "Column base 3",
+        "kind": "column",
+        "min": [
+          -31.45,
+          0,
+          -7.45
+        ],
+        "max": [
+          -30.55,
+          0.7,
+          -6.55
+        ]
+      },
+      {
+        "id": "column-4",
+        "label": "Column 4",
+        "kind": "column",
+        "min": [
+          -31.2,
+          0,
+          7.8
+        ],
+        "max": [
+          -30.8,
+          14.4,
+          8.2
+        ]
+      },
+      {
+        "id": "column-base-4",
+        "label": "Column base 4",
+        "kind": "column",
+        "min": [
+          -31.45,
+          0,
+          7.55
+        ],
+        "max": [
+          -30.55,
+          0.7,
+          8.45
+        ]
+      },
+      {
+        "id": "column-5",
+        "label": "Column 5",
+        "kind": "column",
+        "min": [
+          30.8,
+          0,
+          -31.2
+        ],
+        "max": [
+          31.2,
+          14.4,
+          -30.8
+        ]
+      },
+      {
+        "id": "column-base-5",
+        "label": "Column base 5",
+        "kind": "column",
+        "min": [
+          30.55,
+          0,
+          -31.45
+        ],
+        "max": [
+          31.45,
+          0.7,
+          -30.55
+        ]
+      },
+      {
+        "id": "column-6",
+        "label": "Column 6",
+        "kind": "column",
+        "min": [
+          30.8,
+          0,
+          -19.2
+        ],
+        "max": [
+          31.2,
+          14.4,
+          -18.8
+        ]
+      },
+      {
+        "id": "column-base-6",
+        "label": "Column base 6",
+        "kind": "column",
+        "min": [
+          30.55,
+          0,
+          -19.45
+        ],
+        "max": [
+          31.45,
+          0.7,
+          -18.55
+        ]
+      },
+      {
+        "id": "column-7",
+        "label": "Column 7",
+        "kind": "column",
+        "min": [
+          30.8,
+          0,
+          -7.2
+        ],
+        "max": [
+          31.2,
+          14.4,
+          -6.8
+        ]
+      },
+      {
+        "id": "column-base-7",
+        "label": "Column base 7",
+        "kind": "column",
+        "min": [
+          30.55,
+          0,
+          -7.45
+        ],
+        "max": [
+          31.45,
+          0.7,
+          -6.55
+        ]
+      },
+      {
+        "id": "column-8",
+        "label": "Column 8",
+        "kind": "column",
+        "min": [
+          30.8,
+          0,
+          7.8
+        ],
+        "max": [
+          31.2,
+          14.4,
+          8.2
+        ]
+      },
+      {
+        "id": "column-base-8",
+        "label": "Column base 8",
+        "kind": "column",
+        "min": [
+          30.55,
+          0,
+          7.55
+        ],
+        "max": [
+          31.45,
+          0.7,
+          8.45
+        ]
+      },
+      {
+        "id": "north-wall",
+        "label": "North wall and closed loading doors",
+        "kind": "wall",
+        "min": [
+          -32,
+          0,
+          -34.050000000000004
+        ],
+        "max": [
+          32,
+          14.4,
+          -33.35
+        ]
+      },
+      {
+        "id": "west-wall",
+        "label": "West wall",
+        "kind": "wall",
+        "min": [
+          -32.025,
+          0,
+          -34
+        ],
+        "max": [
+          -31.775,
+          13.4,
+          10
+        ]
+      },
+      {
+        "id": "east-wall",
+        "label": "East low wall",
+        "kind": "wall",
+        "min": [
+          31.799999999999997,
+          0,
+          -34
+        ],
+        "max": [
+          32,
+          1.3,
+          10
+        ]
+      },
+      {
+        "id": "mezzanine-floor",
+        "label": "Mezzanine platform",
+        "kind": "mezzanine",
+        "min": [
+          -31.25,
+          5.825,
+          -33.4
+        ],
+        "max": [
+          -18.75,
+          6.175,
+          -26
+        ]
+      },
+      {
+        "id": "control-booth",
+        "label": "Control booth",
+        "kind": "mezzanine",
+        "min": [
+          -30.5,
+          6.15,
+          -33.1
+        ],
+        "max": [
+          -19.5,
+          9.25,
+          -27.1
+        ]
+      },
+      {
+        "id": "control-roof",
+        "label": "Control booth roof",
+        "kind": "mezzanine",
+        "min": [
+          -30.75,
+          9.31,
+          -33.25
+        ],
+        "max": [
+          -19.25,
+          9.49,
+          -26.950000000000003
+        ]
+      },
+      {
+        "id": "stairs",
+        "label": "Mezzanine stairs",
+        "kind": "mezzanine",
+        "min": [
+          -30.5,
+          0,
+          -26.400000000000002
+        ],
+        "max": [
+          -28.1,
+          6.1,
+          -17.8
+        ]
+      }
+    ],
+    "devices": [
+      {
+        "id": "camera-01",
+        "kind": "camera",
+        "label": "Sentinel",
+        "position": [
+          -30.2,
+          10,
+          8
+        ],
+        "heading": 0,
+        "pan": 104,
+        "tilt": -16,
+        "airborne": false,
+        "profile": {
+          "scale": 1,
+          "speed": 0,
+          "telemetryRange": 45,
+          "inspectRange": 45,
+          "payloadKg": null
+        }
+      },
+      {
+        "id": "rover-01",
+        "kind": "rover",
+        "label": "Scout",
+        "position": [
+          -6,
+          0.45,
+          3
+        ],
+        "heading": 3.141592653589793,
+        "pan": 0,
+        "tilt": 0,
+        "airborne": false,
+        "profile": {
+          "scale": 1,
+          "speed": 1.8,
+          "telemetryRange": 4,
+          "inspectRange": 2.3,
+          "payloadKg": null
+        }
+      },
+      {
+        "id": "arm-01",
+        "kind": "arm",
+        "label": "Atlas",
+        "position": [
+          4,
+          0.5,
+          0
+        ],
+        "heading": 0,
+        "pan": 0,
+        "tilt": 0,
+        "airborne": false,
+        "profile": {
+          "scale": 1,
+          "speed": 0,
+          "telemetryRange": 2.8,
+          "inspectRange": null,
+          "payloadKg": 5
+        }
+      },
+      {
+        "id": "drone-01",
+        "kind": "drone",
+        "label": "Wisp",
+        "position": [
+          -4,
+          0.4,
+          -3
+        ],
+        "heading": 3.141592653589793,
+        "pan": 180,
+        "tilt": -35,
+        "airborne": false,
+        "profile": {
+          "scale": 1,
+          "speed": 2.4,
+          "telemetryRange": 9,
+          "inspectRange": 5,
+          "payloadKg": null
+        }
+      },
+      {
+        "id": "trial-rover",
+        "kind": "rover",
+        "label": "Temporary inspection rover",
+        "position": [
+          -6,
+          0.45,
+          3
+        ],
+        "heading": 3.141592653589793,
+        "pan": 0,
+        "tilt": 0,
+        "airborne": false,
+        "profile": {
+          "scale": 1,
+          "speed": 3,
+          "telemetryRange": 4,
+          "inspectRange": 2.3,
+          "payloadKg": null
+        }
+      }
+    ],
+    "cargo": [
+      {
+        "id": "crate-07",
+        "label": "Priority cargo · 07",
+        "position": [
+          2,
+          0.55,
+          0
+        ],
+        "condition": "Seal intact. Label verified. Cleared for dispatch.",
+        "massKg": 1
+      },
+      {
+        "id": "crate-12",
+        "label": "Storage cargo · 12",
+        "position": [
+          -8.4,
+          0.55,
+          -18
+        ],
+        "condition": "Surface abrasion on north face. Seal intact.",
+        "massKg": 1
+      },
+      {
+        "id": "crate-18",
+        "label": "Storage cargo · 18",
+        "position": [
+          8.4,
+          0.55,
+          -30
+        ],
+        "condition": "Seal intact. Awaiting inventory scan.",
+        "massKg": 1
+      }
+    ],
+    "workflow": {
+      "name": "Three-cargo inspection loop via center aisle",
+      "actors": {
+        "inspector": "trial-rover"
+      },
+      "steps": [
+        {
+          "actor": "inspector",
+          "label": "Approach priority cargo",
+          "command": {
+            "type": "move",
+            "x": 0,
+            "z": 0
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Inspect priority cargo",
+          "dwellSeconds": 2,
+          "command": {
+            "type": "inspect",
+            "objectId": "crate-07"
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Follow center aisle",
+          "command": {
+            "type": "move",
+            "x": 0,
+            "z": -20
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "West storage approach",
+          "command": {
+            "type": "move",
+            "x": -8,
+            "z": -20
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Inspect west cargo",
+          "dwellSeconds": 2,
+          "command": {
+            "type": "inspect",
+            "objectId": "crate-12"
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Return to center aisle",
+          "command": {
+            "type": "move",
+            "x": 0,
+            "z": -20
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Follow center to north aisle",
+          "command": {
+            "type": "move",
+            "x": 0,
+            "z": -30
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "East storage approach",
+          "command": {
+            "type": "move",
+            "x": 8,
+            "z": -30
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Inspect east cargo",
+          "dwellSeconds": 2,
+          "command": {
+            "type": "inspect",
+            "objectId": "crate-18"
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Return from east cargo",
+          "command": {
+            "type": "move",
+            "x": 0,
+            "z": -30
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Return down center aisle",
+          "command": {
+            "type": "move",
+            "x": 0,
+            "z": 3
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Return to staging",
+          "command": {
+            "type": "move",
+            "x": -6,
+            "z": 3
+          }
+        },
+        {
+          "actor": "inspector",
+          "label": "Stop safely",
+          "command": {
+            "type": "stop"
+          }
+        }
+      ],
+      "stopOnError": true,
+      "maxSimulatedSeconds": 120,
+      "requireSafeEnd": true
+    }
+  },
+  "baselineReport": {
+    "at": "2026-10-18T15:01:49.438Z",
+    "tool": "experiment_inspect",
+    "input": {
+      "runId": "run-53b4997c",
+      "imageResourceId": "trial-rover"
+    },
+    "note": "Inspect baseline outcome and actual trial-device camera image; verify frozen 1.8 m/s definition after draft changed to 3 m/s.",
+    "isError": false,
+    "result": {
+      "run": {
+        "id": "run-53b4997c",
+        "sandboxId": "sandbox-818a5a21",
+        "sourceRevision": 2,
+        "name": "Three-cargo inspection loop via center aisle",
+        "sandboxName": "Independent rover inspection speed trial",
+        "status": "completed",
+        "startedAt": 1792335684237,
+        "playbackRate": 8,
+        "currentStep": 13,
+        "definition": {
+          "version": 1,
+          "name": "Independent rover inspection speed trial",
+          "obstacles": [
+            {
+              "id": "rack-1",
+              "label": "Storage bay 1",
+              "kind": "rack",
+              "min": [
+                -28.8,
+                0,
+                -28.23
+              ],
+              "max": [
+                -21.2,
+                8.05,
+                -25.77
+              ]
+            },
+            {
+              "id": "rack-2",
+              "label": "Storage bay 2",
+              "kind": "rack",
+              "min": [
+                -18.8,
+                0,
+                -28.23
+              ],
+              "max": [
+                -11.2,
+                8.05,
+                -25.77
+              ]
+            },
+            {
+              "id": "rack-3",
+              "label": "Storage bay 3",
+              "kind": "rack",
+              "min": [
+                -8.8,
+                0,
+                -28.23
+              ],
+              "max": [
+                -1.2000000000000002,
+                8.05,
+                -25.77
+              ]
+            },
+            {
+              "id": "rack-4",
+              "label": "Storage bay 4",
+              "kind": "rack",
+              "min": [
+                1.2000000000000002,
+                0,
+                -28.23
+              ],
+              "max": [
+                8.8,
+                8.05,
+                -25.77
+              ]
+            },
+            {
+              "id": "rack-5",
+              "label": "Storage bay 5",
+              "kind": "rack",
+              "min": [
+                11.2,
+                0,
+                -28.23
+              ],
+              "max": [
+                18.8,
+                8.05,
+                -25.77
+              ]
+            },
+            {
+              "id": "rack-6",
+              "label": "Storage bay 6",
+              "kind": "rack",
+              "min": [
+                21.2,
+                0,
+                -28.23
+              ],
+              "max": [
+                28.8,
+                8.05,
+                -25.77
+              ]
+            },
+            {
+              "id": "rack-7",
+              "label": "Storage bay 7",
+              "kind": "rack",
+              "min": [
+                -28.8,
+                0,
+                -17.23
+              ],
+              "max": [
+                -21.2,
+                8.05,
+                -14.77
+              ]
+            },
+            {
+              "id": "rack-8",
+              "label": "Storage bay 8",
+              "kind": "rack",
+              "min": [
+                -18.8,
+                0,
+                -17.23
+              ],
+              "max": [
+                -11.2,
+                8.05,
+                -14.77
+              ]
+            },
+            {
+              "id": "rack-9",
+              "label": "Storage bay 9",
+              "kind": "rack",
+              "min": [
+                -8.8,
+                0,
+                -17.23
+              ],
+              "max": [
+                -1.2000000000000002,
+                8.05,
+                -14.77
+              ]
+            },
+            {
+              "id": "rack-10",
+              "label": "Storage bay 10",
+              "kind": "rack",
+              "min": [
+                1.2000000000000002,
+                0,
+                -17.23
+              ],
+              "max": [
+                8.8,
+                8.05,
+                -14.77
+              ]
+            },
+            {
+              "id": "rack-11",
+              "label": "Storage bay 11",
+              "kind": "rack",
+              "min": [
+                11.2,
+                0,
+                -17.23
+              ],
+              "max": [
+                18.8,
+                8.05,
+                -14.77
+              ]
+            },
+            {
+              "id": "rack-12",
+              "label": "Storage bay 12",
+              "kind": "rack",
+              "min": [
+                21.2,
+                0,
+                -17.23
+              ],
+              "max": [
+                28.8,
+                8.05,
+                -14.77
+              ]
+            },
+            {
+              "id": "rack-13",
+              "label": "Storage bay 13",
+              "kind": "rack",
+              "min": [
+                -28.8,
+                0,
+                -6.23
+              ],
+              "max": [
+                -21.2,
+                8.05,
+                -3.77
+              ]
+            },
+            {
+              "id": "rack-14",
+              "label": "Storage bay 14",
+              "kind": "rack",
+              "min": [
+                -18.8,
+                0,
+                -6.23
+              ],
+              "max": [
+                -11.2,
+                8.05,
+                -3.77
+              ]
+            },
+            {
+              "id": "rack-15",
+              "label": "Storage bay 15",
+              "kind": "rack",
+              "min": [
+                11.2,
+                0,
+                -6.23
+              ],
+              "max": [
+                18.8,
+                8.05,
+                -3.77
+              ]
+            },
+            {
+              "id": "rack-16",
+              "label": "Storage bay 16",
+              "kind": "rack",
+              "min": [
+                21.2,
+                0,
+                -6.23
+              ],
+              "max": [
+                28.8,
+                8.05,
+                -3.77
+              ]
+            },
+            {
+              "id": "freight-1",
+              "label": "Freight stack 1",
+              "kind": "freight",
+              "min": [
+                -27.4,
+                0,
+                1.75
+              ],
+              "max": [
+                -24.6,
+                1.75,
+                4.25
+              ]
+            },
+            {
+              "id": "freight-2",
+              "label": "Freight stack 2",
+              "kind": "freight",
+              "min": [
+                -27.4,
+                0,
+                5.05
+              ],
+              "max": [
+                -24.6,
+                1.75,
+                7.55
+              ]
+            },
+            {
+              "id": "freight-3",
+              "label": "Freight stack 3",
+              "kind": "freight",
+              "min": [
+                -23.4,
+                0,
+                1.75
+              ],
+              "max": [
+                -20.6,
+                1.75,
+                4.25
+              ]
+            },
+            {
+              "id": "freight-4",
+              "label": "Freight stack 4",
+              "kind": "freight",
+              "min": [
+                -23.4,
+                0,
+                5.05
+              ],
+              "max": [
+                -20.6,
+                1.75,
+                7.55
+              ]
+            },
+            {
+              "id": "freight-5",
+              "label": "Freight stack 5",
+              "kind": "freight",
+              "min": [
+                19.6,
+                0,
+                1.75
+              ],
+              "max": [
+                22.4,
+                1.75,
+                4.25
+              ]
+            },
+            {
+              "id": "freight-6",
+              "label": "Freight stack 6",
+              "kind": "freight",
+              "min": [
+                19.6,
+                0,
+                5.05
+              ],
+              "max": [
+                22.4,
+                1.75,
+                7.55
+              ]
+            },
+            {
+              "id": "freight-7",
+              "label": "Freight stack 7",
+              "kind": "freight",
+              "min": [
+                23.6,
+                0,
+                1.75
+              ],
+              "max": [
+                26.4,
+                1.75,
+                4.25
+              ]
+            },
+            {
+              "id": "freight-8",
+              "label": "Freight stack 8",
+              "kind": "freight",
+              "min": [
+                23.6,
+                0,
+                5.05
+              ],
+              "max": [
+                26.4,
+                1.75,
+                7.55
+              ]
+            },
+            {
+              "id": "column-1",
+              "label": "Column 1",
+              "kind": "column",
+              "min": [
+                -31.2,
+                0,
+                -31.2
+              ],
+              "max": [
+                -30.8,
+                14.4,
+                -30.8
+              ]
+            },
+            {
+              "id": "column-base-1",
+              "label": "Column base 1",
+              "kind": "column",
+              "min": [
+                -31.45,
+                0,
+                -31.45
+              ],
+              "max": [
+                -30.55,
+                0.7,
+                -30.55
+              ]
+            },
+            {
+              "id": "column-2",
+              "label": "Column 2",
+              "kind": "column",
+              "min": [
+                -31.2,
+                0,
+                -19.2
+              ],
+              "max": [
+                -30.8,
+                14.4,
+                -18.8
+              ]
+            },
+            {
+              "id": "column-base-2",
+              "label": "Column base 2",
+              "kind": "column",
+              "min": [
+                -31.45,
+                0,
+                -19.45
+              ],
+              "max": [
+                -30.55,
+                0.7,
+                -18.55
+              ]
+            },
+            {
+              "id": "column-3",
+              "label": "Column 3",
+              "kind": "column",
+              "min": [
+                -31.2,
+                0,
+                -7.2
+              ],
+              "max": [
+                -30.8,
+                14.4,
+                -6.8
+              ]
+            },
+            {
+              "id": "column-base-3",
+              "label": "Column base 3",
+              "kind": "column",
+              "min": [
+                -31.45,
+                0,
+                -7.45
+              ],
+              "max": [
+                -30.55,
+                0.7,
+                -6.55
+              ]
+            },
+            {
+              "id": "column-4",
+              "label": "Column 4",
+              "kind": "column",
+              "min": [
+                -31.2,
+                0,
+                7.8
+              ],
+              "max": [
+                -30.8,
+                14.4,
+                8.2
+              ]
+            },
+            {
+              "id": "column-base-4",
+              "label": "Column base 4",
+              "kind": "column",
+              "min": [
+                -31.45,
+                0,
+                7.55
+              ],
+              "max": [
+                -30.55,
+                0.7,
+                8.45
+              ]
+            },
+            {
+              "id": "column-5",
+              "label": "Column 5",
+              "kind": "column",
+              "min": [
+                30.8,
+                0,
+                -31.2
+              ],
+              "max": [
+                31.2,
+                14.4,
+                -30.8
+              ]
+            },
+            {
+              "id": "column-base-5",
+              "label": "Column base 5",
+              "kind": "column",
+              "min": [
+                30.55,
+                0,
+                -31.45
+              ],
+              "max": [
+                31.45,
+                0.7,
+                -30.55
+              ]
+            },
+            {
+              "id": "column-6",
+              "label": "Column 6",
+              "kind": "column",
+              "min": [
+                30.8,
+                0,
+                -19.2
+              ],
+              "max": [
+                31.2,
+                14.4,
+                -18.8
+              ]
+            },
+            {
+              "id": "column-base-6",
+              "label": "Column base 6",
+              "kind": "column",
+              "min": [
+                30.55,
+                0,
+                -19.45
+              ],
+              "max": [
+                31.45,
+                0.7,
+                -18.55
+              ]
+            },
+            {
+              "id": "column-7",
+              "label": "Column 7",
+              "kind": "column",
+              "min": [
+                30.8,
+                0,
+                -7.2
+              ],
+              "max": [
+                31.2,
+                14.4,
+                -6.8
+              ]
+            },
+            {
+              "id": "column-base-7",
+              "label": "Column base 7",
+              "kind": "column",
+              "min": [
+                30.55,
+                0,
+                -7.45
+              ],
+              "max": [
+                31.45,
+                0.7,
+                -6.55
+              ]
+            },
+            {
+              "id": "column-8",
+              "label": "Column 8",
+              "kind": "column",
+              "min": [
+                30.8,
+                0,
+                7.8
+              ],
+              "max": [
+                31.2,
+                14.4,
+                8.2
+              ]
+            },
+            {
+              "id": "column-base-8",
+              "label": "Column base 8",
+              "kind": "column",
+              "min": [
+                30.55,
+                0,
+                7.55
+              ],
+              "max": [
+                31.45,
+                0.7,
+                8.45
+              ]
+            },
+            {
+              "id": "north-wall",
+              "label": "North wall and closed loading doors",
+              "kind": "wall",
+              "min": [
+                -32,
+                0,
+                -34.050000000000004
+              ],
+              "max": [
+                32,
+                14.4,
+                -33.35
+              ]
+            },
+            {
+              "id": "west-wall",
+              "label": "West wall",
+              "kind": "wall",
+              "min": [
+                -32.025,
+                0,
+                -34
+              ],
+              "max": [
+                -31.775,
+                13.4,
+                10
+              ]
+            },
+            {
+              "id": "east-wall",
+              "label": "East low wall",
+              "kind": "wall",
+              "min": [
+                31.799999999999997,
+                0,
+                -34
+              ],
+              "max": [
+                32,
+                1.3,
+                10
+              ]
+            },
+            {
+              "id": "mezzanine-floor",
+              "label": "Mezzanine platform",
+              "kind": "mezzanine",
+              "min": [
+                -31.25,
+                5.825,
+                -33.4
+              ],
+              "max": [
+                -18.75,
+                6.175,
+                -26
+              ]
+            },
+            {
+              "id": "control-booth",
+              "label": "Control booth",
+              "kind": "mezzanine",
+              "min": [
+                -30.5,
+                6.15,
+                -33.1
+              ],
+              "max": [
+                -19.5,
+                9.25,
+                -27.1
+              ]
+            },
+            {
+              "id": "control-roof",
+              "label": "Control booth roof",
+              "kind": "mezzanine",
+              "min": [
+                -30.75,
+                9.31,
+                -33.25
+              ],
+              "max": [
+                -19.25,
+                9.49,
+                -26.950000000000003
+              ]
+            },
+            {
+              "id": "stairs",
+              "label": "Mezzanine stairs",
+              "kind": "mezzanine",
+              "min": [
+                -30.5,
+                0,
+                -26.400000000000002
+              ],
+              "max": [
+                -28.1,
+                6.1,
+                -17.8
+              ]
+            }
+          ],
+          "devices": [
+            {
+              "id": "camera-01",
+              "kind": "camera",
+              "label": "Sentinel",
+              "position": [
+                -30.2,
+                10,
+                8
+              ],
+              "heading": 0,
+              "pan": 104,
+              "tilt": -16,
+              "airborne": false,
+              "profile": {
+                "scale": 1,
+                "speed": 0,
+                "telemetryRange": 45,
+                "inspectRange": 45,
+                "payloadKg": null
+              }
+            },
+            {
+              "id": "rover-01",
+              "kind": "rover",
+              "label": "Scout",
+              "position": [
+                -6,
+                0.45,
+                3
+              ],
+              "heading": 3.141592653589793,
+              "pan": 0,
+              "tilt": 0,
+              "airborne": false,
+              "profile": {
+                "scale": 1,
+                "speed": 1.8,
+                "telemetryRange": 4,
+                "inspectRange": 2.3,
+                "payloadKg": null
+              }
+            },
+            {
+              "id": "arm-01",
+              "kind": "arm",
+              "label": "Atlas",
+              "position": [
+                4,
+                0.5,
+                0
+              ],
+              "heading": 0,
+              "pan": 0,
+              "tilt": 0,
+              "airborne": false,
+              "profile": {
+                "scale": 1,
+                "speed": 0,
+                "telemetryRange": 2.8,
+                "inspectRange": null,
+                "payloadKg": 5
+              }
+            },
+            {
+              "id": "drone-01",
+              "kind": "drone",
+              "label": "Wisp",
+              "position": [
+                -4,
+                0.4,
+                -3
+              ],
+              "heading": 3.141592653589793,
+              "pan": 180,
+              "tilt": -35,
+              "airborne": false,
+              "profile": {
+                "scale": 1,
+                "speed": 2.4,
+                "telemetryRange": 9,
+                "inspectRange": 5,
+                "payloadKg": null
+              }
+            },
+            {
+              "id": "trial-rover",
+              "kind": "rover",
+              "label": "Temporary inspection rover",
+              "position": [
+                -6,
+                0.45,
+                3
+              ],
+              "heading": 3.141592653589793,
+              "pan": 0,
+              "tilt": 0,
+              "airborne": false,
+              "profile": {
+                "scale": 1,
+                "speed": 1.8,
+                "telemetryRange": 4,
+                "inspectRange": 2.3,
+                "payloadKg": null
+              }
+            }
+          ],
+          "cargo": [
+            {
+              "id": "crate-07",
+              "label": "Priority cargo · 07",
+              "position": [
+                2,
+                0.55,
+                0
+              ],
+              "condition": "Seal intact. Label verified. Cleared for dispatch.",
+              "massKg": 1
+            },
+            {
+              "id": "crate-12",
+              "label": "Storage cargo · 12",
+              "position": [
+                -8.4,
+                0.55,
+                -18
+              ],
+              "condition": "Surface abrasion on north face. Seal intact.",
+              "massKg": 1
+            },
+            {
+              "id": "crate-18",
+              "label": "Storage cargo · 18",
+              "position": [
+                8.4,
+                0.55,
+                -30
+              ],
+              "condition": "Seal intact. Awaiting inventory scan.",
+              "massKg": 1
+            }
+          ],
+          "workflow": {
+            "name": "Three-cargo inspection loop via center aisle",
+            "actors": {
+              "inspector": "trial-rover"
+            },
+            "steps": [
+              {
+                "actor": "inspector",
+                "label": "Approach priority cargo",
+                "command": {
+                  "type": "move",
+                  "x": 0,
+                  "z": 0
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Inspect priority cargo",
+                "dwellSeconds": 2,
+                "command": {
+                  "type": "inspect",
+                  "objectId": "crate-07"
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Follow center aisle",
+                "command": {
+                  "type": "move",
+                  "x": 0,
+                  "z": -20
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "West storage approach",
+                "command": {
+                  "type": "move",
+                  "x": -8,
+                  "z": -20
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Inspect west cargo",
+                "dwellSeconds": 2,
+                "command": {
+                  "type": "inspect",
+                  "objectId": "crate-12"
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Return to center aisle",
+                "command": {
+                  "type": "move",
+                  "x": 0,
+                  "z": -20
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Follow center to north aisle",
+                "command": {
+                  "type": "move",
+                  "x": 0,
+                  "z": -30
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "East storage approach",
+                "command": {
+                  "type": "move",
+                  "x": 8,
+                  "z": -30
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Inspect east cargo",
+                "dwellSeconds": 2,
+                "command": {
+                  "type": "inspect",
+                  "objectId": "crate-18"
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Return from east cargo",
+                "command": {
+                  "type": "move",
+                  "x": 0,
+                  "z": -30
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Return down center aisle",
+                "command": {
+                  "type": "move",
+                  "x": 0,
+                  "z": 3
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Return to staging",
+                "command": {
+                  "type": "move",
+                  "x": -6,
+                  "z": 3
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Stop safely",
+                "command": {
+                  "type": "stop"
+                }
+              }
+            ],
+            "stopOnError": true,
+            "maxSimulatedSeconds": 120,
+            "requireSafeEnd": true
+          }
+        },
+        "workflow": {
+          "name": "Three-cargo inspection loop via center aisle",
+          "actors": {
+            "inspector": "trial-rover"
+          },
+          "steps": [
+            {
+              "actor": "inspector",
+              "label": "Approach priority cargo",
+              "command": {
+                "type": "move",
+                "x": 0,
+                "z": 0
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Inspect priority cargo",
+              "dwellSeconds": 2,
+              "command": {
+                "type": "inspect",
+                "objectId": "crate-07"
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Follow center aisle",
+              "command": {
+                "type": "move",
+                "x": 0,
+                "z": -20
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "West storage approach",
+              "command": {
+                "type": "move",
+                "x": -8,
+                "z": -20
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Inspect west cargo",
+              "dwellSeconds": 2,
+              "command": {
+                "type": "inspect",
+                "objectId": "crate-12"
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Return to center aisle",
+              "command": {
+                "type": "move",
+                "x": 0,
+                "z": -20
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Follow center to north aisle",
+              "command": {
+                "type": "move",
+                "x": 0,
+                "z": -30
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "East storage approach",
+              "command": {
+                "type": "move",
+                "x": 8,
+                "z": -30
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Inspect east cargo",
+              "dwellSeconds": 2,
+              "command": {
+                "type": "inspect",
+                "objectId": "crate-18"
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Return from east cargo",
+              "command": {
+                "type": "move",
+                "x": 0,
+                "z": -30
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Return down center aisle",
+              "command": {
+                "type": "move",
+                "x": 0,
+                "z": 3
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Return to staging",
+              "command": {
+                "type": "move",
+                "x": -6,
+                "z": 3
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Stop safely",
+              "command": {
+                "type": "stop"
+              }
+            }
+          ],
+          "stopOnError": true,
+          "maxSimulatedSeconds": 120,
+          "requireSafeEnd": true
+        },
+        "steps": [
+          {
+            "index": 0,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Approach priority cargo",
+            "command": {
+              "type": "move",
+              "x": 0,
+              "z": 0
+            },
+            "status": "completed",
+            "startedAtSeconds": 0,
+            "before": [
+              -6,
+              0.45,
+              3
+            ],
+            "after": [
+              0,
+              0.45,
+              0
+            ],
+            "finishedAtSeconds": 3.7267799624996494
+          },
+          {
+            "index": 1,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Inspect priority cargo",
+            "command": {
+              "type": "inspect",
+              "objectId": "crate-07"
+            },
+            "status": "completed",
+            "startedAtSeconds": 3.7267799624996494,
+            "before": [
+              0,
+              0.45,
+              0
+            ],
+            "after": [
+              0,
+              0.45,
+              0
+            ],
+            "finishedAtSeconds": 5.726779962499649,
+            "inspection": {
+              "objectId": "crate-07",
+              "condition": "Seal intact. Label verified. Cleared for dispatch."
+            }
+          },
+          {
+            "index": 2,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Follow center aisle",
+            "command": {
+              "type": "move",
+              "x": 0,
+              "z": -20
+            },
+            "status": "completed",
+            "startedAtSeconds": 5.726779962499649,
+            "before": [
+              0,
+              0.45,
+              0
+            ],
+            "after": [
+              0,
+              0.45,
+              -20
+            ],
+            "finishedAtSeconds": 16.83789107361076
+          },
+          {
+            "index": 3,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "West storage approach",
+            "command": {
+              "type": "move",
+              "x": -8,
+              "z": -20
+            },
+            "status": "completed",
+            "startedAtSeconds": 16.83789107361076,
+            "before": [
+              0,
+              0.45,
+              -20
+            ],
+            "after": [
+              -8,
+              0.45,
+              -20
+            ],
+            "finishedAtSeconds": 21.282335518055206
+          },
+          {
+            "index": 4,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Inspect west cargo",
+            "command": {
+              "type": "inspect",
+              "objectId": "crate-12"
+            },
+            "status": "completed",
+            "startedAtSeconds": 21.282335518055206,
+            "before": [
+              -8,
+              0.45,
+              -20
+            ],
+            "after": [
+              -8,
+              0.45,
+              -20
+            ],
+            "finishedAtSeconds": 23.282335518055206,
+            "inspection": {
+              "objectId": "crate-12",
+              "condition": "Surface abrasion on north face. Seal intact."
+            }
+          },
+          {
+            "index": 5,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Return to center aisle",
+            "command": {
+              "type": "move",
+              "x": 0,
+              "z": -20
+            },
+            "status": "completed",
+            "startedAtSeconds": 23.282335518055206,
+            "before": [
+              -8,
+              0.45,
+              -20
+            ],
+            "after": [
+              0,
+              0.45,
+              -20
+            ],
+            "finishedAtSeconds": 27.726779962499652
+          },
+          {
+            "index": 6,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Follow center to north aisle",
+            "command": {
+              "type": "move",
+              "x": 0,
+              "z": -30
+            },
+            "status": "completed",
+            "startedAtSeconds": 27.726779962499652,
+            "before": [
+              0,
+              0.45,
+              -20
+            ],
+            "after": [
+              0,
+              0.45,
+              -30
+            ],
+            "finishedAtSeconds": 33.28233551805521
+          },
+          {
+            "index": 7,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "East storage approach",
+            "command": {
+              "type": "move",
+              "x": 8,
+              "z": -30
+            },
+            "status": "completed",
+            "startedAtSeconds": 33.28233551805521,
+            "before": [
+              0,
+              0.45,
+              -30
+            ],
+            "after": [
+              8,
+              0.45,
+              -30
+            ],
+            "finishedAtSeconds": 37.726779962499656
+          },
+          {
+            "index": 8,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Inspect east cargo",
+            "command": {
+              "type": "inspect",
+              "objectId": "crate-18"
+            },
+            "status": "completed",
+            "startedAtSeconds": 37.726779962499656,
+            "before": [
+              8,
+              0.45,
+              -30
+            ],
+            "after": [
+              8,
+              0.45,
+              -30
+            ],
+            "finishedAtSeconds": 39.726779962499656,
+            "inspection": {
+              "objectId": "crate-18",
+              "condition": "Seal intact. Awaiting inventory scan."
+            }
+          },
+          {
+            "index": 9,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Return from east cargo",
+            "command": {
+              "type": "move",
+              "x": 0,
+              "z": -30
+            },
+            "status": "completed",
+            "startedAtSeconds": 39.726779962499656,
+            "before": [
+              8,
+              0.45,
+              -30
+            ],
+            "after": [
+              0,
+              0.45,
+              -30
+            ],
+            "finishedAtSeconds": 44.1712244069441
+          },
+          {
+            "index": 10,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Return down center aisle",
+            "command": {
+              "type": "move",
+              "x": 0,
+              "z": 3
+            },
+            "status": "completed",
+            "startedAtSeconds": 44.1712244069441,
+            "before": [
+              0,
+              0.45,
+              -30
+            ],
+            "after": [
+              0,
+              0.45,
+              3
+            ],
+            "finishedAtSeconds": 62.504557740277434
+          },
+          {
+            "index": 11,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Return to staging",
+            "command": {
+              "type": "move",
+              "x": -6,
+              "z": 3
+            },
+            "status": "completed",
+            "startedAtSeconds": 62.504557740277434,
+            "before": [
+              0,
+              0.45,
+              3
+            ],
+            "after": [
+              -6,
+              0.45,
+              3
+            ],
+            "finishedAtSeconds": 65.83789107361076
+          },
+          {
+            "index": 12,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Stop safely",
+            "command": {
+              "type": "stop"
+            },
+            "status": "completed",
+            "startedAtSeconds": 65.83789107361076,
+            "before": [
+              -6,
+              0.45,
+              3
+            ],
+            "after": [
+              -6,
+              0.45,
+              3
+            ],
+            "finishedAtSeconds": 65.83789107361076
+          }
+        ],
+        "scenarioHash": "cdc542ed83f5bb4f7bcf13342614b84e4bcd447a48ca221d14f63d177ec86ed9",
+        "workflowHash": "53e9efa5d5a3f3f913457a1f2b2e0320215b031ecf558179daf143e900fe0766",
+        "metrics": {
+          "simulatedSeconds": 65.838,
+          "distanceMeters": 107.708,
+          "completedSteps": 13,
+          "totalSteps": 13,
+          "failedSteps": 0,
+          "blockedMoves": 0,
+          "inspectedCargo": [
+            "crate-07",
+            "crate-12",
+            "crate-18"
+          ],
+          "observedCheckpoints": 10,
+          "eligibleCheckpoints": 85,
+          "allLeasesReleased": true,
+          "safeEndState": true
+        },
+        "assumptions": [
+          "Kinematic motion with static solid obstacles and conservative swept body envelopes; no automatic path planner.",
+          "Uniform device scale changes the rendered body, clearance, mounting offsets and takeoff/landing heights.",
+          "Configured speed and sensor ranges are assumptions, not measurements from a hardware vendor.",
+          "No battery, acceleration, radio, moving-device collision, dynamic cargo collision or hardware calibration.",
+          "Workflows execute typed commands in sequence; they are scripts, not an embedded autonomous model.",
+          "Only kinematic travel and configured per-step dwell consume simulated time. Inspection and arm preset commands have no calibrated hardware duration.",
+          "Coverage counts sampled floor checkpoints, not full areas or exhaustive inventory.",
+          "Drafts and the last 32 runs live in memory. Export JSON to keep them across restarts."
+        ]
+      },
+      "frame": {
+        "id": "e77e47b3-efbf-48c7-9a8e-25b80ac340c1",
+        "instanceId": "af4c422e-3f50-4754-a4f1-66417e1751ac",
+        "resourceId": "trial-rover",
+        "revision": 186,
+        "at": 1792335750074.891,
+        "width": 640,
+        "height": 360,
+        "mimeType": "image/jpeg"
+      }
+    },
+    "image": {
+      "path": "/workspace/ghost/work/lab-agent-01/sensor-1792335709439-e8627f.jpg",
+      "sha256": "ba76f43d0c8b1fd93aa9a7c37bfbbf4780282e46726b570b7d4774714c82c6d5"
+    }
+  },
+  "candidateReport": {
+    "at": "2026-10-18T15:02:01.117Z",
+    "tool": "experiment_inspect",
+    "input": {
+      "runId": "run-ec672338",
+      "imageResourceId": "trial-rover"
+    },
+    "note": "Read candidate complete trace, safety and lease-release metrics plus device JPEG.",
+    "isError": false,
+    "result": {
+      "run": {
+        "id": "run-ec672338",
+        "sandboxId": "sandbox-818a5a21",
+        "sourceRevision": 3,
+        "name": "Three-cargo inspection loop via center aisle",
+        "sandboxName": "Independent rover inspection speed trial",
+        "status": "completed",
+        "startedAt": 1792335699420,
+        "playbackRate": 8,
+        "currentStep": 13,
+        "definition": {
+          "version": 1,
+          "name": "Independent rover inspection speed trial",
+          "obstacles": [
+            {
+              "id": "rack-1",
+              "label": "Storage bay 1",
+              "kind": "rack",
+              "min": [
+                -28.8,
+                0,
+                -28.23
+              ],
+              "max": [
+                -21.2,
+                8.05,
+                -25.77
+              ]
+            },
+            {
+              "id": "rack-2",
+              "label": "Storage bay 2",
+              "kind": "rack",
+              "min": [
+                -18.8,
+                0,
+                -28.23
+              ],
+              "max": [
+                -11.2,
+                8.05,
+                -25.77
+              ]
+            },
+            {
+              "id": "rack-3",
+              "label": "Storage bay 3",
+              "kind": "rack",
+              "min": [
+                -8.8,
+                0,
+                -28.23
+              ],
+              "max": [
+                -1.2000000000000002,
+                8.05,
+                -25.77
+              ]
+            },
+            {
+              "id": "rack-4",
+              "label": "Storage bay 4",
+              "kind": "rack",
+              "min": [
+                1.2000000000000002,
+                0,
+                -28.23
+              ],
+              "max": [
+                8.8,
+                8.05,
+                -25.77
+              ]
+            },
+            {
+              "id": "rack-5",
+              "label": "Storage bay 5",
+              "kind": "rack",
+              "min": [
+                11.2,
+                0,
+                -28.23
+              ],
+              "max": [
+                18.8,
+                8.05,
+                -25.77
+              ]
+            },
+            {
+              "id": "rack-6",
+              "label": "Storage bay 6",
+              "kind": "rack",
+              "min": [
+                21.2,
+                0,
+                -28.23
+              ],
+              "max": [
+                28.8,
+                8.05,
+                -25.77
+              ]
+            },
+            {
+              "id": "rack-7",
+              "label": "Storage bay 7",
+              "kind": "rack",
+              "min": [
+                -28.8,
+                0,
+                -17.23
+              ],
+              "max": [
+                -21.2,
+                8.05,
+                -14.77
+              ]
+            },
+            {
+              "id": "rack-8",
+              "label": "Storage bay 8",
+              "kind": "rack",
+              "min": [
+                -18.8,
+                0,
+                -17.23
+              ],
+              "max": [
+                -11.2,
+                8.05,
+                -14.77
+              ]
+            },
+            {
+              "id": "rack-9",
+              "label": "Storage bay 9",
+              "kind": "rack",
+              "min": [
+                -8.8,
+                0,
+                -17.23
+              ],
+              "max": [
+                -1.2000000000000002,
+                8.05,
+                -14.77
+              ]
+            },
+            {
+              "id": "rack-10",
+              "label": "Storage bay 10",
+              "kind": "rack",
+              "min": [
+                1.2000000000000002,
+                0,
+                -17.23
+              ],
+              "max": [
+                8.8,
+                8.05,
+                -14.77
+              ]
+            },
+            {
+              "id": "rack-11",
+              "label": "Storage bay 11",
+              "kind": "rack",
+              "min": [
+                11.2,
+                0,
+                -17.23
+              ],
+              "max": [
+                18.8,
+                8.05,
+                -14.77
+              ]
+            },
+            {
+              "id": "rack-12",
+              "label": "Storage bay 12",
+              "kind": "rack",
+              "min": [
+                21.2,
+                0,
+                -17.23
+              ],
+              "max": [
+                28.8,
+                8.05,
+                -14.77
+              ]
+            },
+            {
+              "id": "rack-13",
+              "label": "Storage bay 13",
+              "kind": "rack",
+              "min": [
+                -28.8,
+                0,
+                -6.23
+              ],
+              "max": [
+                -21.2,
+                8.05,
+                -3.77
+              ]
+            },
+            {
+              "id": "rack-14",
+              "label": "Storage bay 14",
+              "kind": "rack",
+              "min": [
+                -18.8,
+                0,
+                -6.23
+              ],
+              "max": [
+                -11.2,
+                8.05,
+                -3.77
+              ]
+            },
+            {
+              "id": "rack-15",
+              "label": "Storage bay 15",
+              "kind": "rack",
+              "min": [
+                11.2,
+                0,
+                -6.23
+              ],
+              "max": [
+                18.8,
+                8.05,
+                -3.77
+              ]
+            },
+            {
+              "id": "rack-16",
+              "label": "Storage bay 16",
+              "kind": "rack",
+              "min": [
+                21.2,
+                0,
+                -6.23
+              ],
+              "max": [
+                28.8,
+                8.05,
+                -3.77
+              ]
+            },
+            {
+              "id": "freight-1",
+              "label": "Freight stack 1",
+              "kind": "freight",
+              "min": [
+                -27.4,
+                0,
+                1.75
+              ],
+              "max": [
+                -24.6,
+                1.75,
+                4.25
+              ]
+            },
+            {
+              "id": "freight-2",
+              "label": "Freight stack 2",
+              "kind": "freight",
+              "min": [
+                -27.4,
+                0,
+                5.05
+              ],
+              "max": [
+                -24.6,
+                1.75,
+                7.55
+              ]
+            },
+            {
+              "id": "freight-3",
+              "label": "Freight stack 3",
+              "kind": "freight",
+              "min": [
+                -23.4,
+                0,
+                1.75
+              ],
+              "max": [
+                -20.6,
+                1.75,
+                4.25
+              ]
+            },
+            {
+              "id": "freight-4",
+              "label": "Freight stack 4",
+              "kind": "freight",
+              "min": [
+                -23.4,
+                0,
+                5.05
+              ],
+              "max": [
+                -20.6,
+                1.75,
+                7.55
+              ]
+            },
+            {
+              "id": "freight-5",
+              "label": "Freight stack 5",
+              "kind": "freight",
+              "min": [
+                19.6,
+                0,
+                1.75
+              ],
+              "max": [
+                22.4,
+                1.75,
+                4.25
+              ]
+            },
+            {
+              "id": "freight-6",
+              "label": "Freight stack 6",
+              "kind": "freight",
+              "min": [
+                19.6,
+                0,
+                5.05
+              ],
+              "max": [
+                22.4,
+                1.75,
+                7.55
+              ]
+            },
+            {
+              "id": "freight-7",
+              "label": "Freight stack 7",
+              "kind": "freight",
+              "min": [
+                23.6,
+                0,
+                1.75
+              ],
+              "max": [
+                26.4,
+                1.75,
+                4.25
+              ]
+            },
+            {
+              "id": "freight-8",
+              "label": "Freight stack 8",
+              "kind": "freight",
+              "min": [
+                23.6,
+                0,
+                5.05
+              ],
+              "max": [
+                26.4,
+                1.75,
+                7.55
+              ]
+            },
+            {
+              "id": "column-1",
+              "label": "Column 1",
+              "kind": "column",
+              "min": [
+                -31.2,
+                0,
+                -31.2
+              ],
+              "max": [
+                -30.8,
+                14.4,
+                -30.8
+              ]
+            },
+            {
+              "id": "column-base-1",
+              "label": "Column base 1",
+              "kind": "column",
+              "min": [
+                -31.45,
+                0,
+                -31.45
+              ],
+              "max": [
+                -30.55,
+                0.7,
+                -30.55
+              ]
+            },
+            {
+              "id": "column-2",
+              "label": "Column 2",
+              "kind": "column",
+              "min": [
+                -31.2,
+                0,
+                -19.2
+              ],
+              "max": [
+                -30.8,
+                14.4,
+                -18.8
+              ]
+            },
+            {
+              "id": "column-base-2",
+              "label": "Column base 2",
+              "kind": "column",
+              "min": [
+                -31.45,
+                0,
+                -19.45
+              ],
+              "max": [
+                -30.55,
+                0.7,
+                -18.55
+              ]
+            },
+            {
+              "id": "column-3",
+              "label": "Column 3",
+              "kind": "column",
+              "min": [
+                -31.2,
+                0,
+                -7.2
+              ],
+              "max": [
+                -30.8,
+                14.4,
+                -6.8
+              ]
+            },
+            {
+              "id": "column-base-3",
+              "label": "Column base 3",
+              "kind": "column",
+              "min": [
+                -31.45,
+                0,
+                -7.45
+              ],
+              "max": [
+                -30.55,
+                0.7,
+                -6.55
+              ]
+            },
+            {
+              "id": "column-4",
+              "label": "Column 4",
+              "kind": "column",
+              "min": [
+                -31.2,
+                0,
+                7.8
+              ],
+              "max": [
+                -30.8,
+                14.4,
+                8.2
+              ]
+            },
+            {
+              "id": "column-base-4",
+              "label": "Column base 4",
+              "kind": "column",
+              "min": [
+                -31.45,
+                0,
+                7.55
+              ],
+              "max": [
+                -30.55,
+                0.7,
+                8.45
+              ]
+            },
+            {
+              "id": "column-5",
+              "label": "Column 5",
+              "kind": "column",
+              "min": [
+                30.8,
+                0,
+                -31.2
+              ],
+              "max": [
+                31.2,
+                14.4,
+                -30.8
+              ]
+            },
+            {
+              "id": "column-base-5",
+              "label": "Column base 5",
+              "kind": "column",
+              "min": [
+                30.55,
+                0,
+                -31.45
+              ],
+              "max": [
+                31.45,
+                0.7,
+                -30.55
+              ]
+            },
+            {
+              "id": "column-6",
+              "label": "Column 6",
+              "kind": "column",
+              "min": [
+                30.8,
+                0,
+                -19.2
+              ],
+              "max": [
+                31.2,
+                14.4,
+                -18.8
+              ]
+            },
+            {
+              "id": "column-base-6",
+              "label": "Column base 6",
+              "kind": "column",
+              "min": [
+                30.55,
+                0,
+                -19.45
+              ],
+              "max": [
+                31.45,
+                0.7,
+                -18.55
+              ]
+            },
+            {
+              "id": "column-7",
+              "label": "Column 7",
+              "kind": "column",
+              "min": [
+                30.8,
+                0,
+                -7.2
+              ],
+              "max": [
+                31.2,
+                14.4,
+                -6.8
+              ]
+            },
+            {
+              "id": "column-base-7",
+              "label": "Column base 7",
+              "kind": "column",
+              "min": [
+                30.55,
+                0,
+                -7.45
+              ],
+              "max": [
+                31.45,
+                0.7,
+                -6.55
+              ]
+            },
+            {
+              "id": "column-8",
+              "label": "Column 8",
+              "kind": "column",
+              "min": [
+                30.8,
+                0,
+                7.8
+              ],
+              "max": [
+                31.2,
+                14.4,
+                8.2
+              ]
+            },
+            {
+              "id": "column-base-8",
+              "label": "Column base 8",
+              "kind": "column",
+              "min": [
+                30.55,
+                0,
+                7.55
+              ],
+              "max": [
+                31.45,
+                0.7,
+                8.45
+              ]
+            },
+            {
+              "id": "north-wall",
+              "label": "North wall and closed loading doors",
+              "kind": "wall",
+              "min": [
+                -32,
+                0,
+                -34.050000000000004
+              ],
+              "max": [
+                32,
+                14.4,
+                -33.35
+              ]
+            },
+            {
+              "id": "west-wall",
+              "label": "West wall",
+              "kind": "wall",
+              "min": [
+                -32.025,
+                0,
+                -34
+              ],
+              "max": [
+                -31.775,
+                13.4,
+                10
+              ]
+            },
+            {
+              "id": "east-wall",
+              "label": "East low wall",
+              "kind": "wall",
+              "min": [
+                31.799999999999997,
+                0,
+                -34
+              ],
+              "max": [
+                32,
+                1.3,
+                10
+              ]
+            },
+            {
+              "id": "mezzanine-floor",
+              "label": "Mezzanine platform",
+              "kind": "mezzanine",
+              "min": [
+                -31.25,
+                5.825,
+                -33.4
+              ],
+              "max": [
+                -18.75,
+                6.175,
+                -26
+              ]
+            },
+            {
+              "id": "control-booth",
+              "label": "Control booth",
+              "kind": "mezzanine",
+              "min": [
+                -30.5,
+                6.15,
+                -33.1
+              ],
+              "max": [
+                -19.5,
+                9.25,
+                -27.1
+              ]
+            },
+            {
+              "id": "control-roof",
+              "label": "Control booth roof",
+              "kind": "mezzanine",
+              "min": [
+                -30.75,
+                9.31,
+                -33.25
+              ],
+              "max": [
+                -19.25,
+                9.49,
+                -26.950000000000003
+              ]
+            },
+            {
+              "id": "stairs",
+              "label": "Mezzanine stairs",
+              "kind": "mezzanine",
+              "min": [
+                -30.5,
+                0,
+                -26.400000000000002
+              ],
+              "max": [
+                -28.1,
+                6.1,
+                -17.8
+              ]
+            }
+          ],
+          "devices": [
+            {
+              "id": "camera-01",
+              "kind": "camera",
+              "label": "Sentinel",
+              "position": [
+                -30.2,
+                10,
+                8
+              ],
+              "heading": 0,
+              "pan": 104,
+              "tilt": -16,
+              "airborne": false,
+              "profile": {
+                "scale": 1,
+                "speed": 0,
+                "telemetryRange": 45,
+                "inspectRange": 45,
+                "payloadKg": null
+              }
+            },
+            {
+              "id": "rover-01",
+              "kind": "rover",
+              "label": "Scout",
+              "position": [
+                -6,
+                0.45,
+                3
+              ],
+              "heading": 3.141592653589793,
+              "pan": 0,
+              "tilt": 0,
+              "airborne": false,
+              "profile": {
+                "scale": 1,
+                "speed": 1.8,
+                "telemetryRange": 4,
+                "inspectRange": 2.3,
+                "payloadKg": null
+              }
+            },
+            {
+              "id": "arm-01",
+              "kind": "arm",
+              "label": "Atlas",
+              "position": [
+                4,
+                0.5,
+                0
+              ],
+              "heading": 0,
+              "pan": 0,
+              "tilt": 0,
+              "airborne": false,
+              "profile": {
+                "scale": 1,
+                "speed": 0,
+                "telemetryRange": 2.8,
+                "inspectRange": null,
+                "payloadKg": 5
+              }
+            },
+            {
+              "id": "drone-01",
+              "kind": "drone",
+              "label": "Wisp",
+              "position": [
+                -4,
+                0.4,
+                -3
+              ],
+              "heading": 3.141592653589793,
+              "pan": 180,
+              "tilt": -35,
+              "airborne": false,
+              "profile": {
+                "scale": 1,
+                "speed": 2.4,
+                "telemetryRange": 9,
+                "inspectRange": 5,
+                "payloadKg": null
+              }
+            },
+            {
+              "id": "trial-rover",
+              "kind": "rover",
+              "label": "Temporary inspection rover",
+              "position": [
+                -6,
+                0.45,
+                3
+              ],
+              "heading": 3.141592653589793,
+              "pan": 0,
+              "tilt": 0,
+              "airborne": false,
+              "profile": {
+                "scale": 1,
+                "speed": 3,
+                "telemetryRange": 4,
+                "inspectRange": 2.3,
+                "payloadKg": null
+              }
+            }
+          ],
+          "cargo": [
+            {
+              "id": "crate-07",
+              "label": "Priority cargo · 07",
+              "position": [
+                2,
+                0.55,
+                0
+              ],
+              "condition": "Seal intact. Label verified. Cleared for dispatch.",
+              "massKg": 1
+            },
+            {
+              "id": "crate-12",
+              "label": "Storage cargo · 12",
+              "position": [
+                -8.4,
+                0.55,
+                -18
+              ],
+              "condition": "Surface abrasion on north face. Seal intact.",
+              "massKg": 1
+            },
+            {
+              "id": "crate-18",
+              "label": "Storage cargo · 18",
+              "position": [
+                8.4,
+                0.55,
+                -30
+              ],
+              "condition": "Seal intact. Awaiting inventory scan.",
+              "massKg": 1
+            }
+          ],
+          "workflow": {
+            "name": "Three-cargo inspection loop via center aisle",
+            "actors": {
+              "inspector": "trial-rover"
+            },
+            "steps": [
+              {
+                "actor": "inspector",
+                "label": "Approach priority cargo",
+                "command": {
+                  "type": "move",
+                  "x": 0,
+                  "z": 0
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Inspect priority cargo",
+                "dwellSeconds": 2,
+                "command": {
+                  "type": "inspect",
+                  "objectId": "crate-07"
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Follow center aisle",
+                "command": {
+                  "type": "move",
+                  "x": 0,
+                  "z": -20
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "West storage approach",
+                "command": {
+                  "type": "move",
+                  "x": -8,
+                  "z": -20
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Inspect west cargo",
+                "dwellSeconds": 2,
+                "command": {
+                  "type": "inspect",
+                  "objectId": "crate-12"
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Return to center aisle",
+                "command": {
+                  "type": "move",
+                  "x": 0,
+                  "z": -20
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Follow center to north aisle",
+                "command": {
+                  "type": "move",
+                  "x": 0,
+                  "z": -30
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "East storage approach",
+                "command": {
+                  "type": "move",
+                  "x": 8,
+                  "z": -30
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Inspect east cargo",
+                "dwellSeconds": 2,
+                "command": {
+                  "type": "inspect",
+                  "objectId": "crate-18"
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Return from east cargo",
+                "command": {
+                  "type": "move",
+                  "x": 0,
+                  "z": -30
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Return down center aisle",
+                "command": {
+                  "type": "move",
+                  "x": 0,
+                  "z": 3
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Return to staging",
+                "command": {
+                  "type": "move",
+                  "x": -6,
+                  "z": 3
+                }
+              },
+              {
+                "actor": "inspector",
+                "label": "Stop safely",
+                "command": {
+                  "type": "stop"
+                }
+              }
+            ],
+            "stopOnError": true,
+            "maxSimulatedSeconds": 120,
+            "requireSafeEnd": true
+          }
+        },
+        "workflow": {
+          "name": "Three-cargo inspection loop via center aisle",
+          "actors": {
+            "inspector": "trial-rover"
+          },
+          "steps": [
+            {
+              "actor": "inspector",
+              "label": "Approach priority cargo",
+              "command": {
+                "type": "move",
+                "x": 0,
+                "z": 0
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Inspect priority cargo",
+              "dwellSeconds": 2,
+              "command": {
+                "type": "inspect",
+                "objectId": "crate-07"
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Follow center aisle",
+              "command": {
+                "type": "move",
+                "x": 0,
+                "z": -20
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "West storage approach",
+              "command": {
+                "type": "move",
+                "x": -8,
+                "z": -20
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Inspect west cargo",
+              "dwellSeconds": 2,
+              "command": {
+                "type": "inspect",
+                "objectId": "crate-12"
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Return to center aisle",
+              "command": {
+                "type": "move",
+                "x": 0,
+                "z": -20
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Follow center to north aisle",
+              "command": {
+                "type": "move",
+                "x": 0,
+                "z": -30
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "East storage approach",
+              "command": {
+                "type": "move",
+                "x": 8,
+                "z": -30
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Inspect east cargo",
+              "dwellSeconds": 2,
+              "command": {
+                "type": "inspect",
+                "objectId": "crate-18"
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Return from east cargo",
+              "command": {
+                "type": "move",
+                "x": 0,
+                "z": -30
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Return down center aisle",
+              "command": {
+                "type": "move",
+                "x": 0,
+                "z": 3
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Return to staging",
+              "command": {
+                "type": "move",
+                "x": -6,
+                "z": 3
+              }
+            },
+            {
+              "actor": "inspector",
+              "label": "Stop safely",
+              "command": {
+                "type": "stop"
+              }
+            }
+          ],
+          "stopOnError": true,
+          "maxSimulatedSeconds": 120,
+          "requireSafeEnd": true
+        },
+        "steps": [
+          {
+            "index": 0,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Approach priority cargo",
+            "command": {
+              "type": "move",
+              "x": 0,
+              "z": 0
+            },
+            "status": "completed",
+            "startedAtSeconds": 0,
+            "before": [
+              -6,
+              0.45,
+              3
+            ],
+            "after": [
+              0,
+              0.45,
+              0
+            ],
+            "finishedAtSeconds": 2.23606797749979
+          },
+          {
+            "index": 1,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Inspect priority cargo",
+            "command": {
+              "type": "inspect",
+              "objectId": "crate-07"
+            },
+            "status": "completed",
+            "startedAtSeconds": 2.23606797749979,
+            "before": [
+              0,
+              0.45,
+              0
+            ],
+            "after": [
+              0,
+              0.45,
+              0
+            ],
+            "finishedAtSeconds": 4.23606797749979,
+            "inspection": {
+              "objectId": "crate-07",
+              "condition": "Seal intact. Label verified. Cleared for dispatch."
+            }
+          },
+          {
+            "index": 2,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Follow center aisle",
+            "command": {
+              "type": "move",
+              "x": 0,
+              "z": -20
+            },
+            "status": "completed",
+            "startedAtSeconds": 4.23606797749979,
+            "before": [
+              0,
+              0.45,
+              0
+            ],
+            "after": [
+              0,
+              0.45,
+              -20
+            ],
+            "finishedAtSeconds": 10.902734644166456
+          },
+          {
+            "index": 3,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "West storage approach",
+            "command": {
+              "type": "move",
+              "x": -8,
+              "z": -20
+            },
+            "status": "completed",
+            "startedAtSeconds": 10.902734644166456,
+            "before": [
+              0,
+              0.45,
+              -20
+            ],
+            "after": [
+              -8,
+              0.45,
+              -20
+            ],
+            "finishedAtSeconds": 13.569401310833122
+          },
+          {
+            "index": 4,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Inspect west cargo",
+            "command": {
+              "type": "inspect",
+              "objectId": "crate-12"
+            },
+            "status": "completed",
+            "startedAtSeconds": 13.569401310833122,
+            "before": [
+              -8,
+              0.45,
+              -20
+            ],
+            "after": [
+              -8,
+              0.45,
+              -20
+            ],
+            "finishedAtSeconds": 15.569401310833122,
+            "inspection": {
+              "objectId": "crate-12",
+              "condition": "Surface abrasion on north face. Seal intact."
+            }
+          },
+          {
+            "index": 5,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Return to center aisle",
+            "command": {
+              "type": "move",
+              "x": 0,
+              "z": -20
+            },
+            "status": "completed",
+            "startedAtSeconds": 15.569401310833122,
+            "before": [
+              -8,
+              0.45,
+              -20
+            ],
+            "after": [
+              0,
+              0.45,
+              -20
+            ],
+            "finishedAtSeconds": 18.236067977499786
+          },
+          {
+            "index": 6,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Follow center to north aisle",
+            "command": {
+              "type": "move",
+              "x": 0,
+              "z": -30
+            },
+            "status": "completed",
+            "startedAtSeconds": 18.236067977499786,
+            "before": [
+              0,
+              0.45,
+              -20
+            ],
+            "after": [
+              0,
+              0.45,
+              -30
+            ],
+            "finishedAtSeconds": 21.56940131083312
+          },
+          {
+            "index": 7,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "East storage approach",
+            "command": {
+              "type": "move",
+              "x": 8,
+              "z": -30
+            },
+            "status": "completed",
+            "startedAtSeconds": 21.56940131083312,
+            "before": [
+              0,
+              0.45,
+              -30
+            ],
+            "after": [
+              8,
+              0.45,
+              -30
+            ],
+            "finishedAtSeconds": 24.236067977499786
+          },
+          {
+            "index": 8,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Inspect east cargo",
+            "command": {
+              "type": "inspect",
+              "objectId": "crate-18"
+            },
+            "status": "completed",
+            "startedAtSeconds": 24.236067977499786,
+            "before": [
+              8,
+              0.45,
+              -30
+            ],
+            "after": [
+              8,
+              0.45,
+              -30
+            ],
+            "finishedAtSeconds": 26.236067977499786,
+            "inspection": {
+              "objectId": "crate-18",
+              "condition": "Seal intact. Awaiting inventory scan."
+            }
+          },
+          {
+            "index": 9,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Return from east cargo",
+            "command": {
+              "type": "move",
+              "x": 0,
+              "z": -30
+            },
+            "status": "completed",
+            "startedAtSeconds": 26.236067977499786,
+            "before": [
+              8,
+              0.45,
+              -30
+            ],
+            "after": [
+              0,
+              0.45,
+              -30
+            ],
+            "finishedAtSeconds": 28.902734644166454
+          },
+          {
+            "index": 10,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Return down center aisle",
+            "command": {
+              "type": "move",
+              "x": 0,
+              "z": 3
+            },
+            "status": "completed",
+            "startedAtSeconds": 28.902734644166454,
+            "before": [
+              0,
+              0.45,
+              -30
+            ],
+            "after": [
+              0,
+              0.45,
+              3
+            ],
+            "finishedAtSeconds": 39.90273464416646
+          },
+          {
+            "index": 11,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Return to staging",
+            "command": {
+              "type": "move",
+              "x": -6,
+              "z": 3
+            },
+            "status": "completed",
+            "startedAtSeconds": 39.90273464416646,
+            "before": [
+              0,
+              0.45,
+              3
+            ],
+            "after": [
+              -6,
+              0.45,
+              3
+            ],
+            "finishedAtSeconds": 41.90273464416646
+          },
+          {
+            "index": 12,
+            "actor": "inspector",
+            "resourceId": "trial-rover",
+            "label": "Stop safely",
+            "command": {
+              "type": "stop"
+            },
+            "status": "completed",
+            "startedAtSeconds": 41.90273464416646,
+            "before": [
+              -6,
+              0.45,
+              3
+            ],
+            "after": [
+              -6,
+              0.45,
+              3
+            ],
+            "finishedAtSeconds": 41.90273464416646
+          }
+        ],
+        "scenarioHash": "cdc542ed83f5bb4f7bcf13342614b84e4bcd447a48ca221d14f63d177ec86ed9",
+        "workflowHash": "53e9efa5d5a3f3f913457a1f2b2e0320215b031ecf558179daf143e900fe0766",
+        "metrics": {
+          "simulatedSeconds": 41.903,
+          "distanceMeters": 107.708,
+          "completedSteps": 13,
+          "totalSteps": 13,
+          "failedSteps": 0,
+          "blockedMoves": 0,
+          "inspectedCargo": [
+            "crate-07",
+            "crate-12",
+            "crate-18"
+          ],
+          "observedCheckpoints": 10,
+          "eligibleCheckpoints": 85,
+          "allLeasesReleased": true,
+          "safeEndState": true
+        },
+        "assumptions": [
+          "Kinematic motion with static solid obstacles and conservative swept body envelopes; no automatic path planner.",
+          "Uniform device scale changes the rendered body, clearance, mounting offsets and takeoff/landing heights.",
+          "Configured speed and sensor ranges are assumptions, not measurements from a hardware vendor.",
+          "No battery, acceleration, radio, moving-device collision, dynamic cargo collision or hardware calibration.",
+          "Workflows execute typed commands in sequence; they are scripts, not an embedded autonomous model.",
+          "Only kinematic travel and configured per-step dwell consume simulated time. Inspection and arm preset commands have no calibrated hardware duration.",
+          "Coverage counts sampled floor checkpoints, not full areas or exhaustive inventory.",
+          "Drafts and the last 32 runs live in memory. Export JSON to keep them across restarts."
+        ]
+      },
+      "frame": {
+        "id": "756bd3ab-441a-4186-a4f8-9e8be5f00ccc",
+        "instanceId": "a8934e5c-e634-40b2-ad8a-dd6cf92a6389",
+        "resourceId": "trial-rover",
+        "revision": 126,
+        "at": 1792335741322.7346,
+        "width": 640,
+        "height": 360,
+        "mimeType": "image/jpeg"
+      }
+    },
+    "image": {
+      "path": "/workspace/ghost/work/lab-agent-01/sensor-1792335721117-646324.jpg",
+      "sha256": "ba76f43d0c8b1fd93aa9a7c37bfbbf4780282e46726b570b7d4774714c82c6d5"
+    }
+  },
+  "comparison": {
+    "at": "2026-10-18T15:02:15.887Z",
+    "tool": "experiment_compare",
+    "input": {
+      "runIds": [
+        "run-53b4997c",
+        "run-ec672338"
+      ]
+    },
+    "note": "Check that runs are controlled and quantify simulated speed effect without claiming hardware performance.",
+    "isError": false,
+    "result": {
+      "comparable": true,
+      "reasons": [],
+      "runs": [
+        {
+          "id": "run-53b4997c",
+          "sandboxId": "sandbox-818a5a21",
+          "sourceRevision": 2,
+          "name": "Three-cargo inspection loop via center aisle",
+          "sandboxName": "Independent rover inspection speed trial",
+          "status": "completed",
+          "startedAt": 1792335684237,
+          "playbackRate": 8,
+          "currentStep": 13,
+          "metrics": {
+            "simulatedSeconds": 65.838,
+            "distanceMeters": 107.708,
+            "completedSteps": 13,
+            "totalSteps": 13,
+            "failedSteps": 0,
+            "blockedMoves": 0,
+            "inspectedCargo": [
+              "crate-07",
+              "crate-12",
+              "crate-18"
+            ],
+            "observedCheckpoints": 10,
+            "eligibleCheckpoints": 85,
+            "allLeasesReleased": true,
+            "safeEndState": true
+          }
+        },
+        {
+          "id": "run-ec672338",
+          "sandboxId": "sandbox-818a5a21",
+          "sourceRevision": 3,
+          "name": "Three-cargo inspection loop via center aisle",
+          "sandboxName": "Independent rover inspection speed trial",
+          "status": "completed",
+          "startedAt": 1792335699420,
+          "playbackRate": 8,
+          "currentStep": 13,
+          "metrics": {
+            "simulatedSeconds": 41.903,
+            "distanceMeters": 107.708,
+            "completedSteps": 13,
+            "totalSteps": 13,
+            "failedSteps": 0,
+            "blockedMoves": 0,
+            "inspectedCargo": [
+              "crate-07",
+              "crate-12",
+              "crate-18"
+            ],
+            "observedCheckpoints": 10,
+            "eligibleCheckpoints": 85,
+            "allLeasesReleased": true,
+            "safeEndState": true
+          }
+        }
+      ],
+      "completedRuns": 2,
+      "delta": {
+        "simulatedSeconds": -23.934999999999995,
+        "distanceMeters": 0
+      },
+      "interpretation": "Same scenario and workflow. Compare completion, simulated time, route distance and configured device assumptions."
+    }
+  },
+  "lifecycleVerification": {
+    "property": "frozen run definition after draft edit",
+    "baselineSourceRevision": 2,
+    "baselineFrozenSpeed": 1.8,
+    "candidateSourceRevision": 3,
+    "candidateFrozenSpeed": 3,
+    "scenarioHashEqual": true,
+    "workflowHashEqual": true
+  },
+  "conclusion": "Under static kinematic assumptions the configured 3 m/s rover completes the identical 107.708 m, three-cargo inspection loop 23.935 simulated seconds sooner (36.4% shorter duration), with equal completion and checkpoint metrics. This is a sensitivity result for configured speed, not evidence of real hardware speed, safety, battery, sensing reliability, or calibration. Recommend hardware validation before procurement.",
+  "transportRecovery": "Initial tools:true fetch failed with EPERM on loopback. Retried with explicitly enabled network permissions; succeeded. No MCP command or trial errors."
+}

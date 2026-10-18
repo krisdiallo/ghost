@@ -2749,3 +2749,5 @@ dialog::backdrop {
   font-size: 9px;
   color: #ffb3a5;
 }
+
+.lab-nav-link { color: #c9b6eb; text-decoration: none; font-size: 11px; padding: 8px 10px; border: 1px solid #584c67; border-radius: 5px; white-space: nowrap; }

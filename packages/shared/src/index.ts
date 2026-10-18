@@ -1,4 +1,11 @@
-import { blockingObstacle, BODY_CLEARANCE } from "./geometry.js";
+import { defaultProfile } from "./experiments.js";
+import type { DeviceProfile, LabToolName } from "./experiments.js";
+export * from "./experiments.js";
+import {
+  blockingObstacle,
+  BODY_CLEARANCE,
+  STATIC_OBSTACLES,
+} from "./geometry.js";
 export * from "./geometry.js";
 export type ResourceKind = "camera" | "rover" | "arm" | "drone";
 export type Vec3 = [number, number, number];
@@ -62,6 +69,7 @@ export interface Action {
   target: Vec3 | null;
 }
 export interface Body extends ResourceDefinition {
+  profile?: DeviceProfile;
   heading: number;
   pan: number;
   tilt: number;
@@ -78,6 +86,7 @@ export interface Body extends ResourceDefinition {
   } | null;
 }
 export interface SceneObject {
+  massKg?: number;
   id: string;
   label: string;
   position: Vec3;
@@ -99,6 +108,7 @@ export interface MissionStep {
   complete: boolean;
 }
 export interface Snapshot {
+  layout?: { obstacles: import("./geometry.js").Obstacle[] };
   instanceId: string;
   revision: number;
   at: number;
@@ -144,6 +154,7 @@ export function sensorPose(body: Body): {
   fov: number;
 } {
   const [x, y, z] = body.position;
+  const scale = body.profile?.scale ?? 1;
   if (body.kind === "arm") {
     const end: Vec3 =
       body.preset === "reach"
@@ -152,8 +163,16 @@ export function sensorPose(body: Body): {
           ? [2, 0.35, 2]
           : [0, 1.8, 0];
     return {
-      position: [x + end[0], y + end[1] + 0.48, z + end[2] + 0.55],
-      target: [x + end[0], y + end[1] - 0.25, z + end[2]],
+      position: [
+        x + end[0] * scale,
+        y + (end[1] + 0.48) * scale,
+        z + (end[2] + 0.55) * scale,
+      ],
+      target: [
+        x + end[0] * scale,
+        y + (end[1] - 0.25) * scale,
+        z + end[2] * scale,
+      ],
       fov: 90,
     };
   }
@@ -175,9 +194,9 @@ export function sensorPose(body: Body): {
   const offset =
     body.kind === "camera" ? 0.7 : body.kind === "rover" ? 0.63 : 0.24;
   const position: Vec3 = [
-    x + direction[0] * offset,
-    y + height + direction[1] * offset,
-    z + direction[2] * offset,
+    x + direction[0] * offset * scale,
+    y + (height + direction[1] * offset) * scale,
+    z + direction[2] * offset * scale,
   ];
   return {
     position,
@@ -190,7 +209,13 @@ export interface Possession {
   resource: Body;
   expiresAt: number;
 }
-export type ToolName = "discover" | "possess" | "observe" | "act" | "release";
+export type BodyToolName =
+  | "discover"
+  | "possess"
+  | "observe"
+  | "act"
+  | "release";
+export type ToolName = BodyToolName | LabToolName;
 export interface ApiError {
   code: string;
   message: string;
@@ -210,9 +235,32 @@ export const ARM_PRESETS: Record<Body["preset"], Vec3> = {
   reach: [2, 0.75, 0],
   drop: [6, 0.8, 2],
 };
+export function bodyClearance(body: Body): Vec3 {
+  const base =
+    body.kind === "rover" || body.kind === "drone"
+      ? BODY_CLEARANCE[body.kind]
+      : [0, 0, 0];
+  return base.map((v) => v * (body.profile?.scale ?? 1)) as Vec3;
+}
+export function armPresets(body: Body): Record<Body["preset"], Vec3> {
+  return Object.fromEntries(
+    Object.entries(ARM_PRESETS).map(([key, position]) => [
+      key,
+      position.map(
+        (v, i) =>
+          body.position[i]! +
+          (v - [4, 0.5, 0][i]!) * (body.profile?.scale ?? 1),
+      ),
+    ]),
+  ) as Record<Body["preset"], Vec3>;
+}
 export function bodyLimits(body: Body) {
+  const profile = body.profile ?? defaultProfile(body.kind);
   return {
     ...SENSOR_LIMITS[body.kind],
+    telemetryRange: profile.telemetryRange,
+    inspectRange: profile.inspectRange,
+    scale: profile.scale,
     telemetryModel: body.kind === "camera" ? "range-and-pan-tilt" : "radial-3d",
     telemetryOcclusion: true,
     occlusionModel: "static solid rack, freight and building envelopes",
@@ -234,25 +282,26 @@ export function bodyLimits(body: Body) {
       : {}),
     ...(body.kind === "arm"
       ? {
-          gripperPresets: structuredClone(ARM_PRESETS),
-          graspRadius: 0.9,
+          gripperPresets: armPresets(body),
+          graspRadius: 0.9 * profile.scale,
+          payloadKg: profile.payloadKg,
           dispatch: { preset: "drop", placedCargoHeight: 0.55 },
         }
       : {}),
     ...(body.kind === "rover" || body.kind === "drone"
       ? {
-          speed: body.kind === "drone" ? 2.4 : 1.8,
+          speed: profile.speed,
           collisionChecks: true,
           automaticPathPlanning: false,
-          clearance: [...BODY_CLEARANCE[body.kind]],
+          clearance: bodyClearance(body),
           clearanceUnits:
             "x/y/z half-extents in meters; includes full wheel or rotor footprint",
           ...(body.kind === "drone"
             ? {
-                minFlightAltitude: 0.8,
+                minFlightAltitude: 0.8 * profile.scale,
                 maxFlightAltitude: BOUNDS.maxAltitude,
-                takeoffAltitude: 2.8,
-                landedAltitude: 0.4,
+                takeoffAltitude: 2.8 * profile.scale,
+                landedAltitude: 0.4 * profile.scale,
               }
             : {}),
         }
@@ -260,16 +309,23 @@ export function bodyLimits(body: Body) {
   };
 }
 // Proximity telemetry is range + static line of sight; camera images also use optics.
-export function telemetryVisible(body: Body, position: Vec3): boolean {
+export function telemetryVisible(
+  body: Body,
+  position: Vec3,
+  obstacles = STATIC_OBSTACLES,
+): boolean {
+  const profile = body.profile ?? defaultProfile(body.kind);
   const [dx, dy, dz] = position.map((v, i) => v - body.position[i]!) as Vec3;
   const d = Math.hypot(dx, dy, dz);
-  if (blockingObstacle(sensorPose(body).position, position)) return false;
-  if (body.kind !== "camera")
-    return d <= SENSOR_LIMITS[body.kind].telemetryRange;
+  if (
+    blockingObstacle(sensorPose(body).position, position, [0, 0, 0], obstacles)
+  )
+    return false;
+  if (body.kind !== "camera") return d <= profile.telemetryRange;
   const pan = (Math.atan2(dx, dz) * 180) / Math.PI;
   const tilt = (Math.atan2(dy, Math.hypot(dx, dz)) * 180) / Math.PI;
   return (
-    d < CAMERA_SENSOR.range &&
+    d < profile.telemetryRange &&
     Math.abs(((pan - body.pan + 540) % 360) - 180) <=
       CAMERA_SENSOR.horizontalFov / 2 &&
     Math.abs(tilt - body.tilt) <= CAMERA_SENSOR.verticalFov / 2

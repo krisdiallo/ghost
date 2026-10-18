@@ -11,6 +11,7 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import type { ThreeEvent } from "@react-three/fiber";
 import { CanvasTexture, Fog, Group, Vector3, MOUSE, TOUCH } from "three";
 import { Box, Cylinder, Beam, Text, Ring } from "./ScenePrimitives";
+import { SandboxHall } from "./SandboxHall";
 import { IndustrialHall } from "./IndustrialHall";
 import { WAREHOUSE, sensorPose } from "@ghost/shared";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
@@ -365,19 +366,21 @@ function BodyMesh({
           document.body.style.cursor = "auto";
         }}
       >
-        {body.kind === "rover" ? (
-          <Rover />
-        ) : body.kind === "drone" ? (
-          <Drone body={body} />
-        ) : body.kind === "camera" ? (
-          <Camera
-            pan={body.pan}
-            tilt={body.tilt}
-            active={!sensor && (selected || !!body.lease)}
-          />
-        ) : (
-          <Arm preset={body.preset} />
-        )}
+        <group scale={body.profile?.scale ?? 1}>
+          {body.kind === "rover" ? (
+            <Rover />
+          ) : body.kind === "drone" ? (
+            <Drone body={body} />
+          ) : body.kind === "camera" ? (
+            <Camera
+              pan={body.pan}
+              tilt={body.tilt}
+              active={!sensor && (selected || !!body.lease)}
+            />
+          ) : (
+            <Arm preset={body.preset} />
+          )}
+        </group>
       </group>
       {!sensor && body.kind !== "camera" && (
         <Ring
@@ -783,7 +786,11 @@ export function Warehouse({
         />
         <Suspense fallback={null}>
           <Floor navigate={navigate} />
-          <IndustrialHall />
+          {snapshot.layout ? (
+            <SandboxHall obstacles={snapshot.layout.obstacles} />
+          ) : (
+            <IndustrialHall />
+          )}
           {snapshot.objects.map((object) => (
             <group key={object.id} position={object.position}>
               <Box

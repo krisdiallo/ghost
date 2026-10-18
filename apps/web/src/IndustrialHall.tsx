@@ -7,7 +7,7 @@ import { Beam, Box, Cylinder, Text } from "./ScenePrimitives";
 type Part = { at: Vec3; size: Vec3; color: string };
 // Static obstacle positions are shared with the authority. Instancing keeps hundreds of
 // repeated structural/pallet parts in a handful of draw calls on mobile GPUs.
-function Parts({
+export function Parts({
   parts,
   glow = false,
   shadows = true,

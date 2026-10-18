@@ -66,6 +66,7 @@ if (!process.argv.includes("--serve")) {
       throw new SimError(
         String(result.code ?? "SERVER_ERROR"),
         String(result.message ?? "Warehouse unavailable"),
+        result.details as Record<string, unknown> | undefined,
       );
     return result;
   });

@@ -13,9 +13,8 @@ import type {
   Vec3,
 } from "@ghost/shared";
 
-const checkpoints = Array.from(
-  { length: SURVEY_GRID.rows * SURVEY_GRID.columns },
-  (_, index) => {
+const makeCheckpoints = (obstacles: typeof STATIC_OBSTACLES) =>
+  Array.from({ length: SURVEY_GRID.rows * SURVEY_GRID.columns }, (_, index) => {
     const point = surveyCell(
       index % SURVEY_GRID.columns,
       Math.floor(index / SURVEY_GRID.columns),
@@ -23,15 +22,17 @@ const checkpoints = Array.from(
     return {
       index,
       point,
-      blocked: STATIC_OBSTACLES.some((obstacle) =>
-        containsPoint(obstacle, point),
-      ),
+      blocked: obstacles.some((obstacle) => containsPoint(obstacle, point)),
     };
-  },
-);
-const blockedCount = checkpoints.filter((point) => point.blocked).length;
+  });
 // Shared observation history, never a copy of the spectator's object registry.
 export class SurveyTracker {
+  private checkpoints;
+  private blockedCount;
+  constructor(private obstacles = STATIC_OBSTACLES) {
+    this.checkpoints = makeCheckpoints(obstacles);
+    this.blockedCount = this.checkpoints.filter((p) => p.blocked).length;
+  }
   private covered = new Set<number>();
   private cargo = new Map<string, SurveyCargo>();
   private lastObservedAt: number | null = null;
@@ -59,11 +60,11 @@ export class SurveyTracker {
     }
     // Moving observations still return live objects, but never credit a swept path.
     if (creditCells && body.action?.status !== "running") {
-      for (const checkpoint of checkpoints) {
+      for (const checkpoint of this.checkpoints) {
         if (
           !checkpoint.blocked &&
           !this.covered.has(checkpoint.index) &&
-          telemetryVisible(body, checkpoint.point)
+          telemetryVisible(body, checkpoint.point, this.obstacles)
         ) {
           this.covered.add(checkpoint.index);
           changed = true;
@@ -87,7 +88,7 @@ export class SurveyTracker {
       grid: SURVEY_GRID,
       rows: Array.from({ length: SURVEY_GRID.rows }, (_, row) =>
         Array.from({ length: SURVEY_GRID.columns }, (_, column) =>
-          checkpoints[row * SURVEY_GRID.columns + column]!.blocked
+          this.checkpoints[row * SURVEY_GRID.columns + column]!.blocked
             ? "x"
             : this.covered.has(row * SURVEY_GRID.columns + column)
               ? "1"
@@ -95,8 +96,8 @@ export class SurveyTracker {
         ).join(""),
       ),
       coveredCells: this.covered.size,
-      totalCells: SURVEY_GRID.columns * SURVEY_GRID.rows - blockedCount,
-      blockedCells: blockedCount,
+      totalCells: SURVEY_GRID.columns * SURVEY_GRID.rows - this.blockedCount,
+      blockedCells: this.blockedCount,
       coverageModel: "visible-floor-checkpoints" as const,
       knownCargo: [...this.cargo.values()],
       lastObservedAt: this.lastObservedAt,

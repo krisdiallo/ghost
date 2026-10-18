@@ -1,0 +1,26 @@
+{
+  "context": "Fresh subagent, fork_turns:none. No parent steering during control.",
+  "mission": "Design an isolated warehouse trial with a temporary device, two variants and a controlled comparison. No route, expected result or template supplied.",
+  "sourcesRead": [
+    "Actual MCP schemas",
+    "Own sandbox_* and experiment_* tool results",
+    "Two own returned JPEGs"
+  ],
+  "excludedSources": [
+    "Repository/source/docs/AGENTS",
+    "Helper source",
+    "Other sessions",
+    "Browser DOM",
+    "HTTP spectator APIs"
+  ],
+  "operatorScenarioDataDisclosed": true,
+  "blindInventoryBenchmark": false,
+  "templateUsed": false,
+  "parentMessagesDuringControl": [],
+  "viewedImages": [
+    "sensor-1792335709439-e8627f.jpg",
+    "sensor-1792335721117-646324.jpg"
+  ],
+  "recording": "Original MCP trace and returned images; no continuous video of this independent agent run.",
+  "cleanup": "Deleted unleased draft; retained completed reports."
+}
