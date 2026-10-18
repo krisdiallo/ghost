@@ -1,0 +1,34 @@
+{
+  "capturedAt": "2026-10-18T15:23:56.011Z",
+  "deployment": "local hosted-mode validation; not a live Manufact deployment",
+  "mobileViewport": "390 × 844",
+  "tools": [
+    "discover",
+    "possess",
+    "observe",
+    "act",
+    "release",
+    "sandbox_list",
+    "sandbox_create",
+    "sandbox_inspect",
+    "sandbox_update",
+    "sandbox_add_device",
+    "sandbox_delete",
+    "experiment_templates",
+    "experiment_run",
+    "experiment_inspect",
+    "experiment_cancel",
+    "experiment_compare"
+  ],
+  "inspection": "Seal intact. Label verified. Cleared for dispatch.",
+  "checks": [
+    "private phone login",
+    "authenticated MCP movement and inspection",
+    "shared browser world",
+    "immersive controls",
+    "current-origin connection URL",
+    "logout revokes cookie",
+    "no mobile overflow"
+  ],
+  "browserErrors": []
+}

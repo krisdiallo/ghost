@@ -48,6 +48,8 @@ The evaluator verified that editing the draft preserved the earlier run, then de
 
 There is no continuous video of the independent agent run. Its evidence is the original MCP trace, returned sensor images and authority-checked exports; the UI video above is scripted.
 
+[Authenticated phone immersive view](validation/phone-immersive.jpg) · [Access and touch verification](validation/access-report.json). The mobile header and toolbar wrap to keep all actions on the visible screen. Real browser login, MCP inspection, ordinary Exit touch and logout passed.
+
 ## Current limits
 
 Structures can be edited/imported inside the existing 64 × 44 m hall. Automatic CAD/photo reconstruction and arbitrary building footprints are not implemented. Device candidates are hypothetical uniform scales and bounded profiles, not calibrated vendor models.

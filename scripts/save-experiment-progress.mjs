@@ -98,6 +98,20 @@ await promisify(execFile)("ffmpeg", [
   join(out, "preview.jpg"),
 ]);
 const kb = async (p) => Math.round((await stat(join(out, p))).size / 1024);
+const accessCapture = resolve(
+  process.env.GHOST_ACCESS_CAPTURE_DIR ?? "work/captures",
+);
+const accessProof = await read(accessCapture, "access-report.json");
+assert.deepEqual(accessProof.browserErrors, []);
+assert.ok(accessProof.checks.includes("no mobile overflow"));
+await copyFile(
+  join(accessCapture, "ghost-private-warehouse.jpg"),
+  join(out, "validation/phone-immersive.jpg"),
+);
+await copyFile(
+  join(accessCapture, "access-report.json"),
+  join(out, "validation/access-report.json"),
+);
 const date = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/Los_Angeles",
   dateStyle: "long",
@@ -158,6 +172,8 @@ const report = [
   ),
   "",
   "There is no continuous video of the independent agent run. Its evidence is the original MCP trace, returned sensor images and authority-checked exports; the UI video above is scripted.",
+  "",
+  "[Authenticated phone immersive view](validation/phone-immersive.jpg) · [Access and touch verification](validation/access-report.json). The mobile header and toolbar wrap to keep all actions on the visible screen. Real browser login, MCP inspection, ordinary Exit touch and logout passed.",
   "",
   "## Current limits",
   "",
