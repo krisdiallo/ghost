@@ -8,6 +8,7 @@ import {
   readFile,
   readdir,
   unlink,
+  rename,
 } from "node:fs/promises";
 import { resolve, join } from "node:path";
 import { createHash } from "node:crypto";
@@ -201,6 +202,37 @@ async function finish(note = "Session closed") {
         join(output, "agent-mission-4x.mp4"),
       ]);
     }
+    if (process.env.GHOST_AGENT_CAPTURE_MOBILE === "1") {
+      await page.locator(".survey-panel").screenshot({
+        path: join(output, "survey-ledger.jpg"),
+        quality: 80,
+      });
+      await page.locator(".warehouse-map").screenshot({
+        path: join(output, "survey-map.jpg"),
+        quality: 85,
+      });
+      // Only one live UI page: background pages can stall screenshot stability checks.
+      await page.close();
+      const mobile = await browser.newPage({
+        viewport: { width: 390, height: 844 },
+        isMobile: true,
+        hasTouch: true,
+      });
+      mobile.on("pageerror", (error) => browserErrors.push(error.message));
+      await mobile.bringToFront();
+      await mobile.goto(url);
+      await mobile.locator(".survey-panel").waitFor();
+      await mobile.locator(".survey-panel").screenshot({
+        path: join(output, "survey-mobile.jpg"),
+        quality: 80,
+      });
+      const overflow = await mobile.evaluate(
+        () => document.documentElement.scrollWidth > innerWidth + 1,
+      );
+      if (overflow)
+        browserErrors.push("Mobile survey causes horizontal overflow");
+      await mobile.close();
+    }
   } catch (error) {
     exportError =
       error instanceof Error ? error.message : "Evidence export failed";
@@ -389,10 +421,14 @@ try {
         } catch {
           response = { error: "Invalid recorder command." };
         }
-        await writeFile(
-          requestPath.replace(".request.json", ".response.json"),
-          JSON.stringify(response),
+        const responsePath = requestPath.replace(
+          ".request.json",
+          ".response.json",
         );
+        await writeFile(responsePath + ".tmp", JSON.stringify(response), {
+          mode: 0o600,
+        });
+        await rename(responsePath + ".tmp", responsePath);
         await unlink(requestPath);
       }
       if (!closed) await new Promise((resolve) => setTimeout(resolve, 100));

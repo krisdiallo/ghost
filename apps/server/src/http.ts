@@ -75,7 +75,7 @@ export async function startWarehouse(
     const snapshot = sim.snapshot();
     const frame = await renderer.capture(snapshot, observation.body.id);
     // A revoked/expired capability must never receive an in-flight image.
-    sim.observe((input as { leaseId: string }).leaseId);
+    sim.validateLease((input as { leaseId: string }).leaseId);
     frames.set(observation.body.id, frame);
     return { ...observation, frame };
   };

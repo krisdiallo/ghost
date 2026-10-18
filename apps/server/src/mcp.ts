@@ -8,11 +8,11 @@ import { SimError } from "./simulation.js";
 
 const descriptions: Record<ToolName, string> = {
   discover:
-    "Discover live warehouse bodies, availability, capabilities, lease limits and bounds. Start here. Coordinates are in meters; y is up.",
+    "Discover live warehouse bodies, availability, sensor/inspection and handling limits, lease limits and bounds. Start here. Coordinates are in meters; y is up. Includes shared survey grid history and known cargo from actual observations; use unknown cells to plan your own search. Read surveyGuide before interpreting coverage.",
   possess:
     "Acquire an exclusive expiring lease on a body. Keep the returned opaque leaseId private. Default 60s, range 5–300s. Set owner to an agent display name.",
   observe:
-    "Observe through the possessed body's sensors. Returns pose, analytic cargo telemetry, last inspection and action completion. Set image:true for a server-rendered 640x360 body camera JPEG as MCP image content, plus an embedded viewer in MCP Apps hosts. Frames are frozen at their reported revision; image visibility includes scenery occlusion while cargo telemetry uses analytic range checks.",
+    "Observe through the possessed body's sensors. Returns pose, limits, analytic cargo telemetry, last inspection, action completion and shared survey history. Stationary observations credit fully covered floor cells; motion polls do not credit a swept path. Set image:true for a server-rendered 640x360 body camera JPEG as MCP image content, plus an embedded viewer in MCP Apps hosts. Frames are frozen at their reported revision; image visibility includes scenery occlusion while cargo telemetry uses analytic range checks.",
   act: "Control a possessed body with a typed command. move: rover x/z or airborne drone x/y/z. look: camera pan/tilt in degrees. inspect: visible nearby cargo. arm: preset home/reach/drop, grasp objectId, place; choose drop before placing in dispatch. Drone: takeoff/land. stop cancels motion. Poll observe for completion. Use observations to find cargo and decide where to move; movement does not avoid collisions.",
   release:
     "Release a lease and cancel its pending motion. Repeated release is harmless. A drone holds its last altitude, and a held crate stays attached.",
@@ -102,6 +102,8 @@ export function createHttpMcp(dispatch: Dispatch) {
                 body: z.object({ id: z.string() }).passthrough(),
                 objects: z.array(z.unknown()),
                 inspection: z.unknown(),
+                limits: z.record(z.string(), z.unknown()),
+                survey: z.record(z.string(), z.unknown()),
                 frame: z.record(z.string(), z.unknown()).optional(),
               }),
               view: {

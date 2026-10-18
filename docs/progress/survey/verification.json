@@ -1,0 +1,26 @@
+{
+  "at": "2026-10-18T03:41:44.269Z",
+  "source": "Authority state checked after the agent finished; not supplied during its mission.",
+  "taggedCargo": 3,
+  "inspectedCargo": 3,
+  "allTaggedCargoInspected": true,
+  "uninspectedCargo": [],
+  "priorityDispatchVerified": true,
+  "floorCellsCovered": 96,
+  "floorCellsTotal": 96,
+  "surveyKnownCargo": 3,
+  "allLeasesReleased": true,
+  "armHomeAndEmpty": true,
+  "droneLanded": true,
+  "bodiesUsed": [
+    "camera-01",
+    "arm-01",
+    "drone-01"
+  ],
+  "agentViewedImages": 18,
+  "unavailableImageSteps": [],
+  "recorderErrors": [],
+  "exportError": null,
+  "mcpErrors": [],
+  "presentationErrors": []
+}

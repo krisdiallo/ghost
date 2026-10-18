@@ -64,6 +64,14 @@ Sentinel is fixed to the southwest structural column at X −30.2 / Y 10 / Z 8, 
 
 MCP returns the image as an image content block, frame metadata as structured content, and view-only image bytes in `_meta`. HTTP uses mcp-use’s inline MCP Apps resource and React host hooks to show the same frame in a card; stdio carries image content without the card. The embedded bundle is self-contained and uses no credential-bearing image URLs. Chromium is included in the Manufact image. The local host harness verifies the app handshake and pixel identity; actual ChatGPT OAuth/hosting remains outstanding. Analytic cargo telemetry still differs from image occlusion.
 
-## Fresh-agent experiment
+## Initial fresh-agent experiment
 
 A Codex subagent with no inherited chat or repository context operated all four bodies through MCP, viewed nine images, staged cleared Cargo 07 and reported an abrasion on Cargo 12. It missed Cargo 18, so coverage remains incomplete. Two recorder preview waits timed out; the agent recovered with telemetry. The recorder now focuses the observed body and preserves tool results when presentation fails. The actual trace, image-viewing attestation, post-run authority verification and 4× recording are in [the agent report](progress/agent/README.md). This is a real external-agent run, not a built-in autonomous model runner.
+
+## Shared survey history
+
+Discovery exposes each body's telemetry and inspection ranges, optical field of view, motion limits and arm grasp/preset coordinates. The authority owns a shared 12 × 8 analytic floor grid at Y 0.55 m. A successful stationary observation credits only cells whose entire footprint fits the sensor model; camera checks include the nearest point to avoid overstating vertical coverage. Moving polls return live objects without crediting a swept path.
+
+The cargo ledger records only observations and successful inspections, preserving last-seen positions and conditions across lease changes. No undiscovered cargo IDs or expected count enter MCP discovery. Reset/restart clears all history. UI snapshots and SSE carry the same history, displayed in a map overlay and cargo ledger. This is shared temporal knowledge, not a claim of visual or exhaustive inventory coverage. A deterministic grid test proves the floor can be surveyed through public commands; independent agent results are reported separately.
+
+The follow-up [fresh-agent mission](progress/survey/README.md) completed all 96 floor cells, inspected all 3 tagged crates, staged priority cargo and safely released its bodies. It viewed 18 actual images and used camera, arm and drone by its own choice. The run had no MCP or image-delivery errors. This is one real multimodal tool-use example, not a guaranteed inventory planner or a controlled comparison with the earlier run.

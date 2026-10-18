@@ -232,7 +232,7 @@ fieldset button:disabled {
   background: var(--mint);
 }
 h1 {
-  font: 500 clamp(27px, 2.7vw, 43px)/1.2 var(--display);
+  font: 500 clamp(27px, 2.7vw, 43px) / 1.2 var(--display);
   letter-spacing: -1.8px;
   margin: 10px 0 8px;
 }
@@ -2531,4 +2531,172 @@ dialog::backdrop {
 .camera-tool-label {
   font-size: 8px;
   line-height: 9px;
+}
+
+/* Search evidence stays distinct from the scripted mission checklist. */
+.survey-panel {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.85fr) minmax(0, 1.4fr);
+  gap: 34px;
+  margin: 22px 0;
+  padding: 28px;
+}
+.survey-panel h2 {
+  margin: 8px 0 18px;
+  font-size: 24px;
+  letter-spacing: -0.7px;
+}
+.survey-summary > p {
+  max-width: 430px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.survey-score {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.survey-score > strong {
+  color: var(--mint);
+  font-size: 42px;
+  font-weight: 500;
+  letter-spacing: -2px;
+}
+.survey-score small {
+  font-size: 20px;
+  letter-spacing: 0;
+}
+.survey-score > span {
+  max-width: 160px;
+  font-size: 12px;
+  color: #9db5a4;
+}
+.survey-progress {
+  height: 5px;
+  background: #293c31;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 12px 0;
+}
+.survey-progress > span {
+  display: block;
+  height: 100%;
+  background: #a5dfb9;
+  transition: width 0.5s;
+}
+.survey-ledger-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.survey-ledger h3 {
+  font-size: 14px;
+  margin: 0;
+}
+.survey-ledger-heading > span {
+  color: var(--muted);
+  font-size: 11px;
+}
+.survey-ledger ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.survey-ledger li {
+  padding: 12px 0;
+  border-top: 1px solid #2f4437;
+}
+.survey-ledger li > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.survey-ledger strong {
+  font-size: 12px;
+}
+.survey-ledger p {
+  font-size: 12px;
+  margin: 7px 0;
+  line-height: 1.55;
+}
+.survey-ledger small {
+  color: #93aa9a;
+  font-size: 10px;
+}
+.survey-tag {
+  border: 1px solid #665b3c;
+  color: #e5c98d;
+  padding: 4px 6px;
+  border-radius: 3px;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.survey-tag.survey-inspected {
+  border-color: #54725e;
+  color: #baf7cf;
+  background: #203c2b;
+}
+.survey-empty {
+  padding: 24px;
+  border: 1px dashed #3e5948;
+  border-radius: 4px;
+  color: var(--muted);
+}
+.map-survey-toggle {
+  padding: 2px 5px;
+  background: transparent;
+  border: 1px solid #66818a;
+  border-radius: 3px;
+  color: #c8e0d3;
+  font-size: 8px;
+  cursor: pointer;
+}
+.map-survey-toggle[aria-pressed="true"] {
+  background: #467a6860;
+}
+.map-survey-legend {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #b1c9bd;
+  font-size: 8px;
+  padding-top: 6px;
+}
+.map-survey-legend i {
+  width: 6px;
+  height: 6px;
+  background: #75dbb2;
+}
+@media (max-width: 760px) {
+  .survey-panel {
+    grid-template-columns: 1fr;
+    gap: 22px;
+    padding: 22px 18px;
+  }
+  .survey-panel h2 {
+    font-size: 22px;
+  }
+  .survey-ledger li > div {
+    flex-wrap: wrap;
+    gap: 7px;
+  }
+  .map-survey-legend {
+    font-size: 6px;
+  }
+}
+.sensor-limits {
+  font-size: 10px;
+  line-height: 1.6;
+  color: #d5e3d8;
+  padding-bottom: 10px;
+}
+.sensor-limits > small {
+  display: block;
+  font-size: 9px;
+  color: #9eb7aa;
 }
