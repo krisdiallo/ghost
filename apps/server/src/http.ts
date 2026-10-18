@@ -12,6 +12,7 @@ import {
   accessConfig,
   WarehouseAccess,
   loginPage,
+  platformHosts,
   type AccessOptions,
 } from "./access.js";
 
@@ -85,6 +86,7 @@ export async function startWarehouse(
     `localhost:${port}`,
     `127.0.0.1:${port}`,
     ...(configuredOrigin ? [new URL(configuredOrigin).host] : []),
+    ...platformHosts(port),
   ]);
   const allowedOrigins = new Set([
     `http://localhost:${port}`,
@@ -118,11 +120,13 @@ export async function startWarehouse(
     try {
       const url = new URL(req.url ?? "/", "http://localhost");
       // Apply Host/Origin checks before authentication and every transport.
-      if (!allowedHosts.has(req.headers.host ?? ""))
+      if (!allowedHosts.has(req.headers.host ?? "")) {
+        console.error("GHOST rejected host", JSON.stringify((req.headers.host ?? "").slice(0, 200)));
         return json(res, 403, {
           code: "INVALID_HOST",
           message: "Use the configured warehouse URL.",
         });
+      }
       if (req.headers.origin) {
         if (!allowedOrigins.has(req.headers.origin))
           return json(res, 403, {

@@ -10,6 +10,17 @@ const cookieName = "ghost_session";
 const sessionLifetime = 8 * 60 * 60 * 1000;
 const digest = (value: string) => createHash("sha256").update(value).digest();
 
+// Manufact reaches its containers through Fly's private deployment address.
+// Trust only this machine's platform-provided identity, never forwarded headers.
+export function platformHosts(port: number, env = process.env): string[] {
+  const app = env.FLY_APP_NAME;
+  if (!app || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(app)) return [];
+  const names = [`${app}.flycast`, `${app}.internal`, `${app}.fly.dev`];
+  const ip = env.FLY_PRIVATE_IP;
+  if (ip && /^[0-9a-f:]+$/i.test(ip) && ip.includes(":")) names.push(`[${ip}]`);
+  return names.flatMap((name) => [name, `${name}:${port}`, `${name}:80`]);
+}
+
 export function accessConfig(host: string, options: AccessOptions) {
   const rawOrigin = options.origin ?? process.env.GHOST_ORIGIN;
   const token = options.accessToken ?? process.env.GHOST_ACCESS_TOKEN;
