@@ -71,6 +71,10 @@ export function UIIcon({
   size = 14,
 }: {
   name:
+    | "pan"
+    | "zoomIn"
+    | "zoomOut"
+    | "expand"
     | "arrow"
     | "play"
     | "stop"
@@ -83,6 +87,11 @@ export function UIIcon({
   size?: number;
 }) {
   const paths = {
+    pan: "M12 2v20M2 12h20M9 5l3-3 3 3M9 19l3 3 3-3M5 9l-3 3 3 3M19 9l3 3-3 3",
+    zoomIn: "M5 12h14M12 5v14",
+    zoomOut: "M5 12h14",
+    expand: "M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5",
+
     arrow: "M5 19 19 5M5 5h14v14",
     play: "m8 5 12 7-12 7Z",
     stop: "M6 6h12v12H6Z",

@@ -13,6 +13,7 @@ import { request, RequestError, tool } from "./api";
 import { BodyIcon, Ghost, UIIcon } from "./icons";
 import { BODY_COLORS, Warehouse } from "./Warehouse";
 import type { WarehouseView } from "./Warehouse";
+import { WarehouseMap, destinations } from "./WarehouseMap";
 
 type Tokens = Record<string, { leaseId: string; expiresAt: number }>;
 const readTokens = (): Tokens => {
@@ -134,6 +135,24 @@ export function App() {
   const [focus, setFocus] = useState<Vec3 | null>(null);
   const [view, setView] = useState<WarehouseView>("facility");
   const [cameraReset, setCameraReset] = useState(0);
+  const [cameraMode, setCameraMode] = useState<"orbit" | "pan">("orbit");
+  const [cameraZoom, setCameraZoom] = useState({ id: 0, factor: 1 });
+  const [following, setFollowing] = useState(false);
+  const [immersive, setImmersive] = useState(false);
+  const [mapVisible, setMapVisible] = useState(true);
+  useEffect(() => {
+    if (!immersive) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const exit = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setImmersive(false);
+    };
+    window.addEventListener("keydown", exit);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", exit);
+    };
+  }, [immersive]);
   const [modal, setModal] = useState<"connect" | "help" | "reset" | null>(null);
   const lastSnapshot = useRef<Snapshot | null>(null);
   const instance = useRef<string | null>(null);
@@ -273,8 +292,12 @@ export function App() {
       clearInterval(timer);
     };
   }, [token?.leaseId, owns, live, selected, forget]);
+  const demoSelection = useRef<string | null>(null);
   useEffect(() => {
-    if (!snapshot?.demo.running) return;
+    if (!snapshot?.demo.running) {
+      demoSelection.current = null;
+      return;
+    }
     const kind = snapshot.demo.phase.startsWith("01")
       ? "camera"
       : snapshot.demo.phase.startsWith("02")
@@ -282,9 +305,15 @@ export function App() {
         : snapshot.demo.phase.startsWith("03")
           ? "drone"
           : "arm";
+    if (demoSelection.current === kind) return;
+    demoSelection.current = kind;
     setSelected(`${kind}-01`);
     setView("mission");
-    setFocus(null);
+    const activeBody = lastSnapshot.current?.bodies.find(
+      (b) => b.kind === kind,
+    );
+    setFocus(activeBody ? [...activeBody.position] : null);
+    setFollowing(true);
   }, [snapshot?.demo.phase, snapshot?.demo.running]);
   async function perform(work: () => Promise<void>) {
     if (busy) return;
@@ -370,13 +399,13 @@ export function App() {
   const chooseBody = (id: string) => {
     setSelected(id);
     setTab("control");
-    if (view === "facility") {
-      setFocus(null);
-      setView("mission");
-    }
+    const selectedBody = snapshot?.bodies.find((b) => b.id === id);
+    setFocus(selectedBody ? [...selectedBody.position] : null);
+    setFollowing(true);
+    setView("mission");
   };
   return (
-    <main className="app">
+    <main className={`app ${immersive ? "immersive" : ""}`}>
       <header className="topbar">
         <a className="brand" href="/" aria-label="GHOST home">
           <Ghost size={29} />
@@ -527,13 +556,34 @@ export function App() {
                 / Digital warehouse · simulation
               </span>
             </div>
-            <span className="viewport-badge">
-              {live ? "LIVE TWIN" : "OFFLINE"}
-            </span>
+            <div className="viewport-actions">
+              {immersive && (
+                <button
+                  className="immersive-toggle"
+                  disabled={!live || busy}
+                  onClick={demo}
+                >
+                  {snapshot?.demo.running ? "Stop tour" : "Run tour"}
+                </button>
+              )}
+              <span className="viewport-badge">
+                {live ? "LIVE TWIN" : "OFFLINE"}
+              </span>
+              <button
+                className="immersive-toggle"
+                aria-label={
+                  immersive ? "Exit immersive view" : "Enter immersive view"
+                }
+                aria-pressed={immersive}
+                onClick={() => setImmersive((v) => !v)}
+              >
+                <UIIcon name="expand" /> {immersive ? "Exit" : "Immerse"}
+              </button>
+            </div>
           </div>
           <div
             className={`scene ${navigation ? "navigating" : ""}`}
-            aria-label="Interactive 3D warehouse. Drag to orbit, pinch or scroll to zoom. Use fleet buttons to select bodies."
+            aria-label="Interactive 3D warehouse. Drag to orbit; choose Pan to drag the camera. Pinch, scroll, or use zoom buttons. Use the map to navigate."
           >
             {snapshot ? (
               <Warehouse
@@ -544,6 +594,9 @@ export function App() {
                 focus={focus}
                 view={view}
                 reset={cameraReset}
+                mode={cameraMode}
+                zoom={cameraZoom}
+                follow={following}
               />
             ) : (
               <div className="scene-loading">
@@ -574,9 +627,164 @@ export function App() {
                 <span>{snapshot.demo.phase}</span>
               </div>
             )}
+            {snapshot && mapVisible && (
+              <WarehouseMap
+                snapshot={snapshot}
+                selected={selected}
+                select={chooseBody}
+                navigate={
+                  canAct &&
+                  (body?.kind === "rover" ||
+                    (body?.kind === "drone" && body.airborne))
+                    ? move
+                    : null
+                }
+              />
+            )}
+            {immersive && (
+              <div
+                className="immersive-fleet"
+                role="group"
+                aria-label="Immersive fleet"
+              >
+                {snapshot?.bodies.map((b) => (
+                  <button
+                    key={b.id}
+                    aria-label={`Select ${b.label}`}
+                    aria-pressed={selected === b.id}
+                    onClick={() => chooseBody(b.id)}
+                  >
+                    <BodyIcon kind={b.kind} size={16} />
+                    <span>{b.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+            {immersive && body && (
+              <div className="pilot-dock">
+                <div>
+                  <strong>{body.label}</strong>
+                  <span>
+                    {body.position.map((v) => v.toFixed(1)).join(" / ")} m ·{" "}
+                    {running
+                      ? "IN MOTION"
+                      : owns
+                        ? `${remaining}s LEASE`
+                        : body.lease
+                          ? "LEASED"
+                          : "AVAILABLE"}
+                  </span>
+                </div>
+                <div className="pilot-actions">
+                  {!owns ? (
+                    <button
+                      disabled={!live || busy || !!body.lease}
+                      onClick={possess}
+                    >
+                      Possess {body.label}
+                    </button>
+                  ) : (
+                    <>
+                      {(body.kind === "rover" || body.kind === "drone") && (
+                        <button
+                          disabled={
+                            !canAct || (body.kind === "drone" && !body.airborne)
+                          }
+                          aria-pressed={navigation}
+                          onClick={() => setNavigation((v) => !v)}
+                        >
+                          Set destination
+                        </button>
+                      )}
+                      {body.kind === "drone" && (
+                        <button
+                          disabled={!canAct}
+                          onClick={() =>
+                            act({ type: body.airborne ? "land" : "takeoff" })
+                          }
+                        >
+                          {body.airborne ? "Land" : "Take off"}
+                        </button>
+                      )}
+                      {body.kind === "camera" && (
+                        <button
+                          disabled={!canAct}
+                          onClick={() =>
+                            act({ type: "look", pan: 63, tilt: -13 })
+                          }
+                        >
+                          Aim at cargo
+                        </button>
+                      )}
+                      {body.kind === "arm" && (
+                        <>
+                          <button
+                            disabled={!canAct}
+                            onClick={() =>
+                              act({
+                                type: "preset",
+                                preset:
+                                  body.preset === "reach" ? "drop" : "reach",
+                              })
+                            }
+                          >
+                            {body.preset === "reach" ? "Dispatch" : "Reach"}
+                          </button>
+                          <button
+                            disabled={!canAct}
+                            onClick={() =>
+                              act(
+                                body.heldObjectId
+                                  ? { type: "place" }
+                                  : { type: "grasp", objectId: "crate-07" },
+                              )
+                            }
+                          >
+                            {body.heldObjectId ? "Place" : "Grasp"}
+                          </button>
+                        </>
+                      )}
+                      {body.kind !== "arm" && (
+                        <button
+                          disabled={
+                            !canAct ||
+                            (body.kind === "drone" && !body.airborne) ||
+                            !observation?.objects.length
+                          }
+                          onClick={() => {
+                            const closest = observation?.objects.reduce(
+                              (a, b) => (a.distance < b.distance ? a : b),
+                            );
+                            if (closest)
+                              act({ type: "inspect", objectId: closest.id });
+                          }}
+                        >
+                          Scan nearby cargo
+                        </button>
+                      )}
+                      <button
+                        disabled={!live || busy || !running}
+                        onClick={() => act({ type: "stop" })}
+                      >
+                        Stop
+                      </button>
+                      <button disabled={!live || busy} onClick={release}>
+                        Release {body.label}
+                      </button>
+                    </>
+                  )}
+                </div>
+                {owns && observation?.inspection && (
+                  <p className="pilot-result">
+                    {observation.inspection.objectId} ·{" "}
+                    {observation.inspection.condition}
+                  </p>
+                )}
+              </div>
+            )}
             {navigation && (
               <div className="navigation-hint" role="status">
-                Click the floor to set a destination{" "}
+                Tap the floor or map to set a destination{" "}
                 <button onClick={() => setNavigation(false)}>Cancel</button>
               </div>
             )}
@@ -587,13 +795,15 @@ export function App() {
               </div>
             )}
             <div className="scene-view-label">
-              {focus
-                ? "BODY FOCUS"
-                : view === "facility"
-                  ? "FACILITY OVERVIEW"
-                  : view === "top"
-                    ? "FLOOR PLAN"
-                    : "EMBODIMENT BAY"}
+              {following
+                ? `FOLLOWING / ${body?.label.toUpperCase() ?? "BODY"}`
+                : focus
+                  ? "BODY FOCUS"
+                  : view === "facility"
+                    ? "FACILITY OVERVIEW"
+                    : view === "top"
+                      ? "FLOOR PLAN"
+                      : "EMBODIMENT BAY"}
               <span>
                 {view === "facility" && !focus
                   ? "2,816 M² · 16 STORAGE BAYS"
@@ -608,6 +818,7 @@ export function App() {
                 onClick={() => {
                   setFocus(null);
                   setView("facility");
+                  setFollowing(false);
                   setCameraReset((value) => value + 1);
                 }}
               >
@@ -618,6 +829,7 @@ export function App() {
                 aria-label="Toggle top view"
                 onClick={() => {
                   setFocus(null);
+                  setFollowing(false);
                   setView((v) => (v === "top" ? "facility" : "top"));
                 }}
               >
@@ -630,20 +842,70 @@ export function App() {
                 onClick={() => {
                   setFocus(null);
                   setView("mission");
+                  setFollowing(false);
                   setCameraReset((value) => value + 1);
                 }}
               >
                 <BodyIcon kind="rover" size={18} />
               </button>
               <button
-                title="Focus selected body"
-                aria-label="Focus selected body"
+                title="Follow selected body"
+                aria-label="Follow selected body"
+                aria-pressed={following}
                 disabled={!body}
                 onClick={() => {
-                  if (body) setFocus([...body.position]);
+                  if (following) setFollowing(false);
+                  else if (body) {
+                    setFocus([...body.position]);
+                    setFollowing(true);
+                  }
                 }}
               >
                 <UIIcon name="target" size={18} />
+              </button>
+              <button
+                title="Drag to orbit"
+                aria-label="Orbit camera"
+                aria-pressed={cameraMode === "orbit"}
+                onClick={() => setCameraMode("orbit")}
+              >
+                <UIIcon name="reset" size={18} />
+                <span className="camera-tool-label">Orbit</span>
+              </button>
+              <button
+                title="Drag to pan"
+                aria-label="Pan camera"
+                aria-pressed={cameraMode === "pan"}
+                onClick={() => setCameraMode("pan")}
+              >
+                <UIIcon name="pan" size={18} />
+                <span className="camera-tool-label">Pan</span>
+              </button>
+              <button
+                title="Zoom in"
+                aria-label="Zoom in"
+                onClick={() =>
+                  setCameraZoom((v) => ({ id: v.id + 1, factor: 0.75 }))
+                }
+              >
+                <UIIcon name="zoomIn" size={18} />
+              </button>
+              <button
+                title="Zoom out"
+                aria-label="Zoom out"
+                onClick={() =>
+                  setCameraZoom((v) => ({ id: v.id + 1, factor: 1.33 }))
+                }
+              >
+                <UIIcon name="zoomOut" size={18} />
+              </button>
+              <button
+                title="Warehouse map"
+                aria-label="Toggle warehouse map"
+                aria-pressed={mapVisible}
+                onClick={() => setMapVisible((v) => !v)}
+              >
+                <UIIcon name="top" size={18} />
               </button>
             </div>
             <div className="scene-legend">
@@ -662,8 +924,8 @@ export function App() {
               <span className="compass">
                 N <UIIcon name="arrow" size={10} />
               </span>{" "}
-              Drag to orbit <span className="dot-separator">·</span> Scroll to
-              zoom
+              {cameraMode === "pan" ? "Drag to pan" : "Drag to orbit"}{" "}
+              <span className="dot-separator">·</span> Scroll / pinch to zoom
             </span>
             <span>
               SIMULATION AUTHORITY{" "}
@@ -803,6 +1065,25 @@ export function App() {
                     <fieldset className="body-controls" disabled={!canAct}>
                       {(body.kind === "rover" || body.kind === "drone") && (
                         <>
+                          <div
+                            className="destination-grid"
+                            aria-label="Warehouse destinations"
+                          >
+                            {destinations.map((point) => (
+                              <button
+                                key={point.label}
+                                disabled={
+                                  body.kind === "drone" && !body.airborne
+                                }
+                                onClick={() => move(point.x, point.z)}
+                              >
+                                {point.label}
+                                <span>
+                                  {point.x} / {point.z} m
+                                </span>
+                              </button>
+                            ))}
+                          </div>
                           <div className="coordinate-inputs">
                             <label>
                               X
@@ -1281,7 +1562,10 @@ export function App() {
             </li>
           </ol>
           <p className="control-note">
-            3D: drag to orbit, scroll or pinch to zoom. The top-view and focus
+            3D: choose Orbit or Pan, then drag. Scroll, pinch, or use + / − to
+            zoom. Use Immerse for a full-window warehouse with live fleet
+            controls. The map shows the whole warehouse; while controlling a
+            rover or airborne drone, tap it to move. The top-view and follow
             buttons help you navigate. All motion is kinematic; there is no
             collision physics.
           </p>

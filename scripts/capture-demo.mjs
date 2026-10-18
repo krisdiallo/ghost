@@ -141,8 +141,8 @@ try {
   const restored = await page
     .locator(".scene")
     .screenshot({ type: "jpeg", quality: 65 });
-  async function difference(first, second) {
-    return page.evaluate(
+  async function difference(first, second, evaluator = page) {
+    return evaluator.evaluate(
       async ([a, b]) => {
         async function pixels(source) {
           const image = new Image();
@@ -182,12 +182,53 @@ try {
     resetDifference < 0.025,
     `reset restores the overview after orbit (difference ${resetDifference})`,
   );
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await wait(1500);
+  const zoomed = await page
+    .locator(".scene")
+    .screenshot({ type: "jpeg", quality: 65 });
+  const zoomDifference = await difference(restored, zoomed);
+  assert.ok(
+    zoomDifference > 0.02,
+    "zoom button changes the rendered camera distance",
+  );
+  await page.getByRole("button", { name: "Pan camera", exact: true }).click();
+  await page.mouse.move(
+    orbitArea.x + orbitArea.width * 0.55,
+    orbitArea.y + orbitArea.height * 0.45,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    orbitArea.x + orbitArea.width * 0.55 + 110,
+    orbitArea.y + orbitArea.height * 0.45 + 50,
+    { steps: 12 },
+  );
+  await page.mouse.up();
+  await wait(700);
+  const panned = await page
+    .locator(".scene")
+    .screenshot({ type: "jpeg", quality: 65 });
+  const panDifference = await difference(zoomed, panned);
+  assert.ok(panDifference > 0.02, "pan tool translates the rendered view");
+  await page.getByRole("button", { name: "Orbit camera", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Reset warehouse view", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Enter immersive view", exact: true })
+    .click();
+  await wait(1000);
+  const immersiveBounds = await page.locator(".viewport").boundingBox();
+  assert.equal(immersiveBounds.width, 1440, "immersive view fills the window");
+  assert.equal(immersiveBounds.height, 1280);
+  await screenshot(page, "ghost-immersive.png");
   const sceneBounds = await page.locator(".scene").boundingBox();
-  await page.getByRole("button", { name: "Run guided demo" }).click();
+  await page.getByRole("button", { name: "Run tour", exact: true }).click();
   const start = Date.now();
   const frames = [];
   const milestones = new Set();
-  while (Date.now() - start < 40000) {
+  const travel = { roverFarthestZ: 3, droneFarthestZ: -3, droneMaxY: 0.4 };
+  while (Date.now() - start < 150000) {
     const at = Date.now();
     const path = join(
       scratch,
@@ -196,17 +237,21 @@ try {
     await page.screenshot({ path });
     frames.push({ path, at });
     const state = authority.sim.snapshot();
+    const rover = state.bodies.find((body) => body.kind === "rover");
     const drone = state.bodies.find((body) => body.kind === "drone");
     const arm = state.bodies.find((body) => body.kind === "arm");
+    travel.roverFarthestZ = Math.min(travel.roverFarthestZ, rover.position[2]);
+    travel.droneFarthestZ = Math.min(travel.droneFarthestZ, drone.position[2]);
+    travel.droneMaxY = Math.max(travel.droneMaxY, drone.position[1]);
     const candidates = [
+      ["ghost-rover-aisle.png", rover.position[2] < -16],
+      ["ghost-drone-docks.png", drone.position[2] < -28],
       [
         "ghost-camera.png",
-        state.mission[0].complete && !state.mission[1].complete,
+        state.bodies.find((b) => b.kind === "camera").lease?.owner ===
+          "Ghost · guided demo",
       ],
-      [
-        "ghost-rover.png",
-        state.mission[1].complete && !state.mission[2].complete,
-      ],
+      ["ghost-rover.png", rover.lease?.owner === "Ghost · guided demo"],
       ["ghost-drone.png", drone.airborne && drone.position[1] > 1],
       ["ghost-arm.png", arm.lease?.owner === "Ghost · guided demo"],
     ];
@@ -237,7 +282,22 @@ try {
     final.mission.every((step) => step.complete),
     "mission completed before timeout",
   );
-  assert.equal(milestones.size, 4, "captured each body in the actual mission");
+  assert.equal(
+    milestones.size,
+    6,
+    "captured every body plus storage aisle and dock visits",
+  );
+  assert.ok(
+    travel.roverFarthestZ <= -17,
+    "rover actually visits the storage aisle",
+  );
+  assert.ok(
+    travel.droneFarthestZ <= -29 && travel.droneMaxY >= 8.9,
+    "drone surveys loading docks above the racks",
+  );
+  await page
+    .getByRole("button", { name: "Exit immersive view", exact: true })
+    .click();
   const concat =
     frames
       .map(
@@ -272,7 +332,7 @@ try {
     join(output, "ghost-demo.mp4"),
   ]);
   captures.push("ghost-demo.mp4");
-  const crop = `crop=${Math.floor(sceneBounds.width)}:${Math.floor(sceneBounds.height)}:${Math.floor(sceneBounds.x)}:${Math.floor(sceneBounds.y)},fps=6,scale=800:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=96[p];[s1][p]paletteuse=dither=bayer`;
+  const crop = `crop=${Math.floor(sceneBounds.width)}:${Math.floor(sceneBounds.height)}:${Math.floor(sceneBounds.x)}:${Math.floor(sceneBounds.y)},fps=3,scale=640:-1:flags=lanczos,split[s0][s1];[s0]palettegen=max_colors=64[p];[s1][p]paletteuse=dither=bayer`;
   await run("ffmpeg", [
     "-y",
     "-f",
@@ -288,6 +348,7 @@ try {
     join(output, "ghost-demo.gif"),
   ]);
   captures.push("ghost-demo.gif");
+  await desktop.close();
 
   // Exercise the touch layout through real browser controls, including a manual rover inspection.
   const mobile = await browser.newContext({
@@ -314,11 +375,77 @@ try {
     .getByRole("button", { name: "Reset warehouse", exact: true })
     .tap();
   await phone.locator(".body-card").filter({ hasText: "Scout" }).tap();
+  await phone.getByLabel("Lease duration").selectOption("120");
   await phone.getByRole("button", { name: "Possess body", exact: true }).tap();
   await phone.getByText("YOU ARE IN CONTROL", { exact: true }).waitFor();
   await phone.locator(".inspector").scrollIntoViewIfNeeded();
   await screenshot(phone, "ghost-mobile-controls.png");
-  await phone.getByRole("button", { name: /Move to point/ }).tap();
+  await phone
+    .getByRole("button", { name: "Enter immersive view", exact: true })
+    .tap();
+  await phone.getByRole("button", { name: "Zoom in", exact: true }).tap();
+  await phone.getByRole("button", { name: "Pan camera", exact: true }).tap();
+  await screenshot(phone, "ghost-mobile-immersive.png");
+  const touchBefore = await phone
+    .locator(".scene")
+    .screenshot({ type: "jpeg", quality: 65 });
+  const phoneArea = await phone.locator(".scene").boundingBox();
+  const touch = await mobile.newCDPSession(phone);
+  const cx = phoneArea.x + phoneArea.width * 0.5,
+    cy = phoneArea.y + phoneArea.height * 0.42;
+  await touch.send("Input.dispatchTouchEvent", {
+    type: "touchStart",
+    touchPoints: [
+      { x: cx - 35, y: cy },
+      { x: cx + 35, y: cy },
+    ],
+  });
+  for (let step = 1; step <= 6; step++)
+    await touch.send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: [
+        { x: cx - 35 - step * 3, y: cy + step * 4 },
+        { x: cx + 35 + step * 6, y: cy + step * 4 },
+      ],
+    });
+  await touch.send("Input.dispatchTouchEvent", {
+    type: "touchEnd",
+    touchPoints: [],
+  });
+  await wait(500);
+  const touchAfter = await phone
+    .locator(".scene")
+    .screenshot({ type: "jpeg", quality: 65 });
+  const touchDifference = await difference(touchBefore, touchAfter, phone);
+  assert.ok(
+    touchDifference > 0.015,
+    "two-finger touch pan and pinch change the rendered mobile view",
+  );
+  await touch.detach();
+  const mapBounds = await phone.locator(".warehouse-map svg").boundingBox();
+  // Destination on the map is beyond the old bay. Check the authority, then stop safely.
+  await phone.touchscreen.tap(
+    mapBounds.x + mapBounds.width * (22 / 64),
+    mapBounds.y + mapBounds.height * (16 / 44),
+  );
+  await phone.waitForFunction(() =>
+    document.querySelector(".pilot-dock")?.textContent.includes("IN MOTION"),
+  );
+  const mapTarget = authority.sim
+    .snapshot()
+    .bodies.find((b) => b.kind === "rover").action.target;
+  assert.ok(
+    Math.abs(mapTarget[0] + 10) < 0.4 && Math.abs(mapTarget[2] + 18) < 0.4,
+    "phone map sends the selected warehouse destination to the authority",
+  );
+  await phone.getByRole("button", { name: "Stop", exact: true }).tap();
+  await phone
+    .getByRole("button", { name: "Exit immersive view", exact: true })
+    .tap();
+  await phone
+    .locator(".destination-grid")
+    .getByRole("button", { name: /Inspection bay/ })
+    .tap();
   await phone
     .getByRole("button", { name: /Scan priority cargo/ })
     .waitFor({ state: "visible" });
@@ -353,6 +480,13 @@ try {
     durationSeconds: (frames.at(-1).at - start) / 1000,
     frameCount: frames.length,
     cameraReset: { orbitDifference, resetDifference },
+    cameraTools: {
+      panDifference,
+      zoomDifference,
+      touchDifference,
+      immersive: true,
+    },
+    warehouseTravel: travel,
     manualRoverInspection: "Seal intact. Label verified. Cleared for dispatch.",
     browserErrors: errors,
     captures,

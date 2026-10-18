@@ -28,6 +28,14 @@ For a deterministic manual MCP walkthrough, call `discover({})`, then perform th
 
 Calls to `act` wrap the command: `{leaseId, command}`. `observe({leaseId})` reports `body.action.status`, visible object IDs/distances, and inspection findings. Scene units are meters; y is vertical.
 
+## Whole-warehouse tour and camera
+
+**Run guided demo** takes about 90 seconds. Scout travels through X −10 to Z −18 and inspects Cargo 12 before returning to the bay. Wisp climbs to Y 9, flies to X 10 / Z −30, descends to scan Cargo 18, climbs above the racks and returns. These are actual server actions using leases, not decorative animation. The tour uses clear aisle waypoints; free movement remains kinematic without collision avoidance.
+
+Choose **Pan** and drag to translate the camera; choose **Orbit** to rotate. Scroll/pinch or use **+ / −** to zoom. Two fingers pan and zoom. **Follow** tracks the selected body's current position. **Facility overview** restores the whole hall, and **Top view** gives a floor plan.
+
+Use **Immerse** for a full-window warehouse with a live map, fleet switcher and compact control dock. Select Scout, possess it and tap a destination on the map. Wisp must take off before accepting a destination. Set its desired flight altitude in the full control panel. **Stop** cancels the current movement. **Exit** or Escape returns to the full operations console.
+
 ## Manual browser walkthrough
 
 - **Sentinel:** possess → Aim camera → Scan priority cargo. Defaults point at Cargo 07.

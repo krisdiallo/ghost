@@ -61,13 +61,13 @@ const bays = [-27, -16]
   .flatMap((z) => [-25, -15, -5, 5, 15, 25].map((x) => [x, z] as const))
   .concat([-25, -15, 15, 25].map((x) => [x, -5] as const));
 for (const [bay, [x, z]] of bays.entries()) {
-  for (const dx of [-4.05, 4.05])
+  for (const dx of [-3.65, 3.65])
     for (const dz of [-1.05, 1.05])
       add(frame, [x + dx, 4, z + dz], [0.16, 8, 0.16], steel);
   for (const y of [0.3, 2.3, 4.3, 6.3]) {
-    add(frame, [x, y, z], [8.3, 0.14, 2.3], rail);
-    add(accents, [x, y + 0.07, z + 1.18], [8.3, 0.12, 0.08], amber);
-    for (const [slot, dx] of [-2.75, 0, 2.75].entries()) {
+    add(frame, [x, y, z], [7.5, 0.14, 2.3], rail);
+    add(accents, [x, y + 0.07, z + 1.18], [7.5, 0.12, 0.08], amber);
+    for (const [slot, dx] of [-2.4, 0, 2.4].entries()) {
       const shade = ["#9f8e71", "#c7af85", "#91a496", "#b8aa91"][
         ((bay + slot + y) % 4) | 0
       ]!;
@@ -82,7 +82,7 @@ for (const [bay, [x, z]] of bays.entries()) {
       );
     }
   }
-  add(frame, [x, 7.95, z], [8.4, 0.2, 2.3], steel);
+  add(frame, [x, 7.95, z], [7.6, 0.2, 2.3], steel);
 }
 // A high north wall, side wall, loading doors and a mezzanine establish the scale.
 add(frame, [0, 7.2, -33.9], [64, 14.4, 0.3], "#394e5a");

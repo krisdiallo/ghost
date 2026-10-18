@@ -28,18 +28,18 @@ Open `http://127.0.0.1:3001`. Build output is ignored by Git. These are executor
 
 ## Demo
 
-Click **Run guided demo** for a repeatable, approximately 20-second scripted mission:
+Click **Run guided demo** for a repeatable, approximately 90-second scripted warehouse mission:
 
 1. Sentinel locates and scans Cargo 07.
-2. Scout drives to the crate and inspects its seal.
-3. Wisp takes off, surveys from above, then lands.
+2. Scout drives down the west aisle to inspect Cargo 12, then returns to check Cargo 07.
+3. Wisp climbs to 9 m, flies to the north loading docks to scan Cargo 18, then returns to verify Cargo 07 and land.
 4. Atlas grasps the crate and places it in dispatch.
 
 The ghost acquires and releases each body in turn. The script uses the same simulation command path as MCP and manual controls; it is not an LLM making decisions. Run it again to reset and replay. The demo refuses to start if any body is leased. If an external agent acquires a future mission body, the script reports contention and releases its own leases.
 
 To explore manually, choose a body and **Possess body**. Browser possession switches release your previous body. Use the control panel or pick a destination on the floor. **Observation** shows the sensor's visible objects, distances and inspection results. The browser remembers its tokens in session storage across reloads; they are never included in public snapshots or the activity stream. **Reset warehouse** asks before releasing every lease and restoring the scene.
 
-The warehouse is a 64 × 44 m industrial hall with 16 four-tier storage bays, six loading docks, roof trusses, high-bay lights, and a mezzanine control room. Use the facility overview to explore it, or mission view to see the working bay. The guided demo zooms in automatically. Drag to orbit, scroll/pinch to zoom; use top view or body focus to navigate. Fleet buttons provide accessible selection. Controls stack on mobile. If WebGL fails, the control and telemetry panels remain usable.
+The warehouse is a 64 × 44 m industrial hall with 16 four-tier storage bays, six loading docks, roof trusses, high-bay lights, and a mezzanine control room. Use the facility overview to explore it, or mission view to see the working bay. The guided demo follows each moving body through the warehouse automatically. Choose **Orbit** or **Pan**, then drag with one finger or the left mouse button. Scroll, pinch, or use the **+ / −** buttons to zoom; two fingers pan and zoom together. **Follow** tracks the selected body while preserving your camera angle. **Immerse** fills the window and keeps fleet selection, possession, movement, scanning, stopping, and release controls available. Exit with its toolbar button or Escape. The live map always covers the whole hall: select a body marker, or tap empty map space to send your possessed rover or airborne drone there. The control panel also offers named warehouse destinations. Fleet buttons provide accessible selection. Controls stack on mobile. If WebGL fails, the control and telemetry panels remain usable.
 
 See [the demo playbook](docs/demo-playbook.md) for individual commands and recovery steps.
 
