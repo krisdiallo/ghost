@@ -1,5 +1,9 @@
 # GHOST · latest visual progress
 
+[Rack tops: preserve the fourth storage tier and remove overlapping surfaces](../racks/README.md)
+
+![Rack tops after the geometry fix](../racks/after-angled.jpg)
+
 [Navigation realism: blocked routes, occluded sensing, drone gimbal and a fresh agent mission](../navigation/README.md)
 
 ![Actual drone sensor frame — 29 KB](../navigation/validation/drone-side.jpg)
