@@ -1,0 +1,20 @@
+{
+  "source": "Original continuous 4x mission recording. Three chronological 8-second excerpts; this highlights edit omits the time between clips. Clip selection centers on actual observation events using first-frame file arrival time as the wall-clock reference.",
+  "cuts": [
+    {
+      "observationStep": 19,
+      "sourceMovieStartSeconds": 30.088224243164063,
+      "durationSeconds": 8
+    },
+    {
+      "observationStep": 65,
+      "sourceMovieStartSeconds": 98.19847424316406,
+      "durationSeconds": 8
+    },
+    {
+      "observationStep": 137,
+      "sourceMovieStartSeconds": 205.42772424316405,
+      "durationSeconds": 8
+    }
+  ]
+}

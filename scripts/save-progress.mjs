@@ -63,7 +63,7 @@ ${timestamp} PT · actual app captures
 
 **Hosted MCP progress:** [Manufact preparation and private phone demo screenshots](../manufact/README.md). See that report for deployment status.
 
-**Real agent:** [Fresh-context mission, verified cargo handling, actual trace and incomplete inventory coverage](../agent/README.md).
+**Real agent:** [Search coverage, cargo ledger and a new fresh-context mission](../survey/README.md). [Initial mission and its incomplete inventory result](../agent/README.md).
 
 **Body vision:** [Four camera views, actual MCP images, embedded mcp-use card and a short recording](../vision/README.md).
 

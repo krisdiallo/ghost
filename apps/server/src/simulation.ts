@@ -4,6 +4,10 @@ import {
   CAPABILITIES,
   CAMERA_SENSOR,
   DEMO_RESOURCES,
+  ARM_PRESETS,
+  SENSOR_LIMITS,
+  bodyLimits,
+  telemetryVisible,
 } from "@ghost/shared";
 import type {
   Action,
@@ -19,6 +23,7 @@ import type {
   Vec3,
 } from "@ghost/shared";
 import { schemas } from "./contracts.js";
+import { SurveyTracker } from "./survey.js";
 
 export class SimError extends Error {
   constructor(
@@ -41,6 +46,7 @@ const distance = (a: Vec3, b: Vec3) =>
 
 export class Simulation {
   private instanceId = randomUUID();
+  private survey = new SurveyTracker();
   private revision = 0;
   private bodies: Body[] = [];
   private objects: SceneObject[] = [];
@@ -138,6 +144,7 @@ export class Simulation {
       objects: this.objects,
       activity: this.activity,
       demo: this.demo,
+      survey: this.survey.snapshot(),
       mission: [
         {
           id: "camera",
@@ -232,14 +239,18 @@ export class Simulation {
     this.tick();
     return {
       mode: "live",
-      bounds: BOUNDS,
+      bounds: { ...BOUNDS },
       leaseLimits: { default: 60, min: 5, max: 300 },
+      survey: this.survey.snapshot(),
+      surveyGuide:
+        "Shared floor telemetry history since reset. rows encode north-to-south, columns west-to-east: 1=whole cell observed, 0=unknown. Cell center x=minX+(column+0.5)*(maxX-minX)/columns; z=minZ+(row+0.5)*(maxZ-minZ)/rows. Only stationary observe calls credit cells, using analytic telemetry at floorCargoHeight. Images can be occluded. This does not certify elevated cargo or exhaustive inventory. knownCargo contains only observed cargo; inspect discovered objects for condition. Choose your own search strategy and revisit unknown cells.",
       resources: this.bodies
         .filter((b) => !kind || b.kind === kind)
         .map((b) => ({
           ...structuredClone(b),
           available: !b.lease,
           capabilities: CAPABILITIES[b.kind],
+          limits: bodyLimits(b),
         })),
     };
   }
@@ -276,41 +287,29 @@ export class Simulation {
   }
   private visible(body: Body, object: SceneObject) {
     if (object.heldBy && object.heldBy !== body.id) return false;
-    const d = distance(body.position, object.position);
-    if (body.kind === "camera") {
-      const dx = object.position[0] - body.position[0],
-        dz = object.position[2] - body.position[2];
-      const pan = (Math.atan2(dx, dz) * 180) / Math.PI;
-      const tilt =
-        (Math.atan2(object.position[1] - body.position[1], Math.hypot(dx, dz)) *
-          180) /
-        Math.PI;
-      const delta = Math.abs(((pan - body.pan + 540) % 360) - 180);
-      return (
-        d < CAMERA_SENSOR.range &&
-        delta <= CAMERA_SENSOR.horizontalFov / 2 &&
-        Math.abs(tilt - body.tilt) <= CAMERA_SENSOR.verticalFov / 2
-      );
-    }
-    return d <= (body.kind === "rover" ? 4 : body.kind === "drone" ? 9 : 2.8);
+    return telemetryVisible(body, object.position);
   }
+  validateLease(id: string) {
+    this.authorize(id);
+  }
+
   observe(id: string): Observation {
     const { body } = this.authorize(id);
+    const objects = this.objects.filter((object) => this.visible(body, object));
+    if (this.survey.record(body, objects, this.wallClock())) this.changed();
     return {
       at: this.wallClock(),
       revision: this.revision,
       body: structuredClone(body),
-      objects: this.objects
-        .filter((o) => this.visible(body, o))
-        .map((o) => ({
-          id: o.id,
-          label: o.label,
-          position: [...o.position] as Vec3,
-          distance: Math.round(distance(body.position, o.position) * 100) / 100,
-          ...(o.inspectedBy.includes(body.id)
-            ? { condition: o.condition }
-            : {}),
-        })),
+      limits: bodyLimits(body),
+      survey: this.survey.snapshot(),
+      objects: objects.map((o) => ({
+        id: o.id,
+        label: o.label,
+        position: [...o.position] as Vec3,
+        distance: Math.round(distance(body.position, o.position) * 100) / 100,
+        ...(o.inspectedBy.includes(body.id) ? { condition: o.condition } : {}),
+      })),
       inspection: this.inspections.get(id) ?? null,
     };
   }
@@ -417,11 +416,7 @@ export class Simulation {
         if (
           !this.visible(body, object) ||
           distance(body.position, object.position) >
-            (body.kind === "rover"
-              ? 2.3
-              : body.kind === "drone"
-                ? 5
-                : CAMERA_SENSOR.range)
+            (SENSOR_LIMITS[body.kind].inspectRange ?? 0)
         )
           throw new SimError(
             "OUT_OF_REACH",
@@ -431,6 +426,7 @@ export class Simulation {
           throw new SimError("NOT_AIRBORNE", "Take off for an aerial survey.");
         if (!object.inspectedBy.includes(body.id))
           object.inspectedBy.push(body.id);
+        this.survey.inspect(body, object, this.wallClock());
         this.inspections.set(id, {
           objectId: object.id,
           condition: object.condition,
@@ -523,12 +519,9 @@ export class Simulation {
     };
   }
   private gripper(body: Body): Vec3 {
-    return body.preset === "reach"
-      ? [2, 0.75, 0]
-      : body.preset === "drop"
-        ? [6, 0.8, 2]
-        : [4, 2.3, 0];
+    return [...ARM_PRESETS[body.preset]] as Vec3;
   }
+
   tool(name: ToolName, input: unknown): unknown {
     const parsed = schemas[name].safeParse(input);
     if (!parsed.success)
@@ -561,6 +554,7 @@ export class Simulation {
     for (const id of this.leases.keys()) this.endLease(id, "LEASE_RELEASED");
     this.motions.clear();
     this.inspections.clear();
+    this.survey = new SurveyTracker();
     this.initialize();
     this.demo = { running: false, phase: "Ready to begin", error: null };
     this.log("Warehouse reset · all leases released", "system");

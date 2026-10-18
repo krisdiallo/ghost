@@ -99,6 +99,7 @@ export interface Snapshot {
   mission: MissionStep[];
   activity: Activity[];
   demo: { running: boolean; phase: string; error: string | null };
+  survey: Survey;
 }
 export interface Observation {
   at: number;
@@ -112,6 +113,8 @@ export interface Observation {
     condition?: string;
   }[];
   inspection: { objectId: string; condition: string } | null;
+  limits: ReturnType<typeof bodyLimits>;
+  survey: Survey;
   frame?: SensorFrame;
 }
 export interface SensorFrame {
@@ -181,4 +184,118 @@ export type ToolName = "discover" | "possess" | "observe" | "act" | "release";
 export interface ApiError {
   code: string;
   message: string;
+}
+
+export const SENSOR_LIMITS = {
+  camera: {
+    telemetryRange: CAMERA_SENSOR.range,
+    inspectRange: CAMERA_SENSOR.range,
+  },
+  rover: { telemetryRange: 4, inspectRange: 2.3 },
+  arm: { telemetryRange: 2.8, inspectRange: null },
+  drone: { telemetryRange: 9, inspectRange: 5 },
+} as const;
+export const ARM_PRESETS: Record<Body["preset"], Vec3> = {
+  home: [4, 2.3, 0],
+  reach: [2, 0.75, 0],
+  drop: [6, 0.8, 2],
+};
+export function bodyLimits(body: Body) {
+  return {
+    ...SENSOR_LIMITS[body.kind],
+    telemetryModel: body.kind === "camera" ? "range-and-pan-tilt" : "radial-3d",
+    telemetryOcclusion: false,
+    image: {
+      verticalFov: sensorPose(body).fov,
+      aspectRatio: 16 / 9,
+      occlusion: true,
+    },
+    ...(body.kind === "camera"
+      ? {
+          horizontalFov: CAMERA_SENSOR.horizontalFov,
+          verticalFov: CAMERA_SENSOR.verticalFov,
+          panBounds: [-180, 180],
+          tiltBounds: [-80, 30],
+        }
+      : {}),
+    ...(body.kind === "arm"
+      ? {
+          gripperPresets: structuredClone(ARM_PRESETS),
+          graspRadius: 0.9,
+          dispatch: { preset: "drop", placedCargoHeight: 0.55 },
+        }
+      : {}),
+    ...(body.kind === "rover" || body.kind === "drone"
+      ? {
+          speed: body.kind === "drone" ? 2.4 : 1.8,
+          collisionAvoidance: false,
+          ...(body.kind === "drone"
+            ? {
+                minFlightAltitude: 0.8,
+                maxFlightAltitude: BOUNDS.maxAltitude,
+                takeoffAltitude: 2.8,
+                landedAltitude: 0.4,
+              }
+            : {}),
+        }
+      : {}),
+  };
+}
+// Analytic telemetry is deliberately separate from the rendered camera frustum.
+export function telemetryVisible(body: Body, position: Vec3): boolean {
+  const [dx, dy, dz] = position.map((v, i) => v - body.position[i]!) as Vec3;
+  const d = Math.hypot(dx, dy, dz);
+  if (body.kind !== "camera")
+    return d <= SENSOR_LIMITS[body.kind].telemetryRange;
+  const pan = (Math.atan2(dx, dz) * 180) / Math.PI;
+  const tilt = (Math.atan2(dy, Math.hypot(dx, dz)) * 180) / Math.PI;
+  return (
+    d < CAMERA_SENSOR.range &&
+    Math.abs(((pan - body.pan + 540) % 360) - 180) <=
+      CAMERA_SENSOR.horizontalFov / 2 &&
+    Math.abs(tilt - body.tilt) <= CAMERA_SENSOR.verticalFov / 2
+  );
+}
+export const SURVEY_GRID = {
+  columns: 12,
+  rows: 8,
+  minX: BOUNDS.minX,
+  maxX: BOUNDS.maxX,
+  minZ: BOUNDS.minZ,
+  maxZ: BOUNDS.maxZ,
+  floorCargoHeight: 0.55,
+};
+export function surveyCell(column: number, row: number) {
+  const width = (SURVEY_GRID.maxX - SURVEY_GRID.minX) / SURVEY_GRID.columns;
+  const depth = (SURVEY_GRID.maxZ - SURVEY_GRID.minZ) / SURVEY_GRID.rows;
+  const minX = SURVEY_GRID.minX + column * width,
+    minZ = SURVEY_GRID.minZ + row * depth;
+  return {
+    minX,
+    minZ,
+    maxX: minX + width,
+    maxZ: minZ + depth,
+    center: [
+      minX + width / 2,
+      SURVEY_GRID.floorCargoHeight,
+      minZ + depth / 2,
+    ] as Vec3,
+  };
+}
+export interface SurveyCargo {
+  id: string;
+  label: string;
+  position: Vec3;
+  lastSeenAt: number;
+  condition?: string;
+  inspectedBy: string[];
+}
+export interface Survey {
+  grid: typeof SURVEY_GRID;
+  // North-to-south rows, west-to-east columns. 1 = fully covered cell, 0 = unknown.
+  rows: string[];
+  coveredCells: number;
+  totalCells: number;
+  knownCargo: SurveyCargo[];
+  lastObservedAt: number | null;
 }

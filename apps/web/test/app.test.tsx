@@ -111,6 +111,23 @@ test(
         root.render(createElement(App));
       });
       assert.match(document.body.textContent!, /Systems live/);
+      assert.match(
+        document.querySelector(".survey-panel")!.textContent!,
+        /No cargo observed yet/,
+      );
+      assert.equal(
+        document
+          .querySelector('[role="progressbar"]')!
+          .getAttribute("aria-valuenow"),
+        "0",
+      );
+      await click("Survey on");
+      assert.equal(
+        document.querySelector('[aria-label="Survey coverage grid"]'),
+        null,
+      );
+      await click("Survey off");
+      assert.ok(document.querySelector('[aria-label="Survey coverage grid"]'));
       await click("Possess body");
       assert.match(document.body.textContent!, /YOU ARE IN CONTROL/);
       assert.equal(sim.snapshot().bodies[1]!.lease!.owner, "You · browser");
@@ -123,6 +140,14 @@ test(
       });
       assert.match(document.body.textContent!, /move · completed/);
       await click("Scan priority cargo");
+      assert.match(
+        document.querySelector(".survey-ledger")!.textContent!,
+        /Cleared for dispatch/,
+      );
+      assert.match(
+        document.querySelector(".survey-ledger")!.textContent!,
+        /1 \/ 1 inspected/,
+      );
       await click("Observation");
       assert.match(document.body.textContent!, /Seal intact/);
       assert.match(document.body.textContent!, /crate-07/);

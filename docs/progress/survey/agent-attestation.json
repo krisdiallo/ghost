@@ -1,0 +1,56 @@
+{
+  "task": "/root/blind_survey_mission",
+  "contextMode": "fork_turns=none",
+  "missionPrompt": "Find and inspect tagged cargo in the warehouse. Report condition exceptions. Stage cleared priority cargo in dispatch using suitable bodies, and verify the result. Search systematically using available observation history; report any remaining unknown areas. Use both camera images and structured observations. Stop safely when work cannot be verified. Budget 100 MCP calls excluding aggregated motion polls.",
+  "providedInitialContext": [
+    "General mission objective",
+    "Actual MCP schemas",
+    "Recorder transport instructions"
+  ],
+  "excludedInitialContext": [
+    "Parent conversation",
+    "Repository source and docs",
+    "Cargo locations and IDs",
+    "Expected conditions",
+    "Body sequence and route",
+    "Spectator state"
+  ],
+  "agentReportedSourceFilesRead": false,
+  "agentReportedSpectatorStateUsed": false,
+  "viewedObservationSteps": [
+    3,
+    6,
+    8,
+    11,
+    14,
+    19,
+    27,
+    32,
+    35,
+    38,
+    47,
+    52,
+    60,
+    65,
+    80,
+    95,
+    122,
+    137
+  ],
+  "unavailableImageSteps": [],
+  "parentMessagesDuringControl": [
+    "Transport-only warning about optional post-run mobile export, requesting a pause after all mission decisions, final observations and safe cleanup were complete. No route or outcome guidance."
+  ],
+  "parentMessagesAfterControl": [
+    "Authority verification confirmed results after the agent declared control finished.",
+    "Parent captured separate spectator stills after cleanup; no images were supplied to the agent.",
+    "Agent was then asked to send finish normally and preserve any export error."
+  ],
+  "finalReport": "The agent inspected three tagged crates: Cargo 07 cleared for dispatch; Cargo 12 surface abrasion on north face with intact seal; Cargo 18 intact seal awaiting inventory scan. It staged Cargo 07 at [6,0.55,2], viewed the arm placement image and independently verified the position through drone telemetry. It completed 96/96 analytic floor cells, while explicitly declining to certify elevated or occluded inventory. The arm was home and empty, the drone landed at [2.583,0.4,-18], and all leases were released. It used camera images, sensor limits and unknown floor cells to choose its route, including changing approaches after rack-face images. It made 90 recorded MCP calls excluding 50 aggregated movement waits. No MCP errors, unavailable images or final export errors occurred.",
+  "agentAttestation": "The agent confirmed no repository source, AGENTS.md, docs, other sessions files, spectator DOM or snapshots were read during decisions; only own MCP results and returned JPEG paths. Parent supplied no cargo IDs/locations, expected conditions, body sequence or route before control finished. Transport notes and post-control verification did not guide mission decisions.",
+  "timing": {
+    "controlSecondsApproximate": 824,
+    "totalSessionSeconds": 948,
+    "includesPostControlSpectatorPause": true
+  }
+}

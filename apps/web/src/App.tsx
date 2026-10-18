@@ -13,6 +13,7 @@ import { request, RequestError, tool } from "./api";
 import { BodyIcon, Ghost, UIIcon } from "./icons";
 import { BODY_COLORS, Warehouse } from "./Warehouse";
 import { SensorPanel } from "./SensorPanel";
+import { SurveyPanel } from "./SurveyPanel";
 import type { WarehouseView } from "./Warehouse";
 import { WarehouseMap, destinations } from "./WarehouseMap";
 
@@ -1432,6 +1433,7 @@ export function App() {
           )}
         </aside>
       </section>
+      {snapshot && <SurveyPanel survey={snapshot.survey} />}
       <section className="bottom-grid">
         <div className="mission-panel panel">
           <div className="section-heading">

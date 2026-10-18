@@ -74,15 +74,23 @@ After building, launch the entry point **directly**, not through npm:
 
 The stdio adapter connects to the existing authority at port 3001. If none exists, it starts an embedded authority on that port. An embedded authority ends when that owning stdio client disconnects; use the standalone server for a stable shared demo. All diagnostics go to stderr; stdout contains MCP messages only.
 
-| Tool       | Input                                 | Result                                                           |
-| ---------- | ------------------------------------- | ---------------------------------------------------------------- |
-| `discover` | `{ kind? }`                           | Live bodies, availability, capabilities, bounds and lease limits |
-| `possess`  | `{ resourceId, ttlSeconds?, owner? }` | Private `leaseId`, body and expiry                               |
-| `observe`  | `{ leaseId, image? }`                 | Pose, cargo telemetry, last inspection; optional body-camera JPEG and MCP App |
-| `act`      | `{ leaseId, command }`                | Action ID/status/revision, inspection result when applicable     |
-| `release`  | `{ leaseId }`                         | Idempotent release; pending movement cancelled                   |
+| Tool       | Input                                 | Result                                                                            |
+| ---------- | ------------------------------------- | --------------------------------------------------------------------------------- |
+| `discover` | `{ kind? }`                           | Live bodies, availability, sensor/handling limits, bounds and survey history      |
+| `possess`  | `{ resourceId, ttlSeconds?, owner? }` | Private `leaseId`, body and expiry                                                |
+| `observe`  | `{ leaseId, image? }`                 | Pose, sensor limits, cargo telemetry and shared survey; optional JPEG and MCP App |
+| `act`      | `{ leaseId, command }`                | Action ID/status/revision, inspection result when applicable                      |
+| `release`  | `{ leaseId }`                         | Idempotent release; pending movement cancelled                                    |
 
 Default TTL is 60 seconds, bounded to 5–300. Competing possession returns `RESOURCE_BUSY`. Expiry uses a monotonic clock and cancels movement. Observe and act require a valid lease. Commands are validated through strict per-command schemas on both HTTP and MCP paths. Motion returns `running`; poll `observe` for completion. Commands serialize per body. Work that would outlast its lease is rejected.
+
+## Search the warehouse
+
+The warehouse map overlays a shared 12 × 8 floor survey grid. Green cells were fully inside a stationary body's analytic telemetry footprint at cargo height (0.55 m); dark cells remain unknown. Movement polls never credit an entire swept path. Toggle **Survey on/off** to compare the grid with the facility map.
+
+The **Observed cargo** ledger records only cargo actually returned through a leased observation or successful inspection. It retains last-seen positions and inspection findings across body switches and lease expiry, and clears on warehouse reset/restart. It does not reveal unseen cargo or a ground-truth inventory count. This is shared warehouse knowledge, not private per-agent memory.
+
+MCP `discover` includes sensor/inspection ranges, camera angle limits, arm gripper preset positions and grasp reach, drone altitude limits, and the same survey state. `surveyGuide` explains grid row/column coordinates so an agent can choose its own search strategy. `observe` updates that history and returns it alongside the body's live telemetry. Grid coverage concerns the floor telemetry plane; it does not prove visual coverage, elevated-rack coverage, or complete inventory. Images can be occluded while analytic telemetry sees through scenery.
 
 ## Model and boundaries
 
@@ -125,7 +133,7 @@ Tests cover lease contention and expiry, invalid tokens, repeated release, bound
 
 ## See what the agent sees
 
-**Real agent progress:** [A fresh Codex agent used all four bodies, staged cleared cargo and reported an exception](docs/progress/agent/README.md). It inspected two of three tagged crates and explicitly reported incomplete coverage. [Run and record agent missions](docs/agent-missions.md).
+**Real agent progress:** [A new fresh-context agent inspected all 3 tagged crates, surveyed all 96 floor cells and verified priority dispatch](docs/progress/survey/README.md). The report includes a 30 KB phone preview, short edited highlights, original MCP trace and remaining limits. [Initial run: 2 of 3 crates inspected](docs/progress/agent/README.md). [Run and record agent missions](docs/agent-missions.md).
 
 **Body camera** switches the main warehouse viewer to the selected body's live optics: Sentinel's mounted lens, Scout's mast, Wisp's downward-facing camera, or Atlas's wrist camera. Switch back to **Warehouse view** to orbit, pan and zoom. Mobile bodies initially face into the hall, and cargo has physical labels on its faces.
 

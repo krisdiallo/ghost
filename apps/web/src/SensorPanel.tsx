@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Body, Observation, SensorFrame } from "@ghost/shared";
+import { bodyLimits } from "@ghost/shared";
 
 export function SensorPanel({
   body,
@@ -16,6 +17,7 @@ export function SensorPanel({
   const [frame, setFrame] = useState<SensorFrame | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const limits = bodyLimits(body);
   useEffect(() => {
     if (!open || !live) return;
     let active = true;
@@ -75,6 +77,17 @@ export function SensorPanel({
       </button>
       {open && (
         <div className="sensor-content">
+          <div className="sensor-limits">
+            Telemetry: {limits.telemetryRange} m{" "}
+            {body.kind === "camera" ? "aimed range" : "radius"}
+            {limits.inspectRange !== null && (
+              <> · inspect ≤ {limits.inspectRange} m</>
+            )}
+            <small>
+              Camera: {limits.image.verticalFov}° vertical view · scenery can
+              block images.
+            </small>
+          </div>
           {frame ? (
             <>
               <div className="sensor-image">

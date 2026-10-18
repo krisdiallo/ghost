@@ -1,4 +1,5 @@
-import { BOUNDS } from "@ghost/shared";
+import { useState } from "react";
+import { BOUNDS, surveyCell } from "@ghost/shared";
 import type { Snapshot } from "@ghost/shared";
 import { BODY_COLORS } from "./Warehouse";
 
@@ -23,10 +24,19 @@ export function WarehouseMap({
   select: (id: string) => void;
 }) {
   const body = snapshot.bodies.find((b) => b.id === selected);
+  const [showSurvey, setShowSurvey] = useState(true);
   return (
     <div className={`warehouse-map ${navigate ? "can-navigate" : ""}`}>
       <div className="map-heading">
         <span>WAREHOUSE MAP</span>
+        <button
+          type="button"
+          className="map-survey-toggle"
+          aria-pressed={showSurvey}
+          onClick={() => setShowSurvey(!showSurvey)}
+        >
+          Survey {showSurvey ? "on" : "off"}
+        </button>
         <span>N ↑</span>
       </div>
       <svg
@@ -63,6 +73,29 @@ export function WarehouseMap({
             navigate(Math.round(x * 10) / 10, Math.round(z * 10) / 10);
           }}
         />
+        {showSurvey && (
+          <g pointerEvents="none" aria-label="Survey coverage grid">
+            {snapshot.survey.rows.flatMap((row, r) =>
+              [...row].map((covered, c) => {
+                const cell = surveyCell(c, r);
+                return (
+                  <rect
+                    key={`${r}/${c}`}
+                    x={px(cell.minX)}
+                    y={pz(cell.minZ)}
+                    width={(cell.maxX - cell.minX) * 5}
+                    height={(cell.maxZ - cell.minZ) * 5}
+                    fill={covered === "1" ? "#75dbb2" : "#07151f"}
+                    fillOpacity={covered === "1" ? ".3" : ".42"}
+                    stroke="#a4d5c6"
+                    strokeOpacity=".15"
+                    strokeWidth=".4"
+                  />
+                );
+              }),
+            )}
+          </g>
+        )}
         <g
           pointerEvents="none"
           fill="#506471"
@@ -162,6 +195,13 @@ export function WarehouseMap({
           ? "Tap map to set destination"
           : "Live fleet positions · 64 × 44 m"}
       </span>
+      {showSurvey && (
+        <span className="map-survey-legend">
+          <i />
+          {snapshot.survey.coveredCells}/{snapshot.survey.totalCells} cells
+          surveyed · dark = unknown
+        </span>
+      )}
     </div>
   );
 }

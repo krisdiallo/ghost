@@ -1,0 +1,7 @@
+{
+  "at": "2026-10-18T03:40:59.143Z",
+  "instanceId": "eafba1de-0a0c-4992-b682-0e3c6d658a59",
+  "revision": 4649,
+  "source": "Parent spectator captured the same live authority after the agent declared its control finished and released all leases. These images were not supplied to the agent. The UI includes the final contrast correction.",
+  "browserErrors": []
+}

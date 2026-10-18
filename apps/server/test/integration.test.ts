@@ -45,6 +45,13 @@ test(
       );
       assert.equal(discovery.mode, "live");
       assert.equal(discovery.resources.length, 4);
+      assert.equal(
+        discovery.resources.find((r: { kind: string }) => r.kind === "drone")
+          .limits.inspectRange,
+        5,
+      );
+      assert.equal(discovery.survey.coveredCells, 0);
+      assert.deepEqual(discovery.survey.knownCargo, []);
       const lease = decode(
         await a.callTool({
           name: "possess",
@@ -57,6 +64,16 @@ test(
       });
       assert.equal(busy.isError, true);
       assert.equal(decode(busy).code, "RESOURCE_BUSY");
+      const observed = await a.callTool({
+        name: "observe",
+        arguments: { leaseId: lease.leaseId },
+      });
+      const structured = observed.structuredContent as {
+        limits: { telemetryRange: number };
+        survey: { totalCells: number };
+      };
+      assert.equal(structured.limits.telemetryRange, 4);
+      assert.equal(structured.survey.totalCells, 96);
       const snapshot = (await (
         await fetch(url + "/api/snapshot")
       ).json()) as Snapshot;

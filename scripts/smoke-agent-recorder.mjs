@@ -61,6 +61,9 @@ try {
     arguments: { leaseRef: "camera-01", image: true },
   });
   assert.equal(first.isError, false);
+  assert.equal(first.result.limits.telemetryRange, 45);
+  assert.ok(first.result.survey.coveredCells > 0);
+  assert.ok(first.result.survey.knownCargo.length > 0);
   assert.ok(first.image?.absolutePath);
   assert.ok(!first.presentationError);
   await call({

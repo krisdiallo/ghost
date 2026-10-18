@@ -28,7 +28,8 @@ while (true) {
     process.stdout.write(JSON.stringify(result) + "\n");
     break;
   } catch (error) {
-    if (error.code !== "ENOENT") throw error;
+    // Also tolerate an older running recorder whose reply write is not atomic.
+    if (error.code !== "ENOENT" && !(error instanceof SyntaxError)) throw error;
     if (Date.now() >= deadline)
       throw new Error(
         "Recorder did not answer within 120 seconds. Do not resubmit a motion until its status is checked.",
