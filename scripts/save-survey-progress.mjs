@@ -13,6 +13,11 @@ const trace = await read("trace.json");
 const world = await read("final-snapshot.json");
 const attestation = await read("agent-attestation.json");
 assert.equal(trace.events.at(-1).tool, "session_end");
+assert.equal(
+  world.survey.coverageModel,
+  undefined,
+  "This publisher preserves the historical whole-cell run; use save-navigation-progress.mjs for current checkpoint runs",
+);
 assert.ok(
   world.bodies.every((b) => !b.lease),
   "publish after cleanup",

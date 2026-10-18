@@ -1,3 +1,5 @@
+import { blockingObstacle, BODY_CLEARANCE } from "./geometry.js";
+export * from "./geometry.js";
 export type ResourceKind = "camera" | "rover" | "arm" | "drone";
 export type Vec3 = [number, number, number];
 export interface ResourceDefinition {
@@ -33,7 +35,7 @@ export const BOUNDS = {
 export const CAMERA_SENSOR = {
   range: 45,
   horizontalFov: 70,
-  verticalFov: 60,
+  verticalFov: 43,
   homePan: 104,
   homeTilt: -16,
 };
@@ -41,7 +43,7 @@ export const CAPABILITIES: Record<ResourceKind, string[]> = {
   camera: ["look", "inspect"],
   rover: ["move", "inspect", "stop"],
   arm: ["preset", "grasp", "place"],
-  drone: ["takeoff", "move", "inspect", "land", "stop"],
+  drone: ["takeoff", "move", "look", "inspect", "land", "stop"],
 };
 export type Command =
   | { type: "move"; x: number; z: number; y?: number }
@@ -68,6 +70,12 @@ export interface Body extends ResourceDefinition {
   airborne: boolean;
   lease: { owner: string; expiresAt: number } | null;
   action: Action | null;
+  lastBlocked: {
+    obstacleId: string;
+    label: string;
+    position: Vec3;
+    at: number;
+  } | null;
 }
 export interface SceneObject {
   id: string;
@@ -129,7 +137,7 @@ export interface SensorFrame {
   data: string;
 }
 // One optical rig for both the interactive viewer and server image observations.
-// Forward is local +Z. Mobile bodies rotate with their authoritative heading.
+// Forward is local +Z. Drone optics have world aim independent of chassis heading.
 export function sensorPose(body: Body): {
   position: Vec3;
   target: Vec3;
@@ -150,9 +158,11 @@ export function sensorPose(body: Body): {
     };
   }
   const pan =
-    body.kind === "camera" ? (body.pan * Math.PI) / 180 : body.heading;
+    body.kind === "camera" || body.kind === "drone"
+      ? (body.pan * Math.PI) / 180
+      : body.heading;
   const tilt =
-    ((body.kind === "camera" ? body.tilt : body.kind === "drone" ? -35 : -8) *
+    ((body.kind === "camera" || body.kind === "drone" ? body.tilt : -8) *
       Math.PI) /
     180;
   const direction: Vec3 = [
@@ -161,9 +171,9 @@ export function sensorPose(body: Body): {
     Math.cos(pan) * Math.cos(tilt),
   ];
   const height =
-    body.kind === "rover" ? 0.9 : body.kind === "drone" ? -0.23 : 0;
+    body.kind === "rover" ? 0.9 : body.kind === "drone" ? -0.15 : 0;
   const offset =
-    body.kind === "camera" ? 0.7 : body.kind === "rover" ? 0.63 : 0.35;
+    body.kind === "camera" ? 0.7 : body.kind === "rover" ? 0.63 : 0.24;
   const position: Vec3 = [
     x + direction[0] * offset,
     y + height + direction[1] * offset,
@@ -172,7 +182,7 @@ export function sensorPose(body: Body): {
   return {
     position,
     target: position.map((v, i) => v + direction[i]! * 10) as Vec3,
-    fov: body.kind === "camera" ? 43 : 58,
+    fov: body.kind === "camera" ? CAMERA_SENSOR.verticalFov : 58,
   };
 }
 export interface Possession {
@@ -204,18 +214,22 @@ export function bodyLimits(body: Body) {
   return {
     ...SENSOR_LIMITS[body.kind],
     telemetryModel: body.kind === "camera" ? "range-and-pan-tilt" : "radial-3d",
-    telemetryOcclusion: false,
+    telemetryOcclusion: true,
+    occlusionModel: "static solid rack, freight and building envelopes",
     image: {
       verticalFov: sensorPose(body).fov,
       aspectRatio: 16 / 9,
       occlusion: true,
     },
-    ...(body.kind === "camera"
+    ...(body.kind === "camera" || body.kind === "drone"
       ? {
-          horizontalFov: CAMERA_SENSOR.horizontalFov,
-          verticalFov: CAMERA_SENSOR.verticalFov,
+          horizontalFov:
+            body.kind === "camera" ? CAMERA_SENSOR.horizontalFov : 360,
+          verticalFov: body.kind === "camera" ? CAMERA_SENSOR.verticalFov : 180,
           panBounds: [-180, 180],
-          tiltBounds: [-80, 30],
+          tiltBounds: [body.kind === "drone" ? -90 : -80, 30],
+          aimReference:
+            "world degrees: 0 faces +Z, 90 faces +X; drone aim persists through flight",
         }
       : {}),
     ...(body.kind === "arm"
@@ -228,7 +242,11 @@ export function bodyLimits(body: Body) {
     ...(body.kind === "rover" || body.kind === "drone"
       ? {
           speed: body.kind === "drone" ? 2.4 : 1.8,
-          collisionAvoidance: false,
+          collisionChecks: true,
+          automaticPathPlanning: false,
+          clearance: [...BODY_CLEARANCE[body.kind]],
+          clearanceUnits:
+            "x/y/z half-extents in meters; includes full wheel or rotor footprint",
           ...(body.kind === "drone"
             ? {
                 minFlightAltitude: 0.8,
@@ -241,10 +259,11 @@ export function bodyLimits(body: Body) {
       : {}),
   };
 }
-// Analytic telemetry is deliberately separate from the rendered camera frustum.
+// Proximity telemetry is range + static line of sight; camera images also use optics.
 export function telemetryVisible(body: Body, position: Vec3): boolean {
   const [dx, dy, dz] = position.map((v, i) => v - body.position[i]!) as Vec3;
   const d = Math.hypot(dx, dy, dz);
+  if (blockingObstacle(sensorPose(body).position, position)) return false;
   if (body.kind !== "camera")
     return d <= SENSOR_LIMITS[body.kind].telemetryRange;
   const pan = (Math.atan2(dx, dz) * 180) / Math.PI;
@@ -292,10 +311,12 @@ export interface SurveyCargo {
 }
 export interface Survey {
   grid: typeof SURVEY_GRID;
-  // North-to-south rows, west-to-east columns. 1 = fully covered cell, 0 = unknown.
+  // North-to-south rows, west-to-east columns. 1 = visible checkpoint, 0 = unknown, x = inside structure.
   rows: string[];
   coveredCells: number;
   totalCells: number;
+  blockedCells: number;
+  coverageModel: "visible-floor-checkpoints";
   knownCargo: SurveyCargo[];
   lastObservedAt: number | null;
 }

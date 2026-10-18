@@ -13,6 +13,7 @@ import { request, RequestError, tool } from "./api";
 import { BodyIcon, Ghost, UIIcon } from "./icons";
 import { BODY_COLORS, Warehouse } from "./Warehouse";
 import { SensorPanel } from "./SensorPanel";
+import { GimbalControls } from "./GimbalControls";
 import { SurveyPanel } from "./SurveyPanel";
 import type { WarehouseView } from "./Warehouse";
 import { WarehouseMap, destinations } from "./WarehouseMap";
@@ -819,6 +820,14 @@ export function App() {
                     </>
                   )}
                 </div>
+                {body.kind === "drone" && (
+                  <GimbalControls
+                    compact
+                    body={body}
+                    enabled={live && owns && !busy}
+                    act={act}
+                  />
+                )}
                 {owns && observation?.inspection && (
                   <p className="pilot-result">
                     {observation.inspection.objectId} ·{" "}
@@ -1327,6 +1336,30 @@ export function App() {
                         </>
                       )}
                     </fieldset>
+                    {body.kind === "drone" && (
+                      <button
+                        className="full-button"
+                        disabled={!canAct || !body.airborne}
+                        onClick={() => {
+                          setAltitude("9");
+                          act({
+                            type: "move",
+                            x: body.position[0],
+                            y: 9,
+                            z: body.position[2],
+                          });
+                        }}
+                      >
+                        Climb above racks · 9 m
+                      </button>
+                    )}
+                    {body.kind === "drone" && (
+                      <GimbalControls
+                        body={body}
+                        enabled={live && owns && !busy}
+                        act={act}
+                      />
+                    )}
                     {running && (
                       <button
                         className="full-button stop-motion"

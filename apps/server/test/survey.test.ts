@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { surveyCell, SURVEY_GRID } from "@ghost/shared";
-import type { Command, Vec3 } from "@ghost/shared";
+import { surveyCell, SURVEY_GRID, telemetryVisible } from "@ghost/shared";
+import { SurveyTracker } from "../src/survey.js";
 import { Simulation } from "../src/simulation.js";
 
 function setup() {
@@ -25,7 +25,7 @@ test("survey knows only leased observations, preserves inspected findings across
   const camera = sim.possess("camera-01");
   const limits = sim.discover("camera").resources[0]!.limits;
   assert.equal(limits.inspectRange, 45);
-  assert.equal(limits.telemetryOcclusion, false);
+  assert.equal(limits.telemetryOcclusion, true);
   assert.equal(limits.image.occlusion, true);
   assert.throws(() => sim.observe("wrong"));
   assert.equal(sim.snapshot().survey.coveredCells, 0);
@@ -61,14 +61,16 @@ test("motion polls do not credit a swept path and high flight cannot survey out-
   const { leaseId } = sim.possess("drone-01", 300);
   sim.act(leaseId, { type: "takeoff" });
   advance(2000);
-  sim.act(leaseId, { type: "move", x: -25, y: 12, z: -30 });
+  sim.act(leaseId, { type: "move", x: -4, y: 12, z: -3 });
+  advance(5000);
+  sim.act(leaseId, { type: "move", x: -12, y: 12, z: -30 });
   advance(4000);
   assert.equal(sim.observe(leaseId).body.action?.status, "running");
   assert.equal(sim.discover().survey.coveredCells, 0);
   advance(20000);
   assert.equal(sim.observe(leaseId).body.action?.status, "completed");
   assert.equal(sim.discover().survey.coveredCells, 0);
-  sim.act(leaseId, { type: "move", x: -25, y: 3.4, z: -30 });
+  sim.act(leaseId, { type: "move", x: -12, y: 3.4, z: -30 });
   advance(5000);
   const covered = sim.observe(leaseId).survey.coveredCells;
   assert.ok(covered > 0);
@@ -83,38 +85,29 @@ test("motion polls do not credit a swept path and high flight cannot survey out-
   assert.equal(sim.discover().survey.coveredCells, covered);
 });
 
-test("a generic grid survey can cover every floor cell and find all tagged cargo without spectator state", () => {
-  const { sim, advance } = setup();
-  const { leaseId } = sim.possess("drone-01", 300);
-  let position: Vec3 = [-4, 0.4, -3];
-  const move = (command: Command, target: Vec3) => {
-    sim.act(leaseId, command);
-    advance(
-      Math.max(
-        450,
-        (Math.hypot(...target.map((v, i) => v - position[i]!)) / 2.4) * 1000,
-      ) + 1,
-    );
-    position = target;
-  };
-  move({ type: "takeoff" }, [-4, 2.8, -3]);
-  for (let row = 0; row < SURVEY_GRID.rows; row++)
-    for (let step = 0; step < SURVEY_GRID.columns; step++) {
-      const column = row % 2 ? SURVEY_GRID.columns - 1 - step : step;
-      const center = surveyCell(column, row).center;
-      const target: Vec3 = [center[0], 3.4, center[2]];
-      move({ type: "move", x: target[0], y: target[1], z: target[2] }, target);
-      sim.observe(leaseId);
-    }
+test("survey samples line-of-sight checkpoints, excludes structures and retains occluded unknowns", () => {
+  const { sim } = setup();
   const survey = sim.discover().survey;
-  assert.equal(survey.coveredCells, survey.totalCells);
-  assert.equal(survey.totalCells, 96);
-  assert.equal(survey.knownCargo.length, 3);
-  assert.ok(
-    survey.knownCargo.every((o) => !o.condition),
-    "survey is not an inspection",
+  assert.ok(survey.blockedCells > 0);
+  assert.equal(survey.totalCells + survey.blockedCells, 96);
+  assert.equal(
+    survey.rows.join("").replace(/[^x]/g, "").length,
+    survey.blockedCells,
   );
-  assert.ok(survey.rows.every((row) => /^1+$/.test(row)));
+  const tracker = new SurveyTracker();
+  const body = {
+    ...sim.snapshot().bodies.find((b) => b.kind === "drone")!,
+    position: [-15, 3.4, -12.5] as [number, number, number],
+  };
+  const point = surveyCell(3, 2).center;
+  assert.ok(Math.hypot(...point.map((v, i) => v - body.position[i]!)) < 9);
+  assert.equal(telemetryVisible(body, point), false);
+  tracker.record(body, [], 1);
+  assert.equal(tracker.snapshot().rows[2]![3], "0");
+  body.position = [-15, 3.4, -21.5];
+  assert.equal(telemetryVisible(body, point), true);
+  tracker.record(body, [], 2);
+  assert.equal(tracker.snapshot().rows[2]![3], "1");
 });
 
 test("instant cargo transfers refresh last-seen position even within one clock timestamp", () => {

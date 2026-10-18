@@ -86,6 +86,9 @@ test(
           {
             code: error instanceof SimError ? error.code : "ERROR",
             message: (error as Error).message,
+            ...(error instanceof SimError && error.details
+              ? { details: error.details }
+              : {}),
           },
           { status: 400 },
         );
@@ -123,11 +126,11 @@ test(
       );
       await click("Survey on");
       assert.equal(
-        document.querySelector('[aria-label="Survey coverage grid"]'),
+        document.querySelector('[aria-label="Observed floor checkpoints"]'),
         null,
       );
       await click("Survey off");
-      assert.ok(document.querySelector('[aria-label="Survey coverage grid"]'));
+      assert.ok(document.querySelector('[aria-label="Observed floor checkpoints"]'));
       await click("Possess body");
       assert.match(document.body.textContent!, /YOU ARE IN CONTROL/);
       assert.equal(sim.snapshot().bodies[1]!.lease!.owner, "You · browser");
@@ -147,6 +150,19 @@ test(
       assert.match(
         document.querySelector(".survey-ledger")!.textContent!,
         /1 \/ 1 inspected/,
+      );
+      const poseBeforeBlocked = [...sim.snapshot().bodies[1]!.position];
+      await act(async () => {
+        (
+          [...document.querySelectorAll(".destination-grid button")].find((b) =>
+            b.textContent?.startsWith("Storage aisle B"),
+          ) as HTMLButtonElement
+        ).click();
+      });
+      assert.deepEqual(sim.snapshot().bodies[1]!.position, poseBeforeBlocked);
+      assert.match(
+        document.querySelector(".map-route-error")!.textContent!,
+        /Direct path blocked/,
       );
       await click("Observation");
       assert.match(document.body.textContent!, /Seal intact/);
@@ -182,6 +198,29 @@ test(
       assert.equal(sim.snapshot().bodies[0]!.lease!.owner, "You · browser");
       await click("Release body");
       assert.ok(sim.snapshot().bodies.every((b) => !b.lease));
+      const wisp = [...document.querySelectorAll(".body-card")].find((b) =>
+        b.textContent?.includes("Wisp"),
+      ) as HTMLButtonElement;
+      await act(async () => {
+        wisp.click();
+      });
+      await click("Possess body");
+      await click("↑ Take off");
+      const motion = sim.snapshot().bodies[3]!.action!.id;
+      assert.equal(
+        button("Look down").disabled,
+        false,
+        "gimbal remains enabled during flight",
+      );
+      await click("Look down");
+      assert.equal(sim.snapshot().bodies[3]!.tilt, -90);
+      assert.equal(sim.snapshot().bodies[3]!.action!.id, motion);
+      await act(async () => {
+        now += 2000;
+        sim.tick();
+      });
+      await click("Release body");
+
       await act(async () => {
         stream.onerror?.();
       });

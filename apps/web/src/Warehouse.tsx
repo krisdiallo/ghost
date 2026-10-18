@@ -58,7 +58,8 @@ function Rover() {
     </>
   );
 }
-function Drone({ airborne }: { airborne: boolean }) {
+function Drone({ body }: { body: Body }) {
+  const airborne = body.airborne;
   const rotors = useRef<Group>(null);
   useFrame((_, delta) => {
     if (rotors.current)
@@ -103,12 +104,21 @@ function Drone({ airborne }: { airborne: boolean }) {
           )),
         )}
       </group>
-      <Cylinder
-        position={[0, -0.2, 0.2]}
-        height={0.15}
-        radius={0.13}
-        color={dark}
-      />
+      <group
+        position={[0, -0.15, 0]}
+        rotation={[0, (body.pan * Math.PI) / 180 - body.heading, 0]}
+      >
+        <group rotation={[(-body.tilt * Math.PI) / 180, 0, 0]}>
+          <Box size={[0.24, 0.2, 0.28]} color={dark} />
+          <Cylinder
+            position={[0, 0, 0.16]}
+            height={0.1}
+            radius={0.08}
+            color="#8cd7f7"
+            rotation={[Math.PI / 2, 0, 0]}
+          />
+        </group>
+      </group>
       <Beam
         from={[-0.35, -0.1, -0.3]}
         to={[-0.45, -0.4, 0.4]}
@@ -358,7 +368,7 @@ function BodyMesh({
         {body.kind === "rover" ? (
           <Rover />
         ) : body.kind === "drone" ? (
-          <Drone airborne={body.airborne} />
+          <Drone body={body} />
         ) : body.kind === "camera" ? (
           <Camera
             pan={body.pan}

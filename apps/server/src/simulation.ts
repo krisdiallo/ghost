@@ -8,6 +8,9 @@ import {
   SENSOR_LIMITS,
   bodyLimits,
   telemetryVisible,
+  STATIC_OBSTACLES,
+  BODY_CLEARANCE,
+  blockingObstacle,
 } from "@ghost/shared";
 import type {
   Action,
@@ -29,6 +32,7 @@ export class SimError extends Error {
   constructor(
     public code: string,
     message: string,
+    public details?: Record<string, unknown>,
   ) {
     super(message);
   }
@@ -76,13 +80,24 @@ export class Simulation {
     this.bodies = DEMO_RESOURCES.map((r) => ({
       ...structuredClone(r),
       heading: r.kind === "rover" || r.kind === "drone" ? Math.PI : 0,
-      pan: r.kind === "camera" ? CAMERA_SENSOR.homePan : 0,
-      tilt: r.kind === "camera" ? CAMERA_SENSOR.homeTilt : 0,
+      pan:
+        r.kind === "camera"
+          ? CAMERA_SENSOR.homePan
+          : r.kind === "drone"
+            ? 180
+            : 0,
+      tilt:
+        r.kind === "camera"
+          ? CAMERA_SENSOR.homeTilt
+          : r.kind === "drone"
+            ? -35
+            : 0,
       preset: "home",
       heldObjectId: null,
       airborne: false,
       lease: null,
       action: null,
+      lastBlocked: null,
     }));
     this.objects = [
       {
@@ -240,10 +255,20 @@ export class Simulation {
     return {
       mode: "live",
       bounds: { ...BOUNDS },
+      navigation: {
+        obstacles: structuredClone(STATIC_OBSTACLES),
+        model:
+          "static AABB swept-volume collision rejection; no automatic path planning",
+        units: "meters",
+        bodyClearanceUnits:
+          "x/y/z half-extents in meters; includes full wheel or rotor footprint",
+        sensing:
+          "static obstacle line of sight; proximity telemetry is radial for mobile bodies, optical drone aim is independent",
+      },
       leaseLimits: { default: 60, min: 5, max: 300 },
       survey: this.survey.snapshot(),
       surveyGuide:
-        "Shared floor telemetry history since reset. rows encode north-to-south, columns west-to-east: 1=whole cell observed, 0=unknown. Cell center x=minX+(column+0.5)*(maxX-minX)/columns; z=minZ+(row+0.5)*(maxZ-minZ)/rows. Only stationary observe calls credit cells, using analytic telemetry at floorCargoHeight. Images can be occluded. This does not certify elevated cargo or exhaustive inventory. knownCargo contains only observed cargo; inspect discovered objects for condition. Choose your own search strategy and revisit unknown cells.",
+        "Shared floor checkpoint history since reset. rows run north-to-south, columns west-to-east: 1=checkpoint observed with line of sight, 0=unknown, x=inside a static structure and excluded from totalCells. Checkpoint center x=minX+(column+0.5)*(maxX-minX)/columns; z=minZ+(row+0.5)*(maxZ-minZ)/rows at floorCargoHeight. Only stationary observe calls credit checkpoints. These are sampled positions, not full cell area or exhaustive inventory coverage. knownCargo contains only actually observed cargo. Use the published static floorplan and clearance to choose your own collision-free waypoints; direct blocked paths are rejected. Drone look aims optics independently in world pan/tilt degrees, even during flight.",
       resources: this.bodies
         .filter((b) => !kind || b.kind === kind)
         .map((b) => ({
@@ -352,7 +377,15 @@ export class Simulation {
         "INVALID_COMMAND",
         `${body.kind} cannot ${command.type}.`,
       );
-    if (command.type !== "stop" && body.action?.status === "running")
+    const gimbalDuringFlight =
+      body.kind === "drone" &&
+      command.type === "look" &&
+      body.action?.status === "running";
+    if (
+      command.type !== "stop" &&
+      !gimbalDuringFlight &&
+      body.action?.status === "running"
+    )
       throw new SimError(
         "ACTION_BUSY",
         "Wait for the current action or stop it first.",
@@ -408,6 +441,11 @@ export class Simulation {
         target = [body.position[0], 0.4, body.position[2]];
         break;
       case "look":
+        if (body.kind === "camera" && command.tilt < -80)
+          throw new SimError(
+            "INVALID_COMMAND",
+            "Fixed camera tilt must be -80 to 30 degrees.",
+          );
         body.pan = command.pan;
         body.tilt = command.tilt;
         break;
@@ -420,7 +458,7 @@ export class Simulation {
         )
           throw new SimError(
             "OUT_OF_REACH",
-            "Cargo is outside the sensor range or field of view. Move closer or aim the camera.",
+            "Cargo is occluded or outside sensor range/field of view. Move to a clear sightline, move closer, or aim the camera.",
           );
         if (body.kind === "drone" && !body.airborne)
           throw new SimError("NOT_AIRBORNE", "Take off for an aerial survey.");
@@ -475,10 +513,36 @@ export class Simulation {
         break;
       }
       case "stop":
+        body.lastBlocked = null;
         this.cancel(body);
         break;
     }
     if (target) {
+      const clearance = BODY_CLEARANCE[body.kind as "rover" | "drone"];
+      const blocked = blockingObstacle(body.position, target, clearance);
+      if (blocked) {
+        body.lastBlocked = {
+          obstacleId: blocked.obstacle.id,
+          label: blocked.obstacle.label,
+          position: [...blocked.point],
+          at: this.wallClock(),
+        };
+        this.log(
+          `${body.label} · direct path blocked by ${blocked.obstacle.label}`,
+          "action",
+          body.id,
+        );
+        this.changed();
+        throw new SimError(
+          "PATH_BLOCKED",
+          `${blocked.obstacle.label} blocks the direct path near [${blocked.point.map((v) => v.toFixed(2)).join(", ")}]. Choose clear aisle waypoints or sufficient flight clearance.`,
+          {
+            obstacleId: blocked.obstacle.id,
+            position: blocked.point,
+            clearance: [...clearance],
+          },
+        );
+      }
       const duration = Math.max(
         450,
         (distance(body.position, target) /
@@ -490,6 +554,7 @@ export class Simulation {
           "LEASE_TOO_SHORT",
           "Not enough lease time remains for this motion. Release and possess again.",
         );
+      body.lastBlocked = null;
       if (command.type === "takeoff") body.airborne = true;
       const dx = target[0] - body.position[0];
       const dz = target[2] - body.position[2];
@@ -503,7 +568,7 @@ export class Simulation {
       action.target = target;
       action.status = "running";
     }
-    body.action = action;
+    if (!gimbalDuringFlight) body.action = action;
     this.log(
       `${body.label} · ${command.type} ${action.status === "running" ? "accepted" : "completed"}`,
       "action",
@@ -657,11 +722,13 @@ export class Simulation {
       phase("03 / Wisp · north loading dock survey");
       await act("drone", { type: "move", x: 10, z: -30, y: 9 });
       await act("drone", { type: "move", x: 10, z: -30, y: 4.5 });
+      await act("drone", { type: "look", pan: -90, tilt: -68 });
       await act("drone", { type: "inspect", objectId: "crate-18" });
       phase("03 / Wisp · returning above the racks");
       await act("drone", { type: "move", x: 10, z: -30, y: 9 });
       await act("drone", { type: "move", x: 1, z: -1.5, y: 9 });
       await act("drone", { type: "move", x: 1, z: -1.5, y: 3.4 });
+      await act("drone", { type: "look", pan: 34, tilt: -58 });
       await act("drone", { type: "inspect", objectId: "crate-07" });
       await act("drone", { type: "land" });
       release("drone");

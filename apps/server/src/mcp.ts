@@ -8,12 +8,12 @@ import { SimError } from "./simulation.js";
 
 const descriptions: Record<ToolName, string> = {
   discover:
-    "Discover live warehouse bodies, availability, sensor/inspection and handling limits, lease limits and bounds. Start here. Coordinates are in meters; y is up. Includes shared survey grid history and known cargo from actual observations; use unknown cells to plan your own search. Read surveyGuide before interpreting coverage.",
+    "Discover live warehouse bodies, availability, sensor/inspection and handling limits, lease limits and bounds. Start here. Coordinates are in meters; y is up. Includes shared survey grid history and known cargo from actual observations; use unknown checkpoints and static navigation geometry to plan your own search. Read surveyGuide before interpreting coverage.",
   possess:
     "Acquire an exclusive expiring lease on a body. Keep the returned opaque leaseId private. Default 60s, range 5–300s. Set owner to an agent display name.",
   observe:
-    "Observe through the possessed body's sensors. Returns pose, limits, analytic cargo telemetry, last inspection, action completion and shared survey history. Stationary observations credit fully covered floor cells; motion polls do not credit a swept path. Set image:true for a server-rendered 640x360 body camera JPEG as MCP image content, plus an embedded viewer in MCP Apps hosts. Frames are frozen at their reported revision; image visibility includes scenery occlusion while cargo telemetry uses analytic range checks.",
-  act: "Control a possessed body with a typed command. move: rover x/z or airborne drone x/y/z. look: camera pan/tilt in degrees. inspect: visible nearby cargo. arm: preset home/reach/drop, grasp objectId, place; choose drop before placing in dispatch. Drone: takeoff/land. stop cancels motion. Poll observe for completion. Use observations to find cargo and decide where to move; movement does not avoid collisions.",
+    "Observe through the possessed body's sensors. Returns pose, limits, analytic cargo telemetry, last inspection, action completion and shared survey history. Stationary observations credit visible floor checkpoints; motion polls do not credit a swept path. Set image:true for a server-rendered 640x360 body camera JPEG as MCP image content, plus an embedded viewer in MCP Apps hosts. Frames are frozen at their reported revision; image visibility includes scenery occlusion while cargo telemetry uses range and static-obstacle line-of-sight checks.",
+  act: "Control a possessed body with a typed command. move: rover x/z or airborne drone x/y/z. look: fixed camera or drone gimbal pan/tilt in degrees. inspect: visible nearby cargo. arm: preset home/reach/drop, grasp objectId, place; choose drop before placing in dispatch. Drone: takeoff/land. stop cancels motion. Poll observe for completion. Use observations to find cargo and decide where to move; direct paths are checked against static obstacles and body clearance; PATH_BLOCKED rejects the entire motion. Use discover navigation geometry to choose aisle waypoints. Drone look pan/tilt aims its gimbal in world degrees without changing flight or replacing a running motion.",
   release:
     "Release a lease and cancel its pending motion. Repeated release is harmless. A drone holds its last altitude, and a held crate stays attached.",
 };
@@ -51,6 +51,9 @@ async function execute(dispatch: Dispatch, name: ToolName, input: unknown) {
           type: "text" as const,
           text: JSON.stringify({
             code: error instanceof SimError ? error.code : "SERVER_ERROR",
+            ...(error instanceof SimError && error.details
+              ? { details: error.details }
+              : {}),
             message:
               error instanceof SimError
                 ? error.message

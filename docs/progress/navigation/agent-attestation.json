@@ -1,0 +1,62 @@
+{
+  "task": "/root/blind_navigation_mission",
+  "contextMode": "fork_turns=none",
+  "missionPrompt": "Find and inspect tagged cargo. Report condition exceptions. Stage cleared priority cargo in dispatch using suitable bodies, and verify the result. Choose your own bodies, order, route and actions. Use camera images and structured observations. Report coverage uncertainty. Budget 100 MCP calls excluding aggregated motion polls; approximately 15 minutes for control.",
+  "providedInitialContext": [
+    "General mission objective",
+    "Actual MCP schemas",
+    "Recorder transport instructions"
+  ],
+  "excludedInitialContext": [
+    "Parent conversation",
+    "Repository and helper source, AGENTS.md and docs",
+    "Cargo IDs, locations and expected conditions",
+    "Expected cargo count",
+    "Body sequence and route",
+    "Spectator state and DOM",
+    "Other sessions artifacts"
+  ],
+  "agentReportedSourceFilesRead": false,
+  "agentReportedSpectatorStateUsed": false,
+  "viewedObservationSteps": [
+    3,
+    7,
+    11,
+    14,
+    16,
+    21,
+    24,
+    28,
+    31,
+    37,
+    44,
+    48,
+    52,
+    55,
+    65,
+    68,
+    74,
+    77,
+    80,
+    92,
+    95,
+    103,
+    107,
+    111,
+    114,
+    118,
+    122,
+    125
+  ],
+  "unavailableImageSteps": [],
+  "parentMessagesDuringControl": [],
+  "parentReadAuthorityDuringControl": false,
+  "parentObservedProgress": "Agent-supplied status reports and recorded own-MCP results/counts; no route or cargo guidance supplied.",
+  "finalReport": "The agent used Sentinel, Atlas and Wisp by its own choice. It inspected Cargo 07 (seal intact, label verified, cleared for dispatch), used the arm to stage it at [6,0.55,2], viewed the placement image and independently verified the location through Sentinel. It inspected Cargo 12 (surface abrasion on north face, seal intact) and Cargo 18 (seal intact, awaiting inventory scan), leaving both in place and reporting the exceptions. It observed all 85 eligible floor checkpoints while explicitly declining to certify exhaustive inventory or elevated/occluded spaces. Motion 35 returned PATH_BLOCKED at rack-7; the body stayed in place, and the agent recovered by overflying racks at 9 m and descending in clear aisles. The arm ended home and empty, the drone landed at [-29.3,0.4,3], and every lease was released.",
+  "agentAttestation": "Read no excluded files, repository source, helper source, other sessions artifacts, spectator DOM, snapshot APIs or excluded state. Viewed exactly the listed 28 own returned JPEGs; none unavailable. Landed image 125 mostly showed floor with low detail. Published geometry, schemas, returned poses, camera views and unknown survey points informed decisions.",
+  "timing": {
+    "totalSessionSeconds": 648,
+    "includesPostControlSpectatorPause": false
+  },
+  "initialMetadataNote": "The run used the implemented static geometry and collision/occlusion model. Final source clarifies clearance as X/Y/Z half-extents in navigation and body-limit metadata; no route/geometry was changed for the agent."
+}

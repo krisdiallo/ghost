@@ -2700,3 +2700,52 @@ dialog::backdrop {
   font-size: 9px;
   color: #9eb7aa;
 }
+.gimbal-controls {
+  margin-top: 14px;
+  padding: 12px;
+  background: #14232a;
+  border: 1px solid #42616b;
+  border-radius: 6px;
+}
+.gimbal-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font: 9px var(--mono);
+  color: #a9d8ea;
+}
+.gimbal-heading strong {
+  font-weight: 500;
+}
+.gimbal-controls p {
+  margin: 8px 0;
+  font-size: 10px;
+  color: #abc4cb;
+}
+.gimbal-controls .coordinate-inputs {
+  margin: 10px 0;
+}
+.gimbal-presets {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin-top: 8px;
+}
+.gimbal-presets button {
+  padding: 9px 3px;
+  min-height: 40px;
+  font-size: 10px;
+  color: #c8e4ee;
+  border-color: #43616e;
+  background: #223f4b;
+}
+.gimbal-compact {
+  padding: 9px;
+}
+.map-route-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 9px;
+  color: #ffb3a5;
+}

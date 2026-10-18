@@ -284,6 +284,9 @@ export async function startWarehouse(
       }
       json(res, error instanceof SimError ? 400 : 500, {
         code: error instanceof SimError ? error.code : "SERVER_ERROR",
+        ...(error instanceof SimError && error.details
+          ? { details: error.details }
+          : {}),
         message:
           error instanceof SimError
             ? error.message

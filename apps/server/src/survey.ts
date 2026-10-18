@@ -1,4 +1,10 @@
-import { SURVEY_GRID, surveyCell, telemetryVisible } from "@ghost/shared";
+import {
+  SURVEY_GRID,
+  surveyCell,
+  telemetryVisible,
+  STATIC_OBSTACLES,
+  containsPoint,
+} from "@ghost/shared";
 import type {
   Body,
   SceneObject,
@@ -7,6 +13,23 @@ import type {
   Vec3,
 } from "@ghost/shared";
 
+const checkpoints = Array.from(
+  { length: SURVEY_GRID.rows * SURVEY_GRID.columns },
+  (_, index) => {
+    const point = surveyCell(
+      index % SURVEY_GRID.columns,
+      Math.floor(index / SURVEY_GRID.columns),
+    ).center;
+    return {
+      index,
+      point,
+      blocked: STATIC_OBSTACLES.some((obstacle) =>
+        containsPoint(obstacle, point),
+      ),
+    };
+  },
+);
+const blockedCount = checkpoints.filter((point) => point.blocked).length;
 // Shared observation history, never a copy of the spectator's object registry.
 export class SurveyTracker {
   private covered = new Set<number>();
@@ -36,28 +59,16 @@ export class SurveyTracker {
     }
     // Moving observations still return live objects, but never credit a swept path.
     if (creditCells && body.action?.status !== "running") {
-      for (let row = 0; row < SURVEY_GRID.rows; row++)
-        for (let column = 0; column < SURVEY_GRID.columns; column++) {
-          const index = row * SURVEY_GRID.columns + column;
-          if (this.covered.has(index)) continue;
-          const cell = surveyCell(column, row);
-          const points: Vec3[] = [
-            [cell.minX, SURVEY_GRID.floorCargoHeight, cell.minZ],
-            [cell.maxX, SURVEY_GRID.floorCargoHeight, cell.minZ],
-            [cell.minX, SURVEY_GRID.floorCargoHeight, cell.maxZ],
-            [cell.maxX, SURVEY_GRID.floorCargoHeight, cell.maxZ],
-            // Nearest point catches a camera's steepest downward angle inside a cell.
-            [
-              Math.max(cell.minX, Math.min(cell.maxX, body.position[0])),
-              SURVEY_GRID.floorCargoHeight,
-              Math.max(cell.minZ, Math.min(cell.maxZ, body.position[2])),
-            ],
-          ];
-          if (points.every((point) => telemetryVisible(body, point))) {
-            this.covered.add(index);
-            changed = true;
-          }
+      for (const checkpoint of checkpoints) {
+        if (
+          !checkpoint.blocked &&
+          !this.covered.has(checkpoint.index) &&
+          telemetryVisible(body, checkpoint.point)
+        ) {
+          this.covered.add(checkpoint.index);
+          changed = true;
         }
+      }
     }
     if (this.lastObservedAt !== at) changed = true;
     this.lastObservedAt = at;
@@ -76,11 +87,17 @@ export class SurveyTracker {
       grid: SURVEY_GRID,
       rows: Array.from({ length: SURVEY_GRID.rows }, (_, row) =>
         Array.from({ length: SURVEY_GRID.columns }, (_, column) =>
-          this.covered.has(row * SURVEY_GRID.columns + column) ? "1" : "0",
+          checkpoints[row * SURVEY_GRID.columns + column]!.blocked
+            ? "x"
+            : this.covered.has(row * SURVEY_GRID.columns + column)
+              ? "1"
+              : "0",
         ).join(""),
       ),
       coveredCells: this.covered.size,
-      totalCells: SURVEY_GRID.columns * SURVEY_GRID.rows,
+      totalCells: SURVEY_GRID.columns * SURVEY_GRID.rows - blockedCount,
+      blockedCells: blockedCount,
+      coverageModel: "visible-floor-checkpoints" as const,
       knownCargo: [...this.cargo.values()],
       lastObservedAt: this.lastObservedAt,
     });

@@ -84,8 +84,8 @@ export function SensorPanel({
               <> · inspect ≤ {limits.inspectRange} m</>
             )}
             <small>
-              Camera: {limits.image.verticalFov}° vertical view · scenery can
-              block images.
+              Camera: {limits.image.verticalFov}° vertical view · structures
+              block both images and telemetry.
             </small>
           </div>
           {frame ? (

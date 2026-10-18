@@ -12,7 +12,7 @@ export const commandSchema = z.discriminatedUnion("type", [
     .object({
       type: z.literal("look"),
       pan: z.number().finite().min(-180).max(180),
-      tilt: z.number().finite().min(-80).max(30),
+      tilt: z.number().finite().min(-90).max(30),
     })
     .strict(),
   z

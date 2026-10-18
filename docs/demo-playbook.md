@@ -19,18 +19,18 @@ The **guided demo is scripted**. For a real agent demo, connect your MCP client 
 
 For a deterministic manual MCP walkthrough, call `discover({})`, then perform these commands using each body's returned `leaseId`. Acquire with `possess({resourceId, ttlSeconds:120, owner:"Demo ghost"})` and release after each body.
 
-| Body        | `act` commands in order                                                                                                                                    |
-| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `camera-01` | `{type:"look",pan:104,tilt:-16}`, `{type:"inspect",objectId:"crate-07"}`                                                                                    |
-| `rover-01`  | `{type:"move",x:1,z:1.4}`, wait for completion, `{type:"inspect",objectId:"crate-07"}`                                                                     |
-| `drone-01`  | `{type:"takeoff"}`, wait; `{type:"move",x:1,y:3.4,z:-1.5}`, wait; `{type:"inspect",objectId:"crate-07"}`, `{type:"land"}`, wait                            |
-| `arm-01`    | `{type:"preset",preset:"reach"}`, `{type:"grasp",objectId:"crate-07"}`, `{type:"preset",preset:"drop"}`, `{type:"place"}`, `{type:"preset",preset:"home"}` |
+| Body        | `act` commands in order                                                                                                                                          |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `camera-01` | `{type:"look",pan:104,tilt:-16}`, `{type:"inspect",objectId:"crate-07"}`                                                                                         |
+| `rover-01`  | `{type:"move",x:1,z:1.4}`, wait for completion, `{type:"inspect",objectId:"crate-07"}`                                                                           |
+| `drone-01`  | `{type:"takeoff"}`, wait; `{type:"move",x:1,y:3.4,z:-1.5}`, wait; `{type:"look",pan:34,tilt:-58}`, `{type:"inspect",objectId:"crate-07"}`, `{type:"land"}`, wait |
+| `arm-01`    | `{type:"preset",preset:"reach"}`, `{type:"grasp",objectId:"crate-07"}`, `{type:"preset",preset:"drop"}`, `{type:"place"}`, `{type:"preset",preset:"home"}`       |
 
 Calls to `act` wrap the command: `{leaseId, command}`. `observe({leaseId})` reports `body.action.status`, visible object IDs/distances, and inspection findings. Scene units are meters; y is vertical.
 
 ## Whole-warehouse tour and camera
 
-**Run guided demo** takes about 90 seconds. Scout travels through X −10 to Z −18 and inspects Cargo 12 before returning to the bay. Wisp climbs to Y 9, flies to X 10 / Z −30, descends to scan Cargo 18, climbs above the racks and returns. These are actual server actions using leases, not decorative animation. The tour uses clear aisle waypoints; free movement remains kinematic without collision avoidance.
+**Run guided demo** takes about 90 seconds. Scout travels through X −10 to Z −18 and inspects Cargo 12 before returning to the bay. Wisp climbs to Y 9, flies to X 10 / Z −30, descends to scan Cargo 18, climbs above the racks and returns. These are actual server actions using leases, not decorative animation. The tour uses clear aisle waypoints; movement remains kinematic but whole direct paths are checked against static structures. PATH_BLOCKED rejects a crossing, including unsafe descent/landing. Choose clear aisle waypoints or climb before moving across racks.
 
 Choose **Pan** and drag to translate the camera; choose **Orbit** to rotate. Scroll/pinch or use **+ / −** to zoom. Two fingers pan and zoom. **Follow** tracks the selected body's current position. **Facility overview** restores the whole hall, and **Top view** gives a floor plan.
 
@@ -40,7 +40,7 @@ Use **Immerse** for a full-window warehouse with a live map, fleet switcher and 
 
 - **Sentinel:** high on the southwest corner column (X −30.2 / Y 10 / Z 8). Possess → Aim camera → Scan priority cargo. Defaults 104° pan / −16° tilt point inward toward Cargo 07. Sensor range is 45 m.
 - **Scout:** possess → Move to point (defaults 1 / 1.4) → wait for completion → Scan priority cargo.
-- **Wisp:** possess → Take off → wait → set X 1 / Y 3.4 / Z −1.5 → Move → wait → Scan → Land.
+- **Wisp:** possess → Take off → wait → set X 1 / Y 3.4 / Z −1.5 → Move → wait → aim pan 34° / tilt −58° → Scan → Land.
 - **Atlas:** possess → Reach → Grasp cargo → Dispatch → Place cargo → Home.
 - The Observation tab shows sensor outputs; the checklist advances from server-confirmed results.
 
@@ -49,7 +49,7 @@ Use **Immerse** for a full-window warehouse with a live map, fleet switcher and 
 - **Busy body:** another lease owns it. Release in that client or wait for its countdown. Display names do not grant control.
 - **Expired lease:** possess again. Pending movement was cancelled and the previous capability is invalid.
 - **Action busy:** wait or Stop motion. No queue runs past the lease.
-- **Out of reach:** move closer, aim the camera, or set the arm to Reach. Cargo may have moved after the arm step; reset for the standard mission.
+- **Out of reach:** find a clear sightline, move closer, aim the camera, or set the arm to Reach. Cargo may have moved after the arm step; reset for the standard mission.
 - **Disconnected:** the UI keeps its last frame, labels it stale, and disables controls. SSE automatically reconnects with a new snapshot. Server restart resets the world.
 - **Interrupted guided demo:** Stop demo releases its own bodies. It does not release unrelated agents' bodies. Reset warehouse explicitly releases every lease, cancels the script and restores the scene.
 - **WebGL unavailable:** use the controls and telemetry panels; enable WebGL/use a supported browser for the 3D presentation.
@@ -67,3 +67,9 @@ Ctrl+C on the standalone process. All state is in memory. A fresh start resets t
 Choose **Body camera** to look through the selected machine. Open **Agent vision** to see its latest captured frame. An MCP agent can call `observe` with `{leaseId,image:true}` to receive a real JPEG plus frame revision and timestamp. Compatible MCP Apps hosts show the same frame in an embedded card. Use `image:false` (or omit it) for cheap motion polling. After a move completes, request another image to see the new position. Browser possession also enables **Capture sensor frame**, which prepares a frame without automatically sending it to a model.
 
 For a repeatable inspection: possess Scout, move to X 1 / Z 1.4, poll observe until completed, capture an image, inspect crate-07, observe with an image again, then release. A moving world can advance while the renderer works; the captured revision identifies the image’s historical state. This is rendered simulation vision; the guided tour still uses a script, and no LLM has been added. Run `node scripts/capture-sensors.mjs` to verify all bodies, image bytes over HTTP and stdio, and the embedded app in a local test host.
+
+## Collision and gimbal examples
+
+With a newly reset Scout, a direct move to X −6 / Z −30 crosses a storage bay and returns PATH_BLOCKED without moving the rover. The shared map marks the rejection. Use clear aisle waypoints; the guided tour remains a scripted example of such a route. Wisp may overfly racks at Y 9, but land is rejected above a packed bay. Reach a clear floor patch before landing.
+
+Wisp's Camera / Gimbal panel works independently of flight. Look down sets tilt −90; Look ahead aligns with the current chassis heading; Look behind reverses world pan. Use look during a running move without cancelling or replacing it. The exact captured image and live body camera use the same aim. Mobile proximity telemetry is radial but must have a clear static sightline, so it can report a nearby object outside the optical frame.

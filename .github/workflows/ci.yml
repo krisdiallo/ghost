@@ -8,7 +8,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 16
+    timeout-minutes: 18
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,6 +24,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Capture the warehouse and run the mobile mission
         run: node scripts/capture-demo.mjs
+      - name: Verify swept navigation, occlusion and in-flight drone camera controls
+        run: node scripts/capture-navigation.mjs
       - name: Verify private phone access and an authenticated MCP agent
         run: node scripts/capture-access.mjs
       - name: Verify all body images, stdio images and the embedded MCP App

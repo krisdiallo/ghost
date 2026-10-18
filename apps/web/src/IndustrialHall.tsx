@@ -1,10 +1,11 @@
 import { useLayoutEffect, useRef } from "react";
 import { Color, InstancedMesh, Object3D } from "three";
+import { RACK_BAYS, FREIGHT_STACKS, STRUCTURAL_COLUMNS } from "@ghost/shared";
 import type { Vec3 } from "@ghost/shared";
 import { Beam, Box, Cylinder, Text } from "./ScenePrimitives";
 
 type Part = { at: Vec3; size: Vec3; color: string };
-// The large building and its stock are scenery. Instancing keeps hundreds of
+// Static obstacle positions are shared with the authority. Instancing keeps hundreds of
 // repeated structural/pallet parts in a handful of draw calls on mobile GPUs.
 function Parts({
   parts,
@@ -57,9 +58,7 @@ const steel = "#354b59",
   rail = "#687f8a",
   amber = "#d4a451";
 // Sixteen four-tier storage bays; the front center stays open for the mission.
-const bays = [-27, -16]
-  .flatMap((z) => [-25, -15, -5, 5, 15, 25].map((x) => [x, z] as const))
-  .concat([-25, -15, 15, 25].map((x) => [x, -5] as const));
+const bays = RACK_BAYS;
 for (const [bay, [x, z]] of bays.entries()) {
   for (const dx of [-3.65, 3.65])
     for (const dz of [-1.05, 1.05])
@@ -69,7 +68,7 @@ for (const [bay, [x, z]] of bays.entries()) {
     add(accents, [x, y + 0.07, z + 1.18], [7.5, 0.12, 0.08], amber);
     for (const [slot, dx] of [-2.4, 0, 2.4].entries()) {
       const shade = ["#9f8e71", "#c7af85", "#91a496", "#b8aa91"][
-        ((bay + slot + y) % 4) | 0
+        (bay + slot + y) % 4 | 0
       ]!;
       add(stock, [x + dx, y + 0.18, z], [2.28, 0.18, 1.9], "#6c5e48");
       add(stock, [x + dx, y + 1, z], [2.15, 1.5, 1.8], shade);
@@ -102,12 +101,11 @@ for (const x of [-25, -15, -5, 5, 15, 25]) {
   for (const dx of [-4.25, 4.25])
     add(accents, [x + dx, 0.8, -32.9], [0.18, 1.6, 0.18], amber);
 }
-for (const x of [-31, 31])
-  for (const z of [-31, -19, -7, 8]) {
-    add(frame, [x, 7.2, z], [0.4, 14.4, 0.4], steel);
-    add(frame, [x, 0.35, z], [0.9, 0.7, 0.9], "#81908c");
-    add(accents, [x, 1.2, z + 0.22], [0.45, 1.2, 0.05], amber);
-  }
+for (const [x, z] of STRUCTURAL_COLUMNS) {
+  add(frame, [x, 7.2, z], [0.4, 14.4, 0.4], steel);
+  add(frame, [x, 0.35, z], [0.9, 0.7, 0.9], "#81908c");
+  add(accents, [x, 1.2, z + 0.22], [0.45, 1.2, 0.05], amber);
+}
 for (const z of [-31, -19, -7]) {
   add(frame, [0, 14.2, z], [62.4, 0.28, 0.3], steel);
   add(frame, [0, 13, z], [62.4, 0.2, 0.22], steel);
@@ -125,12 +123,11 @@ add(frame, [-25, 9.4, -30.1], [11.5, 0.18, 6.3], steel);
 for (let i = 0; i < 17; i++)
   add(frame, [-29.3, 0.35 * i + 0.2, -18.1 - i * 0.5], [2.2, 0.18, 0.54], rail);
 // Freight waiting at the edges of the open forecourt.
-for (const x of [-26, -22, 21, 25])
-  for (const z of [3, 6.3]) {
-    add(stock, [x, 0.13, z], [2.8, 0.26, 2.5], "#6c5e48");
-    add(stock, [x, 1, z], [2.5, 1.5, 2.2], x < 0 ? "#9aab9f" : "#b6a17e");
-    add(accents, [x, 1, z + 1.12], [0.15, 1.5, 0.03], "#e2cfa4");
-  }
+for (const [x, z] of FREIGHT_STACKS) {
+  add(stock, [x, 0.13, z], [2.8, 0.26, 2.5], "#6c5e48");
+  add(stock, [x, 1, z], [2.5, 1.5, 2.2], x < 0 ? "#9aab9f" : "#b6a17e");
+  add(accents, [x, 1, z + 1.12], [0.15, 1.5, 0.03], "#e2cfa4");
+}
 // Safety lanes, cross-aisles, and perimeter markings share one instanced batch.
 for (const x of [-30, -10, 10, 30])
   for (let z = -32; z < 9; z += 2)
