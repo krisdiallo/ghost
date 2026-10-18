@@ -30,7 +30,7 @@ Open `http://127.0.0.1:3001`. Build output is ignored by Git. These are executor
 
 Click **Run guided demo** for a repeatable, approximately 90-second scripted warehouse mission:
 
-1. Sentinel locates and scans Cargo 07.
+1. Sentinel scans Cargo 07 from its 10 m-high southwest corner mount.
 2. Scout drives down the west aisle to inspect Cargo 12, then returns to check Cargo 07.
 3. Wisp climbs to 9 m, flies to the north loading docks to scan Cargo 18, then returns to verify Cargo 07 and land.
 4. Atlas grasps the crate and places it in dispatch.

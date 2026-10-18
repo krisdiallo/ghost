@@ -8,7 +8,7 @@ import type {
   Snapshot,
   Vec3,
 } from "@ghost/shared";
-import { BOUNDS, CAPABILITIES, WAREHOUSE } from "@ghost/shared";
+import { BOUNDS, CAPABILITIES, CAMERA_SENSOR, WAREHOUSE } from "@ghost/shared";
 import { request, RequestError, tool } from "./api";
 import { BodyIcon, Ghost, UIIcon } from "./icons";
 import { BODY_COLORS, Warehouse } from "./Warehouse";
@@ -47,7 +47,7 @@ const prettyKind = {
   drone: "Aerial drone",
 };
 const bodyDetails = {
-  camera: "A new point of view.",
+  camera: "Southwest corner · column-mounted at 10 m.",
   rover: "Intelligence on the move.",
   arm: "Turn a decision into action.",
   drone: "See the bigger picture.",
@@ -130,8 +130,8 @@ export function App() {
   const [targetX, setTargetX] = useState("1");
   const [targetZ, setTargetZ] = useState("1.4");
   const [altitude, setAltitude] = useState("3.4");
-  const [pan, setPan] = useState("63");
-  const [tilt, setTilt] = useState("-13");
+  const [pan, setPan] = useState(String(CAMERA_SENSOR.homePan));
+  const [tilt, setTilt] = useState(String(CAMERA_SENSOR.homeTilt));
   const [focus, setFocus] = useState<Vec3 | null>(null);
   const [view, setView] = useState<WarehouseView>("facility");
   const [cameraReset, setCameraReset] = useState(0);
@@ -710,7 +710,11 @@ export function App() {
                         <button
                           disabled={!canAct}
                           onClick={() =>
-                            act({ type: "look", pan: 63, tilt: -13 })
+                            act({
+                              type: "look",
+                              pan: CAMERA_SENSOR.homePan,
+                              tilt: CAMERA_SENSOR.homeTilt,
+                            })
                           }
                         >
                           Aim at cargo
@@ -1210,8 +1214,10 @@ export function App() {
                             Scan priority cargo <UIIcon name="target" />
                           </button>
                           <p className="control-note">
-                            70° horizontal view · aim 63° / −13° toward Cargo
-                            07.
+                            {CAMERA_SENSOR.horizontalFov}° view ·{" "}
+                            {CAMERA_SENSOR.range} m range · aim{" "}
+                            {CAMERA_SENSOR.homePan}° / {CAMERA_SENSOR.homeTilt}°
+                            toward Cargo 07.
                           </p>
                         </>
                       )}

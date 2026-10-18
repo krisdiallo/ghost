@@ -21,7 +21,7 @@ For a deterministic manual MCP walkthrough, call `discover({})`, then perform th
 
 | Body        | `act` commands in order                                                                                                                                    |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `camera-01` | `{type:"look",pan:63,tilt:-13}`, `{type:"inspect",objectId:"crate-07"}`                                                                                    |
+| `camera-01` | `{type:"look",pan:104,tilt:-16}`, `{type:"inspect",objectId:"crate-07"}`                                                                                    |
 | `rover-01`  | `{type:"move",x:1,z:1.4}`, wait for completion, `{type:"inspect",objectId:"crate-07"}`                                                                     |
 | `drone-01`  | `{type:"takeoff"}`, wait; `{type:"move",x:1,y:3.4,z:-1.5}`, wait; `{type:"inspect",objectId:"crate-07"}`, `{type:"land"}`, wait                            |
 | `arm-01`    | `{type:"preset",preset:"reach"}`, `{type:"grasp",objectId:"crate-07"}`, `{type:"preset",preset:"drop"}`, `{type:"place"}`, `{type:"preset",preset:"home"}` |
@@ -38,7 +38,7 @@ Use **Immerse** for a full-window warehouse with a live map, fleet switcher and 
 
 ## Manual browser walkthrough
 
-- **Sentinel:** possess → Aim camera → Scan priority cargo. Defaults point at Cargo 07.
+- **Sentinel:** high on the southwest corner column (X −30.2 / Y 10 / Z 8). Possess → Aim camera → Scan priority cargo. Defaults 104° pan / −16° tilt point inward toward Cargo 07. Sensor range is 45 m.
 - **Scout:** possess → Move to point (defaults 1 / 1.4) → wait for completion → Scan priority cargo.
 - **Wisp:** possess → Take off → wait → set X 1 / Y 3.4 / Z −1.5 → Move → wait → Scan → Land.
 - **Atlas:** possess → Reach → Grasp cargo → Dispatch → Place cargo → Home.
