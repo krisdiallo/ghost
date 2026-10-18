@@ -172,7 +172,7 @@ try {
           "S256 PKCE",
           "mobile consent and cross-origin return navigation",
           "state and issuer validation",
-          "all five MCP tools advertise OAuth",
+          "all sixteen MCP tools advertise OAuth",
           "authenticated discover",
           "refresh rotation",
           "revocation rejects access",

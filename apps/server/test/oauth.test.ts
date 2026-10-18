@@ -199,6 +199,19 @@ test("OAuth discovery, consent, PKCE, scoped MCP access, refresh rotation and re
       arguments: {},
     });
     assert(!discovery.isError);
+    const draft = await client.callTool({
+      name: "sandbox_create",
+      arguments: { name: "OAuth experiment" },
+    });
+    assert(!draft.isError);
+    const sandboxId = (draft.structuredContent as { sandbox: { id: string } })
+      .sandbox.id;
+    const removed = await client.callTool({
+      name: "sandbox_delete",
+      arguments: { sandboxId },
+    });
+    assert(!removed.isError);
+
     assert.equal(
       (
         await fetch(base + "/api/snapshot", {

@@ -85,7 +85,7 @@ The model uses static solid structures, conservative swept clearance, occluded r
 
 One process holds the live world, at most eight drafts and four concurrent trial forks. A draft supports twelve devices, 128 obstacles and 32 cargo objects. The last 32 run reports are retained; old completed reports are evicted as new ones start. Restart clears memory. Export JSON for retention and import definitions to reproduce work.
 
-All tools use existing host/origin checks and hosted shared-key authentication. Sensor rendering receives frozen state and local assets only. No database, external model provider or new credentials are required.
+All tools use existing host/origin checks and hosted browser authentication or scoped MCP OAuth/bearer authentication. Sensor rendering receives frozen state and local assets only. No database, external model provider or new credentials are required.
 
 ## Verification
 

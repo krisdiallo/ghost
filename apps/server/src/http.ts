@@ -99,7 +99,9 @@ export async function startWarehouse(
     const snapshot = world.snapshot();
     const frame = await renderer.capture(snapshot, observation.body.id);
     world.validateLease(String(args.leaseId));
-    frames.set(snapshot.instanceId + ":" + observation.body.id, frame);
+    // Only live-body frames have a polling endpoint. Draft frames are returned
+    // directly, so deleting drafts cannot accumulate orphaned cached JPEGs.
+    if (world === sim) frames.set(observation.body.id, frame);
     return { ...observation, frame };
   };
   const mcp = createHttpMcp(dispatch, !!oauth);
@@ -232,7 +234,7 @@ export async function startWarehouse(
       }
       if (url.pathname.startsWith("/api/frames/") && req.method === "GET") {
         const id = url.pathname.slice("/api/frames/".length);
-        const frame = frames.get(sim.snapshot().instanceId + ":" + id);
+        const frame = frames.get(id);
         return json(res, 200, {
           frame: frame?.instanceId === sim.snapshot().instanceId ? frame : null,
         });
