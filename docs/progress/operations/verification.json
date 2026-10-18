@@ -6,6 +6,8 @@
   "operatorPossession": true,
   "actualSensorImage": true,
   "operatorClearance": true,
+  "physicalRecoveryVehicle": true,
+  "sameBoxPersistedInStaging": true,
   "manualMotionVerification": true,
   "autonomyResumed": true,
   "subsequentCargoInspection": true,
@@ -13,20 +15,20 @@
   "phoneNoOverflow": true,
   "browserErrors": [],
   "incident": {
-    "id": "incident-b487cc71",
+    "id": "incident-115a1466",
     "sequence": 1,
     "resourceId": "rover-01",
     "job": "Aisle B inspection",
     "code": "PATH_BLOCKED",
     "message": "Scout stopped before Unexpected floor box. Operator assistance required.",
-    "obstacleId": "ops-box-a77f0bc5",
+    "obstacleId": "ops-box-5d121130",
     "position": [
       -10,
       0.45,
-      -8.241347227818837
+      -7.232057792813382
     ],
-    "createdAt": 1792339477044,
-    "resolvedAt": 1792339489687,
+    "createdAt": 1792340380669,
+    "resolvedAt": 1792340417979,
     "resolution": "Route verified; returned to local autonomy."
   },
   "events": [
@@ -41,7 +43,7 @@
           "position": [
             -10,
             0.45,
-            -8.241347227818837
+            -7.232057792813382
           ],
           "heading": 3.141592653589793,
           "pan": 0,
@@ -51,10 +53,10 @@
           "airborne": false,
           "lease": {
             "owner": "ChatGPT · operator",
-            "expiresAt": 1792339600990
+            "expiresAt": 1792340504329
           },
           "action": {
-            "id": "a0630edf-c55e-47f1-ba8f-daa4909f3267",
+            "id": "b4e8ba8f-b30e-4c82-ba3a-673c5a36eb2a",
             "type": "move",
             "status": "cancelled",
             "target": [
@@ -64,25 +66,25 @@
             ]
           },
           "lastBlocked": {
-            "obstacleId": "ops-box-a77f0bc5",
+            "obstacleId": "ops-box-5d121130",
             "label": "Unexpected floor box",
             "position": [
               -10,
               0.45,
-              -8.27951310986702
+              -7.249535845320201
             ],
-            "at": 1792339477042
+            "at": 1792340380664
           }
         },
-        "expiresAt": 1792339600990
+        "expiresAt": 1792340504329
       }
     },
     {
       "tool": "observe",
       "isError": false,
       "result": {
-        "at": 1792339481015,
-        "revision": 1169,
+        "at": 1792340384361,
+        "revision": 1101,
         "body": {
           "id": "rover-01",
           "kind": "rover",
@@ -90,7 +92,7 @@
           "position": [
             -10,
             0.45,
-            -8.241347227818837
+            -7.232057792813382
           ],
           "heading": 3.141592653589793,
           "pan": 0,
@@ -100,10 +102,10 @@
           "airborne": false,
           "lease": {
             "owner": "ChatGPT · operator",
-            "expiresAt": 1792339600990
+            "expiresAt": 1792340504329
           },
           "action": {
-            "id": "a0630edf-c55e-47f1-ba8f-daa4909f3267",
+            "id": "b4e8ba8f-b30e-4c82-ba3a-673c5a36eb2a",
             "type": "move",
             "status": "cancelled",
             "target": [
@@ -113,14 +115,14 @@
             ]
           },
           "lastBlocked": {
-            "obstacleId": "ops-box-a77f0bc5",
+            "obstacleId": "ops-box-5d121130",
             "label": "Unexpected floor box",
             "position": [
               -10,
               0.45,
-              -8.27951310986702
+              -7.249535845320201
             ],
-            "at": 1792339477042
+            "at": 1792340380664
           }
         },
         "limits": {
@@ -161,25 +163,25 @@
             "x00000000000",
             "000000000000",
             "000110000000",
-            "xxxx0000xxxx",
+            "xxxx1000xxxx",
             "000000000000",
             "0x0000000000"
           ],
-          "coveredCells": 2,
+          "coveredCells": 3,
           "totalCells": 85,
           "blockedCells": 11,
           "coverageModel": "visible-floor-checkpoints",
           "knownCargo": [],
-          "lastObservedAt": 1792339481008
+          "lastObservedAt": 1792340384355
         },
         "objects": [],
         "inspection": null,
         "frame": {
-          "id": "c9f9b63e-f133-46ef-8489-1f40d76f8fc2",
-          "instanceId": "da2e89ca-d522-466c-bf5e-90838296d1a4",
+          "id": "e42ae07e-93e1-4a78-9bb0-3ce16be40fae",
+          "instanceId": "5b2fba7d-bac8-488b-9911-3d38855d1ab0",
           "resourceId": "rover-01",
-          "revision": 1169,
-          "at": 1792339481016,
+          "revision": 1101,
+          "at": 1792340384362,
           "width": 640,
           "height": 360,
           "mimeType": "image/jpeg"
@@ -194,6 +196,18 @@
         "sequence": 2,
         "watchers": 0,
         "mode": "local-autonomy",
+        "recovery": {
+          "incidentId": "incident-115a1466",
+          "resourceId": "handler-01",
+          "obstacleId": "ops-box-5d121130",
+          "phase": "approaching",
+          "message": "Mule is navigating to the obstruction.",
+          "destination": [
+            0,
+            0.65,
+            6
+          ]
+        },
         "jobs": [
           {
             "resourceId": "rover-01",
@@ -243,24 +257,40 @@
         ],
         "incidents": [
           {
-            "id": "incident-b487cc71",
+            "id": "incident-115a1466",
             "sequence": 1,
             "resourceId": "rover-01",
             "job": "Aisle B inspection",
             "code": "PATH_BLOCKED",
             "message": "Scout stopped before Unexpected floor box. Operator assistance required.",
-            "obstacleId": "ops-box-a77f0bc5",
+            "obstacleId": "ops-box-5d121130",
             "position": [
               -10,
               0.45,
-              -8.241347227818837
+              -7.232057792813382
             ],
-            "createdAt": 1792339477044,
+            "createdAt": 1792340380669,
             "resolvedAt": null,
-            "resolution": "Operator removed simulated obstruction; awaiting route verification."
+            "resolution": "Mule dispatched to physically relocate the box. Await recovery before resuming."
           }
         ],
-        "obstructions": []
+        "obstructions": [
+          {
+            "id": "ops-box-5d121130",
+            "label": "Unexpected floor box",
+            "kind": "freight",
+            "min": [
+              -10.65,
+              0,
+              -9.699535845320202
+            ],
+            "max": [
+              -9.35,
+              1.3,
+              -8.399535845320202
+            ]
+          }
+        ]
       }
     },
     {
@@ -268,16 +298,16 @@
       "isError": false,
       "result": {
         "action": {
-          "id": "eb551e73-8842-4c9e-8bfc-06bd79aeca46",
+          "id": "a6266883-a622-423a-82b4-afdcd819790b",
           "type": "move",
           "status": "running",
           "target": [
             -10,
             0.45,
-            -10.241347227818837
+            -9.232057792813382
           ]
         },
-        "revision": 1516
+        "revision": 3405
       }
     },
     {
@@ -288,6 +318,18 @@
         "sequence": 3,
         "watchers": 0,
         "mode": "local-autonomy",
+        "recovery": {
+          "incidentId": "incident-115a1466",
+          "resourceId": "handler-01",
+          "obstacleId": "ops-box-5d121130",
+          "phase": "parked",
+          "message": "Box placed in staging. The aisle is clear; verify and return Scout to autonomy.",
+          "destination": [
+            0,
+            0.65,
+            6
+          ]
+        },
         "jobs": [
           {
             "resourceId": "rover-01",
@@ -305,11 +347,13 @@
             "resourceId": "drone-01",
             "label": "North dock inventory",
             "status": "working",
-            "step": "Verify cargo 18",
-            "cycles": 0,
+            "step": "Climb above storage",
+            "cycles": 1,
             "command": {
-              "type": "inspect",
-              "objectId": "crate-18"
+              "type": "move",
+              "x": -4,
+              "y": 9,
+              "z": -3
             }
           },
           {
@@ -317,7 +361,7 @@
             "label": "Dock surveillance",
             "status": "working",
             "step": "Scan dispatch",
-            "cycles": 2,
+            "cycles": 4,
             "command": {
               "type": "look",
               "pan": 104,
@@ -337,24 +381,40 @@
         ],
         "incidents": [
           {
-            "id": "incident-b487cc71",
+            "id": "incident-115a1466",
             "sequence": 1,
             "resourceId": "rover-01",
             "job": "Aisle B inspection",
             "code": "PATH_BLOCKED",
             "message": "Scout stopped before Unexpected floor box. Operator assistance required.",
-            "obstacleId": "ops-box-a77f0bc5",
+            "obstacleId": "ops-box-5d121130",
             "position": [
               -10,
               0.45,
-              -8.241347227818837
+              -7.232057792813382
             ],
-            "createdAt": 1792339477044,
-            "resolvedAt": 1792339489687,
+            "createdAt": 1792340380669,
+            "resolvedAt": 1792340417979,
             "resolution": "Route verified; returned to local autonomy."
           }
         ],
-        "obstructions": []
+        "obstructions": [
+          {
+            "id": "ops-box-5d121130",
+            "label": "Unexpected floor box",
+            "kind": "freight",
+            "min": [
+              -0.65,
+              0,
+              5.35
+            ],
+            "max": [
+              0.65,
+              1.3,
+              6.65
+            ]
+          }
+        ]
       }
     }
   ]

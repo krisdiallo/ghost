@@ -47,7 +47,7 @@ await writeFile(
   [
     "# GHOST · an operating warehouse, a ghost on call",
     "",
-    "October 18, 2026 · Real browser and official MCP SDK rehearsal. The operator calls in this recording are scripted QA, not a recorded ChatGPT conversation.",
+    "October 18, 2026 · Real browser and official MCP SDK rehearsal. The operator calls in this recording are scripted operator calls, not a recorded ChatGPT conversation.",
     "",
     "![Actual incident: Scout stopped before an inserted box](incident-raised.jpg)",
     "",
@@ -55,7 +55,7 @@ await writeFile(
     "",
     "The warehouse runs local jobs continuously: rover aisle inspections, drone inventory sweeps, camera surveillance, and a one-shot arm dispatch assignment. Runtime box placement is authoritative. Swept collision checks stop a moving rover before contact and raise a detected incident while the other jobs continue.",
     "",
-    "The rehearsal then uses real MCP possession and a body-mounted JPEG, dispatches Mule with a capability-authorized operator action. Mule approaches, lifts, carries and sets the same box down in staging. The rehearsal then drives the rover forward, verifies the route and returns control to the local controller. Scout subsequently inspects Cargo 12. The incident remains in history.",
+    "The rehearsal then uses real MCP possession and a body-mounted JPEG, then dispatches Mule with a capability-authorized operator action. Mule approaches, lifts, carries and sets the same box down in staging. The rehearsal then drives the rover forward, verifies the route and returns control to the local controller. Scout subsequently inspects Cargo 12. The incident remains in history.",
     "",
     "[Mule loading](mule-loading.jpg) · [Carrying the box](mule-carrying.jpg) · [Box staged](box-staged.jpg)",
     "",
