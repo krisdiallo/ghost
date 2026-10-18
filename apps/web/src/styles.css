@@ -562,6 +562,126 @@ h1 span {
   display: flex;
   gap: 5px;
 }
+.sensor-panel {
+  margin-bottom: 18px;
+  border: 1px solid #466056;
+  border-radius: 10px;
+  background: #102127f5;
+  color: #d9eee2;
+  overflow: hidden;
+}
+.sensor-heading {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 11px 13px;
+  color: #d5f0cb;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font:
+    10px "Space Grotesk",
+    sans-serif;
+  letter-spacing: 1.5px;
+}
+.sensor-heading > span:last-child {
+  margin-left: auto;
+  font-size: 17px;
+}
+.sensor-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #d6fc91;
+}
+.sensor-floating {
+  position: absolute;
+  top: 66px;
+  right: 16px;
+  width: 280px;
+  z-index: 3;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 9px 32px #0005;
+}
+.sensor-content {
+  padding: 0 12px 12px;
+}
+.sensor-image {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: #14232c;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.sensor-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.sensor-image > span {
+  position: absolute;
+  bottom: 7px;
+  left: 7px;
+  padding: 4px 6px;
+  font-size: 8px;
+  letter-spacing: 1px;
+  background: #102027e8;
+}
+.sensor-content p {
+  color: #c1d7ca;
+  font-size: 10px;
+  margin: 9px 0;
+  line-height: 1.5;
+}
+.sensor-content small {
+  display: block;
+  color: #9bb2a6;
+  font-size: 10px;
+  line-height: 1.5;
+}
+.sensor-empty {
+  padding: 15px 0 6px;
+}
+.sensor-empty strong {
+  font-size: 12px;
+  font-weight: 500;
+}
+.sensor-capture {
+  width: 100%;
+  min-height: 40px;
+  margin: 12px 0 0;
+  background: #d4f4bd;
+  color: #14271f;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+  font:
+    500 11px "DM Sans",
+    sans-serif;
+}
+.sensor-capture:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+@media (max-width: 700px) {
+  .sensor-floating {
+    top: 63px;
+    right: 10px;
+    width: min(255px, calc(100% - 20px));
+  }
+  .immersive .sensor-floating {
+    top: 146px;
+  }
+  .viewport-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .viewport-actions {
+    flex-wrap: wrap;
+  }
+}
 .scene-controls button {
   width: 31px;
   height: 31px;

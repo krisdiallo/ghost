@@ -18,6 +18,7 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
+      input: { main: "index.html", sensor: "sensor.html" },
       output: {
         manualChunks: (id: string) =>
           id.includes("node_modules/three/") ||

@@ -112,6 +112,65 @@ export interface Observation {
     condition?: string;
   }[];
   inspection: { objectId: string; condition: string } | null;
+  frame?: SensorFrame;
+}
+export interface SensorFrame {
+  id: string;
+  instanceId: string;
+  resourceId: string;
+  revision: number;
+  at: number;
+  width: number;
+  height: number;
+  mimeType: "image/jpeg";
+  data: string;
+}
+// One optical rig for both the interactive viewer and server image observations.
+// Forward is local +Z. Mobile bodies rotate with their authoritative heading.
+export function sensorPose(body: Body): {
+  position: Vec3;
+  target: Vec3;
+  fov: number;
+} {
+  const [x, y, z] = body.position;
+  if (body.kind === "arm") {
+    const end: Vec3 =
+      body.preset === "reach"
+        ? [-2, 0.3, 0]
+        : body.preset === "drop"
+          ? [2, 0.35, 2]
+          : [0, 1.8, 0];
+    return {
+      position: [x + end[0], y + end[1] + 0.48, z + end[2] + 0.55],
+      target: [x + end[0], y + end[1] - 0.25, z + end[2]],
+      fov: 90,
+    };
+  }
+  const pan =
+    body.kind === "camera" ? (body.pan * Math.PI) / 180 : body.heading;
+  const tilt =
+    ((body.kind === "camera" ? body.tilt : body.kind === "drone" ? -35 : -8) *
+      Math.PI) /
+    180;
+  const direction: Vec3 = [
+    Math.sin(pan) * Math.cos(tilt),
+    Math.sin(tilt),
+    Math.cos(pan) * Math.cos(tilt),
+  ];
+  const height =
+    body.kind === "rover" ? 0.9 : body.kind === "drone" ? -0.23 : 0;
+  const offset =
+    body.kind === "camera" ? 0.7 : body.kind === "rover" ? 0.63 : 0.35;
+  const position: Vec3 = [
+    x + direction[0] * offset,
+    y + height + direction[1] * offset,
+    z + direction[2] * offset,
+  ];
+  return {
+    position,
+    target: position.map((v, i) => v + direction[i]! * 10) as Vec3,
+    fov: body.kind === "camera" ? 43 : 58,
+  };
 }
 export interface Possession {
   leaseId: string;

@@ -19,6 +19,30 @@ function setup() {
 const fails = (code: string) => (error: unknown) =>
   error instanceof SimError && error.code === code;
 
+test("vertical flight preserves the body camera heading; image requests still require a valid lease", () => {
+  const { sim, advance } = setup();
+  const { leaseId } = sim.possess("drone-01");
+  const heading = sim.observe(leaseId).body.heading;
+  sim.act(leaseId, { type: "takeoff" });
+  advance(2000);
+  assert.equal(sim.observe(leaseId).body.heading, heading);
+  sim.act(leaseId, { type: "move", x: -4, y: 5, z: -3 });
+  advance(2000);
+  assert.equal(sim.observe(leaseId).body.heading, heading);
+  sim.act(leaseId, { type: "move", x: -1, y: 5, z: -3 });
+  advance(2000);
+  assert.equal(sim.observe(leaseId).body.heading, Math.PI / 2);
+  assert.throws(
+    () => sim.tool("observe", { leaseId, image: "true" }),
+    fails("INVALID_COMMAND"),
+  );
+  sim.release(leaseId);
+  assert.throws(
+    () => sim.tool("observe", { leaseId, image: true }),
+    fails("LEASE_RELEASED"),
+  );
+});
+
 test("exclusive leases, defaults, privacy, release and invalid tokens", () => {
   const { sim } = setup();
   const lease = sim.possess("rover-01");

@@ -13,7 +13,7 @@
     "node": ">=24.15.0 <25"
   },
   "scripts": {
-    "dev": "npm run build -w @ghost/shared && node scripts/dev.mjs",
+    "dev": "npm run build && node scripts/dev.mjs",
     "dev:web": "npm run build -w @ghost/shared && npm run dev -w @ghost/web",
     "dev:server": "npm run build -w @ghost/shared && npm run dev -w @ghost/server",
     "build": "npm run build --workspaces",

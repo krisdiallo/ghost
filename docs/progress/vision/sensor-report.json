@@ -1,0 +1,42 @@
+{
+  "at": "2026-10-18T01:47:23.898Z",
+  "mode": "actual MCP images; local MCP Apps host, not ChatGPT",
+  "results": [
+    {
+      "resourceId": "camera-01",
+      "frameId": "5bf7f359-faa1-4a92-871e-b039a988ce8b",
+      "revision": 1,
+      "bytes": 35951,
+      "sha256": "70c26888d846178fe61ae6c85b8132c6bff48dc9f9ede92dfa972f510b609d5c",
+      "captureMs": 4009
+    },
+    {
+      "resourceId": "rover-01",
+      "frameId": "3ed5c1e0-7596-40fb-8b85-567705cbcfd1",
+      "revision": 151,
+      "bytes": 38530,
+      "sha256": "d3b1f3b24de28c387c5ad1414202851e6b45b086607218fef2c0dadd2919db96",
+      "captureMs": 1671
+    },
+    {
+      "resourceId": "drone-01",
+      "frameId": "c73ba5c8-245c-4bbd-b964-5cc1ef0a54b1",
+      "revision": 261,
+      "bytes": 40074,
+      "sha256": "a8263c281e9478406f58ebcdd77d81371d4d9233c1ea9e72106f9c729d57f098",
+      "captureMs": 1271
+    },
+    {
+      "resourceId": "arm-01",
+      "frameId": "88bf5dac-c806-4aa5-a808-bfbe3da763f7",
+      "revision": 264,
+      "bytes": 13719,
+      "sha256": "aa73e36c94cdb1f36180c752337c2b89ce75984ab98da61cebd11b9e8ee34f91",
+      "captureMs": 842
+    }
+  ],
+  "stdioImage": true,
+  "embeddedImageMatchesAgent": true,
+  "mobileFits": true,
+  "errors": []
+}

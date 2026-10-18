@@ -96,7 +96,7 @@ try {
         "MCP-Protocol-Version": "2025-11-25",
       },
       body: JSON.stringify({ jsonrpc: "2.0", id: ++id, method, params }),
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(45000),
     });
     assert.equal(response.status, 200);
     const body = await response.text();
@@ -136,9 +136,18 @@ try {
     "Container smoke",
   );
   assert.ok(!JSON.stringify(snapshot).includes(leaseId));
+  const observation = await rpc("tools/call", {
+    name: "observe",
+    arguments: { leaseId, image: true },
+  });
+  assert.ok(!observation.isError, "production image renderer works");
+  const frame = observation.content.find((content) => content.type === "image");
+  assert.equal(frame?.mimeType, "image/jpeg");
+  assert.ok(Buffer.from(frame.data, "base64").length > 4000);
+  assert.equal(observation.structuredContent.frame.resourceId, "rover-01");
   await rpc("tools/call", { name: "release", arguments: { leaseId } });
   console.log(
-    "Container passed: protected console/API, MCP initialization, five tools, shared rover possession and release.",
+    "Container passed: protected console/API, MCP initialization, five tools, shared rover possession, actual Chromium sensor image and release.",
   );
 } finally {
   await docker("rm", "--force", name).catch(() => {});
