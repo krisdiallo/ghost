@@ -3,7 +3,6 @@ import { MCPServer, registerViews } from "mcp-use";
 import { readFileSync } from "node:fs";
 import { z } from "zod";
 import type { ToolName, Observation } from "@ghost/shared";
-import { CAMERA_SENSOR } from "@ghost/shared";
 import { schemas } from "./contracts.js";
 import { SimError } from "./simulation.js";
 
@@ -14,7 +13,7 @@ const descriptions: Record<ToolName, string> = {
     "Acquire an exclusive expiring lease on a body. Keep the returned opaque leaseId private. Default 60s, range 5–300s. Set owner to an agent display name.",
   observe:
     "Observe through the possessed body's sensors. Returns pose, analytic cargo telemetry, last inspection and action completion. Set image:true for a server-rendered 640x360 body camera JPEG as MCP image content, plus an embedded viewer in MCP Apps hosts. Frames are frozen at their reported revision; image visibility includes scenery occlusion while cargo telemetry uses analytic range checks.",
-  act: `Control a possessed body with a typed command. move: rover x/z or airborne drone x/y/z. look: camera pan/tilt in degrees. inspect: visible nearby cargo. arm: preset home/reach/drop, grasp objectId, place. Drone: takeoff/land. stop cancels motion. Poll observe for completion. Mission: the camera is fixed 10 m high in the southwest corner, with ${CAMERA_SENSOR.range} m range; look ${CAMERA_SENSOR.homePan}/${CAMERA_SENSOR.homeTilt} and inspect crate-07; rover move 1/1.4 and inspect; drone takeoff, move 1/3.4/-1.5 and inspect, land; arm reach, grasp crate-07, drop, place.`,
+  act: "Control a possessed body with a typed command. move: rover x/z or airborne drone x/y/z. look: camera pan/tilt in degrees. inspect: visible nearby cargo. arm: preset home/reach/drop, grasp objectId, place; choose drop before placing in dispatch. Drone: takeoff/land. stop cancels motion. Poll observe for completion. Use observations to find cargo and decide where to move; movement does not avoid collisions.",
   release:
     "Release a lease and cancel its pending motion. Repeated release is harmless. A drone holds its last altitude, and a held crate stays attached.",
 };

@@ -1,0 +1,35 @@
+{
+  "task": "/root/blind_mcp_mission",
+  "contextMode": "fork_turns=none",
+  "missionPrompt": "Find and inspect tagged cargo in the warehouse. Report any condition exceptions. Stage cleared priority cargo in dispatch using suitable bodies, and verify the result. Choose your own bodies, order, route, and actions. Use camera images and structured observations. Never invent an observation or success. Stop safely if work cannot be verified. Budget 60 MCP calls excluding motion polls.",
+  "providedContext": [
+    "Mission objective",
+    "MCP tool definitions",
+    "Recorder transport instructions"
+  ],
+  "viewedObservationSteps": [
+    3,
+    5,
+    10,
+    13,
+    16,
+    23,
+    26,
+    31,
+    42
+  ],
+  "unavailableImageSteps": [
+    18,
+    33
+  ],
+  "agentReportedSourceFilesRead": false,
+  "finalReport": "Cargo 07 was inspected, cleared, staged via the arm drop preset, and verified at [6,0.55,2] using an arm camera image and independent camera telemetry. Cargo 12 inspection reported surface abrasion on the north face and an intact seal; left in storage. Arm home and empty. Drone returned and landed. Remaining bodies released. The survey found two tagged objects and does not establish inventory completeness. Image deliveries 18 and 33 timed out; successful telemetry recovery was used.",
+  "excludedInitialContext": [
+    "Parent conversation",
+    "Repository source and docs",
+    "Cargo locations and IDs",
+    "Route and body-order recipe",
+    "Expected inspection conditions",
+    "Spectator world state"
+  ]
+}

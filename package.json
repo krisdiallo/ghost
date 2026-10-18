@@ -21,9 +21,12 @@
     "check": "npm run typecheck && npm run build",
     "start": "node apps/server/dist/index.js --serve",
     "deploy": "mcp-use deploy --name ghost --dockerfile Dockerfile --branch main --wait-for-ci",
-    "test": "npm run build && npm run test:server && npm run test:web",
+    "test": "npm run build && npm run test:server && npm run test:web && npm run test:agent",
     "test:server": "node --import tsx --test apps/server/test/*.test.ts",
     "test:web": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/test/*.test.tsx",
+    "test:agent": "node --test scripts/test/*.test.mjs",
+    "agent:record": "npm run build && node scripts/agent-session.mjs",
+    "agent:command": "node scripts/agent-command.mjs",
     "capture": "npm run build && node scripts/capture-demo.mjs",
     "progress": "npm run capture && node scripts/save-progress.mjs"
   },

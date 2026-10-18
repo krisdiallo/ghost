@@ -1,0 +1,31 @@
+{
+  "at": "2026-10-18T02:40:16.254Z",
+  "source": "Authority state checked after the agent finished; not supplied to the agent.",
+  "priorityDispatchVerified": true,
+  "priorityPosition": [
+    6,
+    0.55,
+    2
+  ],
+  "taggedCargo": 3,
+  "inspectedCargo": 2,
+  "inventoryComplete": false,
+  "unseenCargo": [
+    "crate-18"
+  ],
+  "allLeasesReleased": true,
+  "armHomeAndEmpty": true,
+  "droneLanded": true,
+  "bodiesUsed": [
+    "camera-01",
+    "rover-01",
+    "arm-01",
+    "drone-01"
+  ],
+  "agentViewedImages": 9,
+  "unavailableImageSteps": [
+    18,
+    33
+  ],
+  "mcpErrorCount": 0
+}
