@@ -92,17 +92,23 @@ export class WarehouseAccess {
       header?.startsWith("Bearer ") === true && this.matches(header.slice(7))
     );
   }
-  login(token: unknown, res: ServerResponse) {
+  checkKey(token: unknown): "ok" | "limited" | "invalid" {
     const now = Date.now();
     if (now >= this.windowEnds) {
       this.attempts = 0;
       this.windowEnds = now + 60_000;
     }
     if (++this.attempts > 30) {
-      res.setHeader("Retry-After", "60");
       return "limited";
     }
     if (typeof token !== "string" || !this.matches(token)) return "invalid";
+    return "ok";
+  }
+  login(token: unknown, res: ServerResponse) {
+    const result = this.checkKey(token);
+    if (result === "limited") res.setHeader("Retry-After", "60");
+    if (result !== "ok") return result;
+    const now = Date.now();
     for (const [id, expiry] of this.sessions)
       if (expiry <= now) this.sessions.delete(id);
     if (this.sessions.size >= 100)

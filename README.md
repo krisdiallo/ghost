@@ -107,13 +107,13 @@ Wisp's **Camera / Gimbal** controls aim independently of flight, including durin
 
 ## Manufact Cloud
 
-The deployment target is **Manufact Cloud**, following the [official YC starter](https://github.com/mcp-use/hack-yc). HTTP MCP uses mcp-use. A Node 24 Dockerfile builds and serves the console, API/SSE and MCP from one authority. **The public deployment is not live yet:** this executor blocks Manufact's API and a Manufact account still needs to be connected. See [deployment status and configuration](docs/manufact-deployment.md).
+The deployment target is **Manufact Cloud**, following the [official YC starter](https://github.com/mcp-use/hack-yc). HTTP MCP uses mcp-use. A Node 24 Dockerfile builds and serves the console, API/SSE and MCP from one authority. **Live:** [GHOST warehouse](https://bold-zero-suoax.run.mcp-use.com). See [deployment status and configuration](docs/manufact-deployment.md).
 
 The default listener stays loopback-only with no key required. Remote binding requires `GHOST_HOST=0.0.0.0`, an exact HTTPS `GHOST_ORIGIN`, and a random `GHOST_ACCESS_TOKEN` of at least 32 characters in the hosting platform's secret settings. The process refuses an incomplete remote configuration. `PORT` is supported; `GHOST_PORT` overrides it.
 
-Hosted browsers enter through a private login page with an eight-hour HttpOnly, Secure cookie. MCP clients use the HTTPS `/mcp` URL with an Authorization bearer header. All control and spectator endpoints are protected; only the health probe is anonymous. The access key never enters URLs, public snapshots, or JavaScript storage. Sign out revokes the browser session. This supports header-capable MCP clients; **ChatGPT connectors need OAuth, which is not implemented**.
+Hosted browsers enter through a private login page with an eight-hour HttpOnly, Secure cookie. MCP clients use the HTTPS `/mcp` URL with an Authorization bearer header. All control and spectator endpoints are protected; health and OAuth discovery/authorization routes are public. The access key never enters URLs, public snapshots, or JavaScript storage. Sign out revokes the browser session. ChatGPT can use OAuth at the same `/mcp` URL: leave client credentials blank for automatic registration, then enter the warehouse key on GHOST’s consent page. The connector receives separate scoped tokens, never the warehouse key. Access tokens last 15 minutes; rotating refresh tokens last up to eight hours. Restarting the server requires authorization again.
 
-Keep exactly one running replica. Restarts and scale-to-zero reset the in-memory warehouse, leases and sessions. Publishing the cloud workspace alone does not publish the app. No Manufact service or public URL has been provisioned yet.
+Keep exactly one running replica. Restarts and scale-to-zero reset the in-memory warehouse, leases and sessions. The current service uses one authority in the US East region.
 
 ## Development and validation
 
@@ -145,7 +145,7 @@ Tests cover lease contention and expiry, invalid tokens, repeated release, bound
 
 The server runs one lazy, serial Chromium/software-WebGL renderer using the same warehouse scene and optical rigs as the UI. It renders a frozen authority snapshot without a spectator browser, API credentials, external assets, or network access. It sleeps between captures; up to four requests can be queued. No frame is returned if the lease expires or is released while rendering. A restart clears frames. The Manufact Docker image includes Chromium. For a non-container install, run `npx playwright install --with-deps chromium` or set `GHOST_BROWSER_PATH` to a system Chromium executable. Missing browser/WebGL support produces an explicit tool error; structured observations still work.
 
-The MCP image content is available to a multimodal agent. In compatible MCP Apps hosts, mcp-use also renders the same image in a compact in-chat card. The standalone console is custom React/Three.js; mcp-use supplies the embedded app runtime, hooks and host bridge. A local MCP Apps host is tested; **a signed-in ChatGPT connection remains unverified and requires the hosted OAuth integration**. This does not add a model or make the scripted tour autonomous.
+The MCP image content is available to a multimodal agent. In compatible MCP Apps hosts, mcp-use also renders the same image in a compact in-chat card. The standalone console is custom React/Three.js; mcp-use supplies the embedded app runtime, hooks and host bridge. A local MCP Apps host is tested; **a signed-in ChatGPT connection remains a separate account-level verification**. This does not add a model or make the scripted tour autonomous.
 
 Images include normal scene occlusion. Structured telemetry and inspection now require a clear line of sight through the shared static obstacle model. Mobile proximity telemetry is radial, and images use the aimed optical frustum. Packed-rack envelopes are conservative; this is not pixel-perfect visibility or dynamic-object occlusion. `node scripts/capture-sensors.mjs` verifies all four actual JPEGs, HTTP/stdio delivery, pixel identity in the embedded card, and the phone layout.
 

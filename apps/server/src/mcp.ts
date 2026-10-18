@@ -67,7 +67,7 @@ async function execute(dispatch: Dispatch, name: ToolName, input: unknown) {
 
 // Manufact's SDK serves HTTP; stdio retains the official SDK adapter below.
 // Both dispatch into the same long-lived Simulation, never a per-request world.
-export function createHttpMcp(dispatch: Dispatch) {
+export function createHttpMcp(dispatch: Dispatch, oauthEnabled = false) {
   const server = new MCPServer({
     name: "ghost",
     version: "0.2.0",
@@ -97,6 +97,15 @@ export function createHttpMcp(dispatch: Dispatch) {
         name,
         description: descriptions[name],
         inputSchema: schemas[name],
+        ...(oauthEnabled
+          ? {
+              _meta: {
+                securitySchemes: [
+                  { type: "oauth2", scopes: ["ghost:control"] },
+                ],
+              },
+            }
+          : {}),
         ...(name === "observe"
           ? {
               outputSchema: z.object({

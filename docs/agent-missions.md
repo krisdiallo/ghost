@@ -63,4 +63,4 @@ Keep the original trace unchanged. Compare final authority state against the age
 
 `scripts/save-agent-progress.mjs` validates image hashes and cleanup, reads an explicit image-viewing attestation, and publishes a mobile report. The initial run's full-world comparison is in `docs/progress/agent/verification.json`; it was not supplied to the agent during its mission.
 
-This work provides a real agent-controlled example and reusable recording transport. A standalone model runner, one-click autonomous UI mode, a guaranteed exhaustive inventory planner, hosted Manufact endpoint, and ChatGPT OAuth are not implemented.
+This work provides a real agent-controlled example and reusable recording transport. A standalone model runner, one-click autonomous UI mode, and a guaranteed exhaustive inventory planner are not implemented. Manufact hosting and OAuth are now available; see [deployment details](manufact-deployment.md).
