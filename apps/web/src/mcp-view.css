@@ -1,0 +1,97 @@
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  background: transparent;
+}
+.body-card {
+  font:
+    14px/1.5 system-ui,
+    sans-serif;
+  color: #e8eee9;
+  background: #101b1d;
+  border: 1px solid #324240;
+  border-radius: 18px;
+  overflow: hidden;
+  padding: 18px;
+  max-width: 800px;
+  margin: auto;
+}
+.body-card header,
+.body-readout {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  justify-content: space-between;
+  font:
+    10px/1.5 ui-monospace,
+    monospace;
+  letter-spacing: 1.2px;
+  color: #adbfbb;
+}
+.ghost-word {
+  color: #d9ff8d;
+  font-weight: 800;
+  letter-spacing: 3px;
+}
+.body-card h2 {
+  margin: 12px 0;
+  font-size: 23px;
+  font-weight: 500;
+}
+.body-card h2 small {
+  font-size: 11px;
+  color: #adbfbb;
+  margin-left: 8px;
+}
+.body-image {
+  position: relative;
+  background: #14232c;
+  aspect-ratio: 16/9;
+  border-radius: 10px;
+  overflow: hidden;
+}
+.body-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.body-image span {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 5px 8px;
+  background: #0c161ee0;
+  color: #d9ff8d;
+  font:
+    10px ui-monospace,
+    monospace;
+  letter-spacing: 1px;
+}
+.body-card p {
+  font-size: 11px;
+  color: #b9c9c5;
+}
+.body-readout {
+  padding: 12px 0;
+  border-block: 1px solid #31413e;
+}
+.body-card .body-result {
+  padding: 12px;
+  background: #243c30;
+  border-radius: 8px;
+  color: #dbf6d2;
+}
+.body-card footer {
+  font-size: 10px;
+  color: #90aaa3;
+  padding-top: 12px;
+}
+.body-empty {
+  padding: 24px;
+  background: #203031;
+  border-radius: 10px;
+  color: #adc1ba;
+}

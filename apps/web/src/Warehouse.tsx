@@ -12,7 +12,7 @@ import type { ThreeEvent } from "@react-three/fiber";
 import { CanvasTexture, Fog, Group, Vector3, MOUSE, TOUCH } from "three";
 import { Box, Cylinder, Beam, Text, Ring } from "./ScenePrimitives";
 import { IndustrialHall } from "./IndustrialHall";
-import { WAREHOUSE } from "@ghost/shared";
+import { WAREHOUSE, sensorPose } from "@ghost/shared";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import type { Body, ResourceKind, Snapshot, Vec3 } from "@ghost/shared";
 
@@ -240,6 +240,22 @@ function Arm({ preset }: { preset: Body["preset"] }) {
       </mesh>
       <group position={end}>
         <Box size={[0.45, 0.17, 0.3]} color={dark} />
+        <Beam
+          from={[0, 0.08, 0.1]}
+          to={[0, 0.48, 0.5]}
+          width={0.075}
+          color={dark}
+        />
+        <Box
+          position={[0, 0.48, 0.5]}
+          size={[0.25, 0.18, 0.22]}
+          color={metal}
+        />
+        <Box
+          position={[0, 0.4, 0.55]}
+          size={[0.13, 0.08, 0.04]}
+          color="#172a32"
+        />
         <Box
           position={[-0.2, -0.18, 0]}
           size={[0.07, 0.28, 0.25]}
@@ -300,20 +316,24 @@ function BodyMesh({
   body,
   selected,
   onSelect,
+  sensor = false,
 }: {
   body: Body;
   selected: boolean;
   onSelect: (id: string) => void;
+  sensor?: boolean;
 }) {
   const group = useRef<Group>(null);
   const initialPosition = useRef<Vec3>([...body.position]);
   const color = BODY_COLORS[body.kind];
   useFrame((_, delta) => {
     if (!group.current) return;
-    group.current.position.lerp(
-      new Vector3(...body.position),
-      1 - Math.exp(-delta * 18),
-    );
+    if (sensor) group.current.position.set(...body.position);
+    else
+      group.current.position.lerp(
+        new Vector3(...body.position),
+        1 - Math.exp(-delta * 18),
+      );
     if (body.kind !== "camera" && body.kind !== "arm")
       group.current.rotation.y = body.heading;
   });
@@ -343,13 +363,13 @@ function BodyMesh({
           <Camera
             pan={body.pan}
             tilt={body.tilt}
-            active={selected || !!body.lease}
+            active={!sensor && (selected || !!body.lease)}
           />
         ) : (
           <Arm preset={body.preset} />
         )}
       </group>
-      {body.kind !== "camera" && (
+      {!sensor && body.kind !== "camera" && (
         <Ring
           position={[body.position[0], 0.035, body.position[2]]}
           radius={selected ? 1.25 : 1}
@@ -357,7 +377,7 @@ function BodyMesh({
           opacity={selected ? 1 : 0.25}
         />
       )}
-      {body.lease && (
+      {!sensor && body.lease && (
         <GhostSignal
           position={[
             body.position[0],
@@ -366,7 +386,7 @@ function BodyMesh({
           ]}
         />
       )}
-      {body.lease && body.kind !== "camera" && (
+      {!sensor && body.lease && body.kind !== "camera" && (
         <Ring
           position={[body.position[0], 0.04, body.position[2]]}
           radius={1.4}
@@ -374,18 +394,20 @@ function BodyMesh({
           opacity={0.5}
         />
       )}
-      <Text
-        text={`${body.label.toUpperCase()}${body.lease ? " •" : ""}`}
-        position={[
-          body.position[0] +
-            (body.kind === "drone" ? -0.8 : body.kind === "arm" ? 0.5 : 0),
-          body.position[1] + (body.kind === "arm" ? 3.2 : 1.7),
-          body.position[2],
-        ]}
-        color={selected ? "#f0faf2" : color}
-        width={2.1}
-      />
-      {body.action?.status === "running" && body.action.target && (
+      {!sensor && (
+        <Text
+          text={`${body.label.toUpperCase()}${body.lease ? " •" : ""}`}
+          position={[
+            body.position[0] +
+              (body.kind === "drone" ? -0.8 : body.kind === "arm" ? 0.5 : 0),
+            body.position[1] + (body.kind === "arm" ? 3.2 : 1.7),
+            body.position[2],
+          ]}
+          color={selected ? "#f0faf2" : color}
+          width={2.1}
+        />
+      )}
+      {!sensor && body.action?.status === "running" && body.action.target && (
         <>
           <Ring
             position={[body.action.target[0], 0.05, body.action.target[2]]}
@@ -649,6 +671,49 @@ class WebGLErrorBoundary extends Component<
     );
   }
 }
+function SensorCamera({
+  body,
+  capture,
+}: {
+  body: Body;
+  capture?: (data: string) => void;
+}) {
+  const done = useRef(false);
+  const frames = useRef(0);
+  const invalidate = useThree((state) => state.invalidate);
+  useEffect(() => {
+    done.current = false;
+    frames.current = 0;
+    invalidate();
+  }, [capture, invalidate]);
+  const camera = useThree((state) => state.camera);
+  useEffect(
+    () => () => {
+      if ("fov" in camera) {
+        (camera as import("three").PerspectiveCamera).fov = 42;
+        (camera as import("three").PerspectiveCamera).updateProjectionMatrix();
+      }
+    },
+    [camera],
+  );
+  useFrame(({ camera, gl, scene, invalidate }) => {
+    const rig = sensorPose(body);
+    camera.position.set(...rig.position);
+    camera.lookAt(...rig.target);
+    if ("fov" in camera) {
+      (camera as import("three").PerspectiveCamera).fov = rig.fov;
+      (camera as import("three").PerspectiveCamera).updateProjectionMatrix();
+    }
+    gl.render(scene, camera);
+    if (capture && !done.current && ++frames.current > 3) {
+      done.current = true;
+      capture(gl.domElement.toDataURL("image/jpeg", 0.85).split(",")[1]!);
+    }
+    if (capture && !done.current) invalidate();
+  }, 1);
+  return null;
+}
+
 export function Warehouse({
   snapshot,
   selected,
@@ -660,6 +725,8 @@ export function Warehouse({
   mode = "orbit",
   zoom = { id: 0, factor: 1 },
   follow = false,
+  sensorId,
+  capture,
 }: {
   snapshot: Snapshot;
   selected: string;
@@ -671,13 +738,16 @@ export function Warehouse({
   mode?: "orbit" | "pan";
   zoom?: { id: number; factor: number };
   follow?: boolean;
+  sensorId?: string | undefined;
+  capture?: ((data: string) => void) | undefined;
 }) {
   return (
     <WebGLErrorBoundary>
       <Canvas
+        frameloop={capture ? "demand" : "always"}
         shadows
-        dpr={[1, 1.6]}
-        camera={{ position: [44, 38, 44], fov: 42, far: 600 }}
+        dpr={capture ? 1 : [1, 1.6]}
+        camera={{ position: [44, 38, 44], fov: 42, near: 0.025, far: 600 }}
         gl={{ antialias: true, alpha: false }}
         fallback={
           <div className="scene-fallback">
@@ -725,7 +795,30 @@ export function Warehouse({
                 size={[0.25, 0.22, 0.02]}
                 color="#eeeddb"
               />
-              {object.id === "crate-07" && (
+              {[0, Math.PI / 2, Math.PI, -Math.PI / 2].map((angle) => (
+                <group key={angle} rotation={[0, angle, 0]}>
+                  <Box
+                    position={[0, 0.08, 0.485]}
+                    size={[0.72, 0.26, 0.018]}
+                    color="#eeeddb"
+                  />
+                  <Text
+                    text={`CARGO ${object.id.slice(-2)}`}
+                    position={[0, 0.08, 0.5]}
+                    color="#1b3036"
+                    width={0.65}
+                    billboard={false}
+                  />
+                </group>
+              ))}
+              <Text
+                text={`CARGO ${object.id.slice(-2)}`}
+                position={[0, 0.526, 0]}
+                color="#1b3036"
+                width={0.78}
+                floor
+              />
+              {!sensorId && object.id === "crate-07" && (
                 <Text
                   text="CARGO 07"
                   position={[0, 1.3, 0]}
@@ -735,29 +828,39 @@ export function Warehouse({
               )}
             </group>
           ))}
-          {snapshot.bodies.map((body) => (
-            <BodyMesh
-              key={body.id}
-              body={body}
-              selected={selected === body.id}
-              onSelect={onSelect}
-            />
-          ))}
+          {snapshot.bodies
+            .filter((body) => body.id !== sensorId)
+            .map((body) => (
+              <BodyMesh
+                key={body.id}
+                body={body}
+                selected={selected === body.id}
+                onSelect={onSelect}
+                sensor={!!sensorId}
+              />
+            ))}
         </Suspense>
-        <Controls
-          focus={focus}
-          view={view}
-          reset={reset}
-          mode={mode}
-          zoom={zoom}
-          followId={follow ? selected : null}
-          follow={
-            follow
-              ? (snapshot.bodies.find((b) => b.id === selected)?.position ??
-                null)
-              : null
-          }
-        />
+        {sensorId && snapshot.bodies.find((b) => b.id === sensorId) ? (
+          <SensorCamera
+            body={snapshot.bodies.find((b) => b.id === sensorId)!}
+            {...(capture ? { capture } : {})}
+          />
+        ) : (
+          <Controls
+            focus={focus}
+            view={view}
+            reset={reset}
+            mode={mode}
+            zoom={zoom}
+            followId={follow ? selected : null}
+            follow={
+              follow
+                ? (snapshot.bodies.find((b) => b.id === selected)?.position ??
+                  null)
+                : null
+            }
+          />
+        )}
       </Canvas>
     </WebGLErrorBoundary>
   );

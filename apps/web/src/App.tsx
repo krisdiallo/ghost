@@ -12,6 +12,7 @@ import { BOUNDS, CAPABILITIES, CAMERA_SENSOR, WAREHOUSE } from "@ghost/shared";
 import { request, RequestError, tool } from "./api";
 import { BodyIcon, Ghost, UIIcon } from "./icons";
 import { BODY_COLORS, Warehouse } from "./Warehouse";
+import { SensorPanel } from "./SensorPanel";
 import type { WarehouseView } from "./Warehouse";
 import { WarehouseMap, destinations } from "./WarehouseMap";
 
@@ -140,6 +141,7 @@ export function App() {
   const [following, setFollowing] = useState(false);
   const [immersive, setImmersive] = useState(false);
   const [mapVisible, setMapVisible] = useState(true);
+  const [bodyCamera, setBodyCamera] = useState(false);
   useEffect(() => {
     if (!immersive) return;
     const previous = document.body.style.overflow;
@@ -574,6 +576,13 @@ export function App() {
               </span>
             </div>
             <div className="viewport-actions">
+              <button
+                className="immersive-toggle"
+                aria-pressed={bodyCamera}
+                onClick={() => setBodyCamera((value) => !value)}
+              >
+                {bodyCamera ? "Warehouse view" : "Body camera"}
+              </button>
               {immersive && (
                 <button
                   className="immersive-toggle"
@@ -600,7 +609,11 @@ export function App() {
           </div>
           <div
             className={`scene ${navigation ? "navigating" : ""}`}
-            aria-label="Interactive 3D warehouse. Drag to orbit; choose Pan to drag the camera. Pinch, scroll, or use zoom buttons. Use the map to navigate."
+            aria-label={
+              bodyCamera
+                ? "Live body camera. Move the possessed body using its controls or map. Choose Warehouse view to orbit, pan and zoom."
+                : "Interactive 3D warehouse. Drag to orbit; choose Pan to drag the camera. Pinch, scroll, or use zoom buttons. Use the map to navigate."
+            }
           >
             {snapshot ? (
               <Warehouse
@@ -614,6 +627,7 @@ export function App() {
                 mode={cameraMode}
                 zoom={cameraZoom}
                 follow={following}
+                sensorId={bodyCamera ? selected : undefined}
               />
             ) : (
               <div className="scene-loading">
@@ -643,6 +657,15 @@ export function App() {
                 <Ghost size={20} />
                 <span>{snapshot.demo.phase}</span>
               </div>
+            )}
+            {body && (
+              <SensorPanel
+                key={body.id}
+                body={body}
+                leaseId={owns ? tokens[body.id]?.leaseId : undefined}
+                live={live}
+                compact
+              />
             )}
             {snapshot && mapVisible && (
               <WarehouseMap
@@ -816,15 +839,17 @@ export function App() {
               </div>
             )}
             <div className="scene-view-label">
-              {following
-                ? `FOLLOWING / ${body?.label.toUpperCase() ?? "BODY"}`
-                : focus
-                  ? "BODY FOCUS"
-                  : view === "facility"
-                    ? "FACILITY OVERVIEW"
-                    : view === "top"
-                      ? "FLOOR PLAN"
-                      : "EMBODIMENT BAY"}
+              {bodyCamera
+                ? `${body?.label.toUpperCase()} / LIVE BODY CAMERA`
+                : following
+                  ? `FOLLOWING / ${body?.label.toUpperCase() ?? "BODY"}`
+                  : focus
+                    ? "BODY FOCUS"
+                    : view === "facility"
+                      ? "FACILITY OVERVIEW"
+                      : view === "top"
+                        ? "FLOOR PLAN"
+                        : "EMBODIMENT BAY"}
               <span>
                 {view === "facility" && !focus
                   ? "2,816 M² · 16 STORAGE BAYS"
@@ -837,6 +862,7 @@ export function App() {
                 aria-label="Reset warehouse view"
                 aria-pressed={view === "facility" && !focus}
                 onClick={() => {
+                  setBodyCamera(false);
                   setFocus(null);
                   setView("facility");
                   setFollowing(false);
@@ -849,6 +875,7 @@ export function App() {
                 title="Top view"
                 aria-label="Toggle top view"
                 onClick={() => {
+                  setBodyCamera(false);
                   setFocus(null);
                   setFollowing(false);
                   setView((v) => (v === "top" ? "facility" : "top"));
@@ -861,6 +888,7 @@ export function App() {
                 aria-label="Mission view"
                 aria-pressed={view === "mission" && !focus}
                 onClick={() => {
+                  setBodyCamera(false);
                   setFocus(null);
                   setView("mission");
                   setFollowing(false);
@@ -875,6 +903,7 @@ export function App() {
                 aria-pressed={following}
                 disabled={!body}
                 onClick={() => {
+                  setBodyCamera(false);
                   if (following) setFollowing(false);
                   else if (body) {
                     setFocus([...body.position]);
@@ -888,7 +917,10 @@ export function App() {
                 title="Drag to orbit"
                 aria-label="Orbit camera"
                 aria-pressed={cameraMode === "orbit"}
-                onClick={() => setCameraMode("orbit")}
+                onClick={() => {
+                  setBodyCamera(false);
+                  setCameraMode("orbit");
+                }}
               >
                 <UIIcon name="reset" size={18} />
                 <span className="camera-tool-label">Orbit</span>
@@ -897,7 +929,10 @@ export function App() {
                 title="Drag to pan"
                 aria-label="Pan camera"
                 aria-pressed={cameraMode === "pan"}
-                onClick={() => setCameraMode("pan")}
+                onClick={() => {
+                  setBodyCamera(false);
+                  setCameraMode("pan");
+                }}
               >
                 <UIIcon name="pan" size={18} />
                 <span className="camera-tool-label">Pan</span>
@@ -905,6 +940,7 @@ export function App() {
               <button
                 title="Zoom in"
                 aria-label="Zoom in"
+                disabled={bodyCamera}
                 onClick={() =>
                   setCameraZoom((v) => ({ id: v.id + 1, factor: 0.75 }))
                 }
@@ -914,6 +950,7 @@ export function App() {
               <button
                 title="Zoom out"
                 aria-label="Zoom out"
+                disabled={bodyCamera}
                 onClick={() =>
                   setCameraZoom((v) => ({ id: v.id + 1, factor: 1.33 }))
                 }
@@ -945,8 +982,15 @@ export function App() {
               <span className="compass">
                 N <UIIcon name="arrow" size={10} />
               </span>{" "}
-              {cameraMode === "pan" ? "Drag to pan" : "Drag to orbit"}{" "}
-              <span className="dot-separator">·</span> Scroll / pinch to zoom
+              {bodyCamera ? (
+                "Body-mounted optics · move using controls or map"
+              ) : (
+                <>
+                  {cameraMode === "pan" ? "Drag to pan" : "Drag to orbit"}{" "}
+                  <span className="dot-separator">·</span> Scroll / pinch to
+                  zoom
+                </>
+              )}
             </span>
             <span>
               SIMULATION AUTHORITY{" "}
@@ -1308,6 +1352,12 @@ export function App() {
                   </>
                 ) : (
                   <div className="observation-panel">
+                    <SensorPanel
+                      key={body.id}
+                      body={body}
+                      leaseId={owns ? tokens[body.id]?.leaseId : undefined}
+                      live={live}
+                    />
                     <div className="command-header">
                       <h3>Sensor output</h3>
                       <span>STRUCTURED</span>
@@ -1362,7 +1412,8 @@ export function App() {
                         )}
                         <p className="control-note">
                           Authoritative simulation data. Updates every 0.8s.
-                          Images are not generated.
+                          Analytic cargo telemetry; the camera image also
+                          includes scenery occlusion.
                         </p>
                       </>
                     )}

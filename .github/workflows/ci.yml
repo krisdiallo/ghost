@@ -26,6 +26,8 @@ jobs:
         run: node scripts/capture-demo.mjs
       - name: Verify private phone access and an authenticated MCP agent
         run: node scripts/capture-access.mjs
+      - name: Verify all body images, stdio images and the embedded MCP App
+        run: node scripts/capture-sensors.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -35,7 +37,7 @@ jobs:
           retention-days: 14
   container:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -6,7 +6,7 @@ GHOST targets **Manufact Cloud**, matching the [official YC starter](https://git
 
 ## Service configuration
 
-Import the existing private `krisdiallo/ghost` repository through the Manufact GitHub App. Use `main`, repository root `.`, Dockerfile `Dockerfile`, port `3000`, and enable **Wait for CI**. The image builds all three workspaces with Node 24 and serves the web console, API/SSE, and `/mcp` in one process as an unprivileged user. Pushes to the production branch can then deploy automatically.
+Import the existing private `krisdiallo/ghost` repository through the Manufact GitHub App. Use `main`, repository root `.`, Dockerfile `Dockerfile`, port `3000`, and enable **Wait for CI**. The image builds all three workspaces with Node 24 and serves the web console, API/SSE, and `/mcp` in one process as an unprivileged user. It includes Chromium for on-demand body-camera image observations; one renderer sleeps between captures. HTTP observations also support an inline mcp-use MCP Apps card. Pushes to the production branch can then deploy automatically.
 
 Set runtime variables through Manufact's environment/secret settings:
 

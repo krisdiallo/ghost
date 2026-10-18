@@ -4,9 +4,10 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { resolve, extname, sep } from "node:path";
 import { toNodeHandler } from "mcp-use/node";
-import type { ToolName } from "@ghost/shared";
+import type { ToolName, Observation, SensorFrame } from "@ghost/shared";
 import { Simulation, SimError } from "./simulation.js";
 import { createHttpMcp } from "./mcp.js";
+import { SensorRenderer } from "./renderer.js";
 import {
   accessConfig,
   WarehouseAccess,
@@ -64,7 +65,21 @@ export async function startWarehouse(
   const config = accessConfig(host, options);
   const configuredOrigin = config.origin;
   const access = new WarehouseAccess(config.token, config.secure);
-  const mcp = createHttpMcp((name, input) => sim.tool(name, input));
+  const renderer = new SensorRenderer();
+  const frames = new Map<string, SensorFrame>();
+  const dispatch = async (name: ToolName, input: unknown) => {
+    const result = sim.tool(name, input);
+    if (name !== "observe" || !(input as { image?: boolean }).image)
+      return result;
+    const observation = result as Observation;
+    const snapshot = sim.snapshot();
+    const frame = await renderer.capture(snapshot, observation.body.id);
+    // A revoked/expired capability must never receive an in-flight image.
+    sim.observe((input as { leaseId: string }).leaseId);
+    frames.set(observation.body.id, frame);
+    return { ...observation, frame };
+  };
+  const mcp = createHttpMcp(dispatch);
   const handleMcp = toNodeHandler(mcp);
   const allowedHosts = new Set([
     `localhost:${port}`,
@@ -168,6 +183,13 @@ export async function startWarehouse(
         sim.tick();
         return json(res, 200, sim.snapshot());
       }
+      if (url.pathname.startsWith("/api/frames/") && req.method === "GET") {
+        const id = url.pathname.slice("/api/frames/".length);
+        const frame = frames.get(id);
+        return json(res, 200, {
+          frame: frame?.instanceId === sim.snapshot().instanceId ? frame : null,
+        });
+      }
       if (url.pathname === "/api/events" && req.method === "GET") {
         if (streams.size >= 40)
           return json(res, 503, {
@@ -194,7 +216,11 @@ export async function startWarehouse(
             code: "UNKNOWN_TOOL",
             message: "Unknown tool.",
           });
-        return json(res, 200, sim.tool(name as ToolName, await readJson(req)));
+        return json(
+          res,
+          200,
+          await dispatch(name as ToolName, await readJson(req)),
+        );
       }
       if (
         req.method === "POST" &&
@@ -203,6 +229,7 @@ export async function startWarehouse(
         )
       ) {
         await readJson(req);
+        if (url.pathname !== "/api/demo/stop") frames.clear();
         if (url.pathname === "/api/demo/start")
           return json(res, 200, sim.startDemo());
         if (url.pathname === "/api/demo/stop") sim.stopDemo();
@@ -293,6 +320,7 @@ export async function startWarehouse(
     sim,
     close: async () => {
       sim.stopDemo();
+      await renderer.close();
       for (const res of streams.keys()) res.end();
       server.closeAllConnections();
       await new Promise<void>((resolve, reject) =>

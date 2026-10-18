@@ -59,7 +59,7 @@ if (!process.argv.includes("--serve")) {
       method: "POST",
       headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify(input),
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(45000),
     });
     const result = (await response.json()) as Record<string, unknown>;
     if (!response.ok)

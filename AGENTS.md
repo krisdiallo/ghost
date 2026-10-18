@@ -24,6 +24,7 @@ Read `README.md` for current functionality, `docs/design-plan.md` for the implem
 - Preserve token privacy: lease IDs never go in public snapshots or logs. Agent display names are not authentication.
 - Preserve focused tests for leases, command validation, cancellation, and state synchronization.
 - Public snapshots are spectator views. Agent observations use per-body sensor visibility and range.
+- `observe({leaseId,image:true})` adds a server-rendered JPEG and an HTTP MCP Apps view using mcp-use. Both optics and scene are shared with the live viewer. Never substitute an orbit-camera screenshot for an agent sensor frame. Captured frames are historical and revision-tagged. Renderer assets are intercepted locally; never give the renderer credentials or Internet access. See the README for Chromium setup and `scripts/capture-sensors.mjs` for real image and embedded-view checks.
 - This is kinematic simulation, without collision avoidance, realistic physics, or real hardware.
 - Keep the API loopback-only by default. Remote binding requires a private `GHOST_ACCESS_TOKEN` and exact HTTPS `GHOST_ORIGIN`; browser sessions and MCP bearer headers protect every endpoint except the health probe. This is a shared-key demo, not per-user OAuth. See `docs/manufact-deployment.md` for the Manufact deployment and current access blockers. Use one replica for the in-memory authority.
 - Avoid extra frameworks, databases, hardware integrations, model providers, or deployment infrastructure unless requested.

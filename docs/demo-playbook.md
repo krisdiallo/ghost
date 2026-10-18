@@ -61,3 +61,9 @@ Ctrl+C on the standalone process. All state is in memory. A fresh start resets t
 ## Visual progress
 
 `npm run progress` captures the actual warehouse, records the four-body mission, runs a touch-emulated rover inspection, and refreshes `docs/progress/latest`. CI independently captures each integrated change and retains the results for 14 days. Only publish reports from passing runs; never use concept images as evidence of working behavior.
+
+## Body vision through MCP
+
+Choose **Body camera** to look through the selected machine. Open **Agent vision** to see its latest captured frame. An MCP agent can call `observe` with `{leaseId,image:true}` to receive a real JPEG plus frame revision and timestamp. Compatible MCP Apps hosts show the same frame in an embedded card. Use `image:false` (or omit it) for cheap motion polling. After a move completes, request another image to see the new position. Browser possession also enables **Capture sensor frame**, which prepares a frame without automatically sending it to a model.
+
+For a repeatable inspection: possess Scout, move to X 1 / Z 1.4, poll observe until completed, capture an image, inspect crate-07, observe with an image again, then release. A moving world can advance while the renderer works; the captured revision identifies the image’s historical state. This is rendered simulation vision; the guided tour still uses a script, and no LLM has been added. Run `node scripts/capture-sensors.mjs` to verify all bodies, image bytes over HTTP and stdio, and the embedded app in a local test host.

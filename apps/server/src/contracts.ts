@@ -43,7 +43,12 @@ export const schemas = {
       owner: z.string().trim().min(1).max(48).default("MCP agent"),
     })
     .strict(),
-  observe: z.object({ leaseId: z.string().min(1).max(100) }).strict(),
+  observe: z
+    .object({
+      leaseId: z.string().min(1).max(100),
+      image: z.boolean().optional(),
+    })
+    .strict(),
   act: z
     .object({ leaseId: z.string().min(1).max(100), command: commandSchema })
     .strict(),

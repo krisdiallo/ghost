@@ -24,3 +24,5 @@ The camera checks exposed a portrait-view issue: pulling back to fit the larger 
 The complete scripted camera → rover → drone → arm tour still passed **4 / 4 mission steps**. This remains a simulation and a scripted tour; an external MCP agent supplies real reasoning. Authentication is a shared demo key. Header-capable clients can connect; ChatGPT's OAuth connector flow is not implemented.
 
 The deployment uses mcp-use and targets one Node container on Manufact, preserving one shared in-memory world. Going live still requires network access, Manufact login, GitHub App repository access, runtime secret configuration, and verification that only one replica runs. See [deployment configuration](../../manufact-deployment.md).
+
+**New:** [All four body camera views, actual MCP image observations, and an embedded mcp-use MCP App](../vision/README.md). The local test host and container are verified; hosted ChatGPT OAuth is still outstanding.

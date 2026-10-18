@@ -69,7 +69,7 @@ export class Simulation {
   private initialize() {
     this.bodies = DEMO_RESOURCES.map((r) => ({
       ...structuredClone(r),
-      heading: 0,
+      heading: r.kind === "rover" || r.kind === "drone" ? Math.PI : 0,
       pan: r.kind === "camera" ? CAMERA_SENSOR.homePan : 0,
       tilt: r.kind === "camera" ? CAMERA_SENSOR.homeTilt : 0,
       preset: "home",
@@ -495,10 +495,9 @@ export class Simulation {
           "Not enough lease time remains for this motion. Release and possess again.",
         );
       if (command.type === "takeoff") body.airborne = true;
-      body.heading = Math.atan2(
-        target[0] - body.position[0],
-        target[2] - body.position[2],
-      );
+      const dx = target[0] - body.position[0];
+      const dz = target[2] - body.position[2];
+      if (Math.hypot(dx, dz) > 0.000001) body.heading = Math.atan2(dx, dz);
       this.motions.set(body.id, {
         from: [...body.position],
         target,
