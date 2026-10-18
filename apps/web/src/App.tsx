@@ -14,6 +14,7 @@ import { BodyIcon, Ghost, UIIcon } from "./icons";
 import { BODY_COLORS, Warehouse } from "./Warehouse";
 import { SensorPanel } from "./SensorPanel";
 import { GimbalControls } from "./GimbalControls";
+import { FleetOperations } from "./FleetOperations";
 import { SurveyPanel } from "./SurveyPanel";
 import type { WarehouseView } from "./Warehouse";
 import { WarehouseMap, destinations } from "./WarehouseMap";
@@ -130,6 +131,7 @@ export function App() {
   const [time, setTime] = useState(Date.now());
   const [clockOffset, setClockOffset] = useState(0);
   const [navigation, setNavigation] = useState(false);
+  const [placingBox, setPlacingBox] = useState(false);
   const [targetX, setTargetX] = useState("1");
   const [targetZ, setTargetZ] = useState("1.4");
   const [altitude, setAltitude] = useState("3.4");
@@ -333,6 +335,12 @@ export function App() {
     setFocus(activeBody ? [...activeBody.position] : null);
     setFollowing(true);
   }, [snapshot?.demo.phase, snapshot?.demo.running]);
+  const placeBox = (x: number, z: number) => {
+    void perform(async () => {
+      await tool("operations", { action: "place_box", x, z });
+      setPlacingBox(false);
+    });
+  };
   async function perform(work: () => Promise<void>) {
     if (busy) return;
     setBusy(true);
@@ -442,7 +450,9 @@ export function App() {
           WAREHOUSE / 01
         </span>
         <div className="topbar-actions">
-          <a className="quiet lab-nav-link" href="#lab">Experiment lab ↗</a>
+          <a className="quiet lab-nav-link" href="#lab">
+            Experiment lab ↗
+          </a>
           <span className={`connection ${connection}`} role="status">
             <i />
             {connection === "live"
@@ -481,14 +491,29 @@ export function App() {
           <h1>
             Intelligence, <span>embodied.</span>
           </h1>
-          <p>One ghost. Four bodies. A warehouse of possibilities.</p>
+          <p>
+            Local autonomy handles the routine. Your ghost handles the
+            exception.
+          </p>
         </div>
         <div className="heading-actions">
+          <button
+            className="primary enter-live"
+            onClick={() => {
+              setImmersive(true);
+              setSelected("rover-01");
+              const rover = snapshot?.bodies.find((b) => b.id === "rover-01");
+              setFocus(rover ? [...rover.position] : null);
+              setFollowing(true);
+            }}
+          >
+            Enter live warehouse <UIIcon name="expand" />
+          </button>
           <div className="demo-caption">
-            MEET YOUR NEXT BODY<span>Four bodies · one scripted mission</span>
+            SCRIPTED WALKTHROUGH<span>Classic four-body tour</span>
           </div>
           <button
-            className={`primary demo-button ${snapshot?.demo.running ? "stop-demo" : ""}`}
+            className={`legacy-tour demo-button ${snapshot?.demo.running ? "stop-demo" : ""}`}
             disabled={!live || busy}
             onClick={demo}
           >
@@ -519,6 +544,25 @@ export function App() {
             : "Connecting to the warehouse authority… Start the project with npm run dev if this takes more than a moment."}
         </div>
       )}
+      <FleetOperations
+        snapshot={snapshot}
+        disabled={!live || busy}
+        placing={placingBox}
+        setPlacing={setPlacingBox}
+        leaseId={
+          tokens[
+            snapshot?.operations?.incidents.find((i) => !i.resolvedAt)
+              ?.resourceId ?? ""
+          ]?.leaseId
+        }
+        focus={(id) => {
+          const b = snapshot?.bodies.find((b) => b.id === id);
+          setSelected(id);
+          setBodyCamera(false);
+          setFocus(b ? [...b.position] : null);
+          setFollowing(true);
+        }}
+      />
       <section className="operations" aria-label="Warehouse operations">
         <aside className="fleet panel">
           <div className="section-heading">
@@ -622,12 +666,36 @@ export function App() {
                 : "Interactive 3D warehouse. Drag to orbit; choose Pan to drag the camera. Pinch, scroll, or use zoom buttons. Use the map to navigate."
             }
           >
+            {immersive && (
+              <FleetOperations
+                compact
+                snapshot={snapshot}
+                disabled={!live || busy}
+                placing={placingBox}
+                setPlacing={setPlacingBox}
+                leaseId={
+                  tokens[
+                    snapshot?.operations?.incidents.find((i) => !i.resolvedAt)
+                      ?.resourceId ?? ""
+                  ]?.leaseId
+                }
+                focus={(id) => {
+                  const b = snapshot?.bodies.find((b) => b.id === id);
+                  setSelected(id);
+                  setBodyCamera(false);
+                  setFocus(b ? [...b.position] : null);
+                  setFollowing(true);
+                }}
+              />
+            )}
             {snapshot ? (
               <Warehouse
                 snapshot={snapshot}
                 selected={selected}
                 onSelect={chooseBody}
-                navigate={navigation && canAct ? move : null}
+                navigate={
+                  placingBox ? placeBox : navigation && canAct ? move : null
+                }
                 focus={focus}
                 view={view}
                 reset={cameraReset}
@@ -680,11 +748,13 @@ export function App() {
                 selected={selected}
                 select={chooseBody}
                 navigate={
-                  canAct &&
-                  (body?.kind === "rover" ||
-                    (body?.kind === "drone" && body.airborne))
-                    ? move
-                    : null
+                  placingBox
+                    ? placeBox
+                    : canAct &&
+                        (body?.kind === "rover" ||
+                          (body?.kind === "drone" && body.airborne))
+                      ? move
+                      : null
                 }
               />
             )}
@@ -725,7 +795,12 @@ export function App() {
                 <div className="pilot-actions">
                   {!owns ? (
                     <button
-                      disabled={!live || busy || !!body.lease}
+                      disabled={
+                        !live ||
+                        busy ||
+                        (!!body.lease &&
+                          !body.lease.owner.startsWith("Local autonomy · "))
+                      }
                       onClick={possess}
                     >
                       Possess {body.label}
@@ -1094,7 +1169,9 @@ export function App() {
                           />
                         </div>
                       )}
-                      {!body.lease ? (
+                      {!body.lease ||
+                      (!owns &&
+                        body.lease.owner.startsWith("Local autonomy · ")) ? (
                         <div className="possession-row">
                           <label className="sr-only" htmlFor="lease-duration">
                             Lease duration

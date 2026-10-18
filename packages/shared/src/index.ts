@@ -108,6 +108,7 @@ export interface MissionStep {
   complete: boolean;
 }
 export interface Snapshot {
+  operations?: import("./operations.js").OperationsState;
   layout?: { obstacles: import("./geometry.js").Obstacle[] };
   instanceId: string;
   revision: number;
@@ -215,7 +216,7 @@ export type BodyToolName =
   | "observe"
   | "act"
   | "release";
-export type ToolName = BodyToolName | LabToolName;
+export type ToolName = BodyToolName | LabToolName | "operations";
 export interface ApiError {
   code: string;
   message: string;
@@ -376,3 +377,5 @@ export interface Survey {
   knownCargo: SurveyCargo[];
   lastObservedAt: number | null;
 }
+
+export * from "./operations.js";

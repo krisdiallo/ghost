@@ -791,6 +791,37 @@ export function Warehouse({
           ) : (
             <IndustrialHall />
           )}
+          {!snapshot.layout &&
+            snapshot.operations?.obstructions.map((o) => {
+              const center = o.min.map((v, i) => (v + o.max[i]!) / 2) as Vec3;
+              const size = o.max.map((v, i) => v - o.min[i]!) as Vec3;
+              return (
+                <group key={o.id} position={center}>
+                  <Box size={size} color="#cf9858" />
+                  <Box
+                    position={[0, size[1] / 2 + 0.012, 0]}
+                    size={[0.15, 0.025, size[2] + 0.02]}
+                    color="#f1d7a3"
+                  />
+                  <Box
+                    position={[0, 0, size[2] / 2 + 0.014]}
+                    size={[0.5, 0.4, 0.025]}
+                    color="#f0e4c7"
+                  />
+                  <Text
+                    position={[0, 1.5, 0]}
+                    text="ROUTE OBSTRUCTION"
+                    width={3.1}
+                    color="#ffcf8d"
+                  />
+                  <Ring
+                    position={[0, -center[1] + 0.025, 0]}
+                    radius={1.4}
+                    color="#ffc374"
+                  />
+                </group>
+              );
+            })}
           {snapshot.objects.map((object) => (
             <group key={object.id} position={object.position}>
               <Box

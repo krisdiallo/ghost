@@ -1,11 +1,9 @@
 # GHOST · latest visual progress
 
-[Warehouse experiment lab: isolated candidates, workflows and actual MCP trials](../experiments/README.md)
+[Working warehouse → placed box → incident → MCP operator recovery → sandbox validation](../operations/README.md)
 
-![Actual experiment lab — 39 KB](../experiments/preview.jpg)
+![Actual incident and operator handoff](../operations/incident-raised.jpg)
 
-[Short UI demo, 2×](../experiments/validation/experiment-lab-2x.mp4?raw=true) · [Phone](../experiments/validation/lab-mobile-preview.jpg) · [Independent agent evidence](../experiments/README.md#independent-agent-designed-trial)
+[Continuous rehearsal recording, 2×](../operations/incident-to-experiment-2x.mp4?raw=true) · [Phone](../operations/working-mobile.jpg) · [Operator guide](../../live-operations.md)
 
-Also: [Rack tops and exposed storage tiers](../racks/README.md).
-
-Earlier: [Navigation realism](../navigation/README.md) · [Shared survey](../survey/README.md) · [MCP Apps and cameras](../vision/README.md).
+Earlier: [Experiment lab and independent trials](../experiments/README.md) · [Rack tops](../racks/README.md) · [Navigation](../navigation/README.md) · [Survey](../survey/README.md).

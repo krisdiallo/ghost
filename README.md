@@ -43,6 +43,12 @@ The warehouse is a 64 × 44 m industrial hall with 16 four-tier storage bays, si
 
 See [the demo playbook](docs/demo-playbook.md) for individual commands and recovery steps.
 
+## Live operations and incident recovery
+
+The production warehouse starts working immediately: local controllers run rover inspections, drone inventory sweeps, camera surveillance and an arm dispatch assignment. Choose **Enter live warehouse**, then **Drop box ahead of Scout** or place a box on clear floor space. Scout stops before the obstruction and raises an incident. Ask ChatGPT to investigate: it can possess the affected device, inspect its actual camera image, clear the simulated obstruction, verify the route and return it to local autonomy. Other jobs continue.
+
+One operations MCP tool joins the five embodiment and eleven experiment tools (17 total). The human notices the incident and messages ChatGPT; no background ChatGPT wake-up is required. Clearance simulates operator removal, not a rover gripper. See the [continuous demo and operator guide](docs/live-operations.md). Use GHOST_AUTONOMY=0 to start the standalone server paused.
+
 ## Experiment with a warehouse
 
 Open **Experiment lab** to clone the warehouse, add temporary candidate devices, edit structures, assign workflows and compare independent runs. Trial motion, leases, cargo and observations remain separate from the live warehouse. Change scale, speed or sensor range, then inspect the exact command trace and actual camera images.

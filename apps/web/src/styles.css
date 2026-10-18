@@ -2786,3 +2786,41 @@ dialog::backdrop {
     gap: 8px;
   }
 }
+
+/* An operating warehouse: routine work, interruption, operator handoff. */
+.fleet-ops { margin: 0 0 22px; padding:22px; border-color:#41604d; background:linear-gradient(115deg,#172c21,#131e1c); }
+.fleet-ops.has-incident {border-color:#d4a160;background:linear-gradient(115deg,#32281e,#171e1c)}
+.fleet-ops-header {display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap}
+.fleet-ops h2 {font:500 25px var(--display);margin:9px 0 7px;letter-spacing:-.8px}
+.fleet-ops-header p {font-size:12px;color:#a2b8aa}
+.fleet-ops-actions,.ops-recovery {display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.fleet-ops-actions button,.ops-recovery button,.fleet-ops-actions a {padding:10px 12px;font-size:11px;min-height:40px}
+.fleet-ops-actions button:nth-child(2) {background:#d6a25e;color:#201a11;border-color:#e7b97b}
+.fleet-ops-actions a {color:#d0baf1}
+.fleet-job-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:20px 0 12px}
+.fleet-job {display:flex;align-items:center;text-align:left;gap:12px;padding:14px;background:#10251d;border-color:#344e3d;min-width:0}
+.fleet-job.blocked {background:#3e2b1d;border-color:#c09560}.fleet-job.operator {border-color:#bda4e8;background:#292139}
+.fleet-job-icon {color:#a5ebbf;display:flex}.fleet-job-icon svg {width:26px;height:26px}
+.fleet-job div {min-width:0}.fleet-job strong {display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px}
+.fleet-job i {font:8px var(--mono);text-transform:uppercase;color:#c7dbbf;letter-spacing:.4px;border:1px solid #637c5c;padding:3px 5px;border-radius:3px}
+.fleet-job span:not(.fleet-job-icon) {display:block;margin:6px 0;font-size:11px;color:#b7c9bb}
+.fleet-job small {display:block;font-size:10px;color:#91a595;line-height:1.4}
+.ops-incident {display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;padding:16px;margin-top:14px;background:#251c12;border:1px solid #a97f4b;border-radius:7px}
+.ops-incident>div:first-child {display:flex;flex-direction:column;gap:7px;position:relative;padding-left:21px;font-size:12px}
+.ops-incident strong {font:11px var(--mono);color:#ffce86}.ops-incident small {font:9px var(--mono);color:#baa78d}
+.ops-beacon {position:absolute;left:0;top:3px;width:8px;height:8px;border-radius:50%;background:#ffc77c;box-shadow:0 0 14px #e6a050}
+.ops-restored {padding:14px;background:#1b3c2c;color:#c4f3cf;font-size:12px;border-radius:5px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.ops-hint,.ops-placement {font-size:12px;color:#b8d6c4;margin:12px 0}.ops-error {color:#ffb3a5;font-size:12px;margin-top:10px}
+.ops-disclosure {font:9px var(--mono);color:#8da197;margin-top:13px;line-height:1.5}
+@media(max-width:1100px){.fleet-job-grid {grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){.fleet-ops {padding:16px}.fleet-ops h2 {font-size:22px}.fleet-job {padding:10px;gap:7px}.fleet-job-icon {display:none}.fleet-ops-actions button,.ops-recovery button {min-height:44px}.fleet-ops-actions {gap:7px}.fleet-ops-actions button {flex:1}.ops-recovery {width:100%}.ops-recovery button {flex:1}}
+.scene .fleet-ops.compact {position:absolute;z-index:16;right:14px;top:58px;width:310px;padding:13px;margin:0;background:#11271ff0;backdrop-filter:blur(10px)}
+.fleet-ops.compact h2 {font-size:17px;letter-spacing:-.4px;margin:5px 0}
+.fleet-ops.compact .fleet-job-grid,.fleet-ops.compact .fleet-ops-header p,.fleet-ops.compact .ops-hint,.fleet-ops.compact .ops-disclosure,.fleet-ops.compact .fleet-ops-actions>a {display:none}
+.fleet-ops.compact .fleet-ops-header {gap:9px}.fleet-ops.compact .eyebrow {font-size:8px}
+.fleet-ops.compact .fleet-ops-actions button {padding:8px;font-size:10px;min-height:34px}.fleet-ops.compact .fleet-ops-actions button:nth-child(3) {display:none}
+.fleet-ops.compact .ops-incident {padding:10px;gap:10px;margin-top:12px}.fleet-ops.compact .ops-incident>div:first-child {font-size:11px}.fleet-ops.compact .ops-recovery button {font-size:10px;padding:8px}
+@media(max-width:720px){.scene .fleet-ops.compact{top:145px;right:10px;width:min(290px,calc(100% - 20px))}.fleet-ops.compact h2{font-size:15px}.fleet-ops.compact .fleet-ops-actions button {min-height:40px}.fleet-ops.compact .ops-incident small{display:none}}
+.enter-live {display:inline-flex;align-items:center;gap:10px;padding:14px 18px;min-height:46px;font-size:13px}
+.legacy-tour {background:transparent!important;border:1px solid #405345!important;color:#b0c7b6!important;font-size:11px!important;box-shadow:none!important}
+@media(max-width:720px){.heading-actions{flex-wrap:wrap;gap:12px}.enter-live{flex:1 1 100%;justify-content:center}.legacy-tour{min-height:40px!important}}

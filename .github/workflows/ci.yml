@@ -26,6 +26,8 @@ jobs:
         run: node scripts/capture-demo.mjs
       - name: Verify swept navigation, occlusion and in-flight drone camera controls
         run: node scripts/capture-navigation.mjs
+      - name: Verify ongoing work, obstruction incident and MCP operator handoff
+        run: node scripts/capture-operations.mjs
       - name: Verify isolated experiments, MCP reports, export/import and phone UI
         run: node scripts/capture-lab.mjs
       - name: Verify private phone access and an authenticated MCP agent

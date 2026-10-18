@@ -58,7 +58,7 @@ try {
   await client.connect(
     new StreamableHTTPClientTransport(new URL(url + "/mcp")),
   );
-  assert.equal((await client.listTools()).tools.length, 16);
+  assert.equal((await client.listTools()).tools.length, 17);
   await page.goto(url + "/#lab");
   await page.getByText("Lab connected", { exact: true }).waitFor();
   await page.screenshot({ path: join(output, "lab-empty.jpg"), quality: 80 });

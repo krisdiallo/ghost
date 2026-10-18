@@ -33,6 +33,9 @@ export class SurveyTracker {
     this.checkpoints = makeCheckpoints(obstacles);
     this.blockedCount = this.checkpoints.filter((p) => p.blocked).length;
   }
+  setObstacles(obstacles: typeof STATIC_OBSTACLES) {
+    this.obstacles = obstacles;
+  }
   private covered = new Set<number>();
   private cargo = new Map<string, SurveyCargo>();
   private lastObservedAt: number | null = null;

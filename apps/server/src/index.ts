@@ -28,6 +28,8 @@ async function ensureWarehouse() {
   }
   try {
     owned = await startWarehouse(port, process.env.GHOST_HOST ?? "127.0.0.1");
+    if (process.argv.includes("--serve") && process.env.GHOST_AUTONOMY !== "0")
+      owned.operations.start();
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "EADDRINUSE") throw error;
     // A concurrent client may have started the single authority first.

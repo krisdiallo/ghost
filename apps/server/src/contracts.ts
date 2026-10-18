@@ -148,6 +148,27 @@ export const definitionSchema = z
   })
   .strict();
 export const schemas = {
+  operations: z
+    .object({
+      action: z
+        .enum([
+          "status",
+          "start",
+          "pause",
+          "place_box",
+          "clear_box",
+          "resume",
+          "watch",
+        ])
+        .default("status"),
+      x: z.number().finite().min(-30).max(30).optional(),
+      z: z.number().finite().min(-32).max(8).optional(),
+      incidentId: z.string().min(1).max(80).optional(),
+      leaseId: z.string().min(1).max(100).optional(),
+      afterSequence: z.number().int().min(0).optional(),
+      waitSeconds: z.number().int().min(0).max(25).default(20),
+    })
+    .strict(),
   ...bodySchemas,
   sandbox_list: z.object({}).strict(),
   sandbox_create: z

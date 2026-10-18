@@ -1,6 +1,6 @@
 # Manufact deployment
 
-GHOST targets **Manufact Cloud**, matching the [official YC starter](https://github.com/mcp-use/hack-yc). HTTP MCP uses `mcp-use`; the five tools still dispatch to the existing simulation. Stdio remains an official MCP SDK adapter to that same authority.
+GHOST targets **Manufact Cloud**, matching the [official YC starter](https://github.com/mcp-use/hack-yc). HTTP MCP uses `mcp-use`; 17 tools dispatch to the live authority and isolated experiment worlds. Stdio remains an official MCP SDK adapter to that same authority.
 
 **Live service:** https://bold-zero-suoax.run.mcp-use.com — MCP endpoint `/mcp`. The private repository is connected through the Manufact GitHub App. Production follows `main` with Wait for CI enabled. Deployment logs confirm one instance in US East; browser login, synchronized controls, images and authenticated MCP have been verified against the live endpoint.
 
@@ -41,7 +41,7 @@ The official MCP SDK handles authorization-code/S256 PKCE, registration, token a
 
 This remains one shared owner key, not individual accounts. The OAuth protocol and browser flow are automatically tested; actual signed-in ChatGPT setup must be verified in the owner’s account. Manufact deployment login is not authentication for GHOST's users. No LLM provider is added; the guided tour remains scripted, while an external agent supplies reasoning.
 
-Before publishing a success report, verify the assigned endpoint: anonymous requests rejected; phone login and WebGL; SSE reconnection; authenticated MCP initialization and all five tools; one client possesses a rover and another sees contention; motion and inspection visible in the browser; release restores availability; logout invalidates the cookie. Confirm only one warehouse authority is active.
+Before publishing a success report, verify the assigned endpoint: anonymous requests rejected; phone login and WebGL; SSE reconnection; authenticated MCP initialization and all 17 tools; one client possesses a rover and another sees contention; motion and inspection visible in the browser; release restores availability; logout invalidates the cookie. Confirm only one warehouse authority is active.
 
 ## Repeatable checks
 

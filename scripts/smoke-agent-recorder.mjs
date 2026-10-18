@@ -47,7 +47,7 @@ try {
     assert.ok(Date.now() < deadline, "recorder starts");
     await new Promise((resolve) => setTimeout(resolve, 100));
   }
-  assert.equal((await call({ tools: true })).tools.length, 16);
+  assert.equal((await call({ tools: true })).tools.length, 17);
   await call({
     objective:
       "Test recorder transport, interleaved cameras, privacy and cleanup.",

@@ -39,6 +39,7 @@ test(
           "act",
           "discover",
           "observe",
+          "operations",
           "possess",
           "release",
           "sandbox_add_device",

@@ -1,11 +1,13 @@
 # GHOST demo playbook
 
+**Primary demo:** [A working warehouse → obstruction → ChatGPT operator recovery → sandbox workflow validation](live-operations.md). The guided tour below is the separate classic walkthrough.
+
 ## Before the demo
 
 1. Use Node 24; `npm ci`, `npm run check`, `npm test`.
 2. `npm start` serves the built demo at `http://127.0.0.1:3001` in the execution environment. `npm run dev` runs the editable UI at port 5173.
 3. Check **Systems live**. Select each machine, orbit the view, and verify the scene on the actual device. The capture run checks software WebGL; physical GPU behavior still needs this device check.
-4. Use a private port forward when viewing from another device. Loopback on a phone points to the phone itself. Configure `GHOST_ORIGIN` and (only if needed) `GHOST_HOST` for the forwarding setup. The API has no public-user authentication.
+4. Use a private port forward when viewing from another device. Loopback on a phone points to the phone itself. Configure `GHOST_ORIGIN` and (only if needed) `GHOST_HOST` for the forwarding setup. Hosted application access uses the existing warehouse key/browser session or scoped MCP OAuth.
 
 ## The 30-second pitch
 

@@ -301,7 +301,7 @@ test(
         }),
       );
       const names = (await stdio.listTools()).tools.map((t) => t.name);
-      assert.equal(names.length, 16);
+      assert.equal(names.length, 17);
       assert.ok(
         names.includes("sandbox_add_device") &&
           names.includes("experiment_compare"),

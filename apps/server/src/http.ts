@@ -7,6 +7,7 @@ import { toNodeHandler } from "mcp-use/node";
 import type { ToolName, Observation, SensorFrame } from "@ghost/shared";
 import { Simulation, SimError } from "./simulation.js";
 import { createHttpMcp } from "./mcp.js";
+import { Operations } from "./operations.js";
 import { ExperimentLab } from "./lab.js";
 import { schemas } from "./contracts.js";
 import { SensorRenderer } from "./renderer.js";
@@ -75,8 +76,10 @@ export async function startWarehouse(
       : undefined;
   const renderer = new SensorRenderer();
   const lab = new ExperimentLab(sim);
+  const operations = new Operations(sim);
   const frames = new Map<string, SensorFrame>();
   const dispatch = async (name: ToolName, input: unknown) => {
+    if (name === "operations") return operations.tool(input);
     const result = lab.tool(name, input);
     const args = input as Record<string, unknown>;
     if (
@@ -133,6 +136,7 @@ export async function startWarehouse(
   });
   const timer = setInterval(() => {
     sim.tick();
+    operations.tick();
     lab.tick();
   }, 50);
   const heartbeat = setInterval(() => {
@@ -277,10 +281,15 @@ export async function startWarehouse(
       ) {
         await readJson(req);
         if (url.pathname !== "/api/demo/stop") frames.clear();
-        if (url.pathname === "/api/demo/start")
+        if (url.pathname === "/api/demo/start") {
+          operations.pause();
           return json(res, 200, sim.startDemo());
+        }
         if (url.pathname === "/api/demo/stop") sim.stopDemo();
-        else sim.reset();
+        else {
+          operations.reset();
+          sim.reset();
+        }
         return json(res, 200, { ok: true });
       }
       if (url.pathname === "/mcp") {
@@ -369,7 +378,9 @@ export async function startWarehouse(
     server,
     sim,
     lab,
+    operations,
     close: async () => {
+      operations.close();
       sim.stopDemo();
       lab.close();
       await renderer.close();

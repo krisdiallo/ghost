@@ -54,6 +54,44 @@ const distance = (a: Vec3, b: Vec3) =>
 
 export class Simulation {
   private instanceId = randomUUID();
+  private autonomousLeases = new Set<string>();
+  private extraObstacles: import("@ghost/shared").Obstacle[] = [];
+  private operationsState?: import("@ghost/shared").OperationsState;
+  publishOperations(state: import("@ghost/shared").OperationsState) {
+    this.operationsState = structuredClone(state);
+    this.changed();
+  }
+  addObstruction(obstacle: import("@ghost/shared").Obstacle) {
+    if (this.extraObstacles.length >= 8)
+      throw new SimError(
+        "OBSTRUCTION_LIMIT",
+        "Remove a box before adding another (maximum eight).",
+      );
+    for (const b of this.bodies)
+      if (
+        blockingObstacle(b.position, b.position, bodyClearance(b), [obstacle])
+      )
+        throw new SimError(
+          "INVALID_PLACEMENT",
+          "Place the box clear of every device footprint.",
+        );
+    const center = obstacle.min.map(
+      (v, i) => (v + obstacle.max[i]!) / 2,
+    ) as Vec3;
+    if (blockingObstacle(center, center, [0.65, 0.65, 0.65], this.obstacles))
+      throw new SimError(
+        "INVALID_PLACEMENT",
+        "Place the box in clear floor space, not in an existing structure.",
+      );
+    this.extraObstacles.push(structuredClone(obstacle));
+    this.log("Operator placed a box on the warehouse floor", "system");
+    this.changed();
+  }
+  removeObstruction(id: string) {
+    this.extraObstacles = this.extraObstacles.filter((o) => o.id !== id);
+    this.changed();
+  }
+
   private survey = new SurveyTracker();
   private revision = 0;
   private bodies: Body[] = [];
@@ -167,7 +205,10 @@ export class Simulation {
     }
   }
   get obstacles() {
-    return this.initialDefinition?.obstacles ?? STATIC_OBSTACLES;
+    return [
+      ...(this.initialDefinition?.obstacles ?? STATIC_OBSTACLES),
+      ...this.extraObstacles,
+    ];
   }
   recognizesLease(id: string) {
     return this.leases.has(id) || this.retired.has(id);
@@ -226,6 +267,7 @@ export class Simulation {
       ...(this.initialDefinition
         ? { layout: { obstacles: this.obstacles } }
         : {}),
+      ...(this.operationsState ? { operations: this.operationsState } : {}),
       instanceId: this.instanceId,
       revision: this.revision,
       at: this.wallClock(),
@@ -297,6 +339,31 @@ export class Simulation {
         1,
         Math.max(0, (now - motion.start) / (motion.end - motion.start)),
       );
+      const next = motion.from.map(
+        (v, i) => v + (motion.target[i]! - v) * t,
+      ) as Vec3;
+      const hit = blockingObstacle(
+        body.position,
+        next,
+        bodyClearance(body),
+        this.extraObstacles,
+      );
+      if (hit) {
+        this.cancel(body);
+        body.lastBlocked = {
+          obstacleId: hit.obstacle.id,
+          label: hit.obstacle.label,
+          position: [...hit.point],
+          at: this.wallClock(),
+        };
+        this.log(
+          body.label + " stopped before " + hit.obstacle.label,
+          "action",
+          body.id,
+        );
+        dirty = true;
+        continue;
+      }
       body.position = motion.from.map(
         (v, i) => v + (motion.target[i]! - v) * t,
       ) as Vec3;
@@ -330,6 +397,7 @@ export class Simulation {
     this.tick();
     return {
       mode: "live",
+      ...(this.operationsState ? {operations:{running:this.operationsState.running,incidents:structuredClone(this.operationsState.incidents),operatorTool:"operations"}} : {}),
       bounds: { ...BOUNDS },
       navigation: {
         obstacles: structuredClone(this.obstacles),
@@ -359,6 +427,7 @@ export class Simulation {
     resourceId: string,
     ttlSeconds = 60,
     owner = "MCP agent",
+    autonomous = false,
   ): Possession {
     this.tick();
     if (!Number.isInteger(ttlSeconds) || ttlSeconds < 5 || ttlSeconds > 300)
@@ -367,6 +436,13 @@ export class Simulation {
         "Lease duration must be 5–300 seconds.",
       );
     const body = this.body(resourceId);
+    if (body.lease && !autonomous) {
+      const old = [...this.leases.values()].find(
+        (l) => l.resourceId === body.id,
+      );
+      if (old && this.autonomousLeases.has(old.id))
+        this.endLease(old.id, "LEASE_RELEASED");
+    }
     if (body.lease)
       throw new SimError(
         "RESOURCE_BUSY",
@@ -381,6 +457,7 @@ export class Simulation {
       expiresAt,
       deadline: this.clock() + ttlSeconds * 1000,
     });
+    if (autonomous) this.autonomousLeases.add(id);
     body.lease = { owner, expiresAt };
     this.log(`${owner} possessed ${body.label}`, "lease", body.id);
     this.changed();
@@ -397,6 +474,7 @@ export class Simulation {
   observe(id: string): Observation {
     const { body } = this.authorize(id);
     const objects = this.objects.filter((object) => this.visible(body, object));
+    this.survey.setObstacles(this.obstacles);
     if (this.survey.record(body, objects, this.wallClock())) this.changed();
     return {
       at: this.wallClock(),
@@ -428,6 +506,7 @@ export class Simulation {
     this.cancel(body);
     body.lease = null;
     this.leases.delete(id);
+    this.autonomousLeases.delete(id);
     this.inspections.delete(id);
     this.retired.set(id, { code, at: this.clock() });
     this.log(
@@ -705,6 +784,7 @@ export class Simulation {
     this.stopDemo();
     for (const id of this.leases.keys()) this.endLease(id, "LEASE_RELEASED");
     this.motions.clear();
+    this.extraObstacles = [];
     this.inspections.clear();
     this.survey = new SurveyTracker(this.obstacles);
     this.initialize();

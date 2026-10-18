@@ -778,6 +778,11 @@ export class ExperimentLab {
       );
     const a = parsed.data as Record<string, unknown>;
     switch (name) {
+      case "operations":
+        throw new SimError(
+          "LIVE_ONLY",
+          "Operations controls apply to the live warehouse only.",
+        );
       case "sandbox_list":
         return this.list();
       case "sandbox_create":

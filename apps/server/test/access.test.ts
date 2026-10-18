@@ -196,7 +196,7 @@ test(
           requestInit: { headers },
         }),
       );
-      assert.equal((await a.listTools()).tools.length, 16);
+      assert.equal((await a.listTools()).tools.length, 17);
       const possession = await a.callTool({
         name: "possess",
         arguments: { resourceId: "rover-01", owner: "Remote test" },
