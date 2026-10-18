@@ -61,6 +61,8 @@ await writeFile(
 
 ${timestamp} PT · actual app captures
 
+**Hosted MCP progress:** [Manufact preparation and private phone demo screenshots](../manufact/README.md). See that report for deployment status.
+
 ## A corner-mounted warehouse camera
 
 **Sentinel is mounted 10 m high on the southwest corner column.** A short bolted bracket replaces the freestanding floor pole. It looks inward across the open inspection and dispatch area at 104° pan / −16° tilt, with a 45 m sensor range. Both the renderer and simulation use the same fixed location.

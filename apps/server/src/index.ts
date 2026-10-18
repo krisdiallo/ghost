@@ -3,10 +3,13 @@ import { startWarehouse } from "./http.js";
 import { createMcp } from "./mcp.js";
 import { SimError } from "./simulation.js";
 
-const port = Number(process.env.GHOST_PORT ?? 3001);
+const port = Number(process.env.GHOST_PORT ?? process.env.PORT ?? 3001);
 if (!Number.isInteger(port) || port < 1 || port > 65535)
   throw new Error("GHOST_PORT must be a valid port.");
 const url = `http://127.0.0.1:${port}`;
+const authHeaders = process.env.GHOST_ACCESS_TOKEN
+  ? { Authorization: `Bearer ${process.env.GHOST_ACCESS_TOKEN}` }
+  : {};
 let owned: Awaited<ReturnType<typeof startWarehouse>> | undefined;
 async function ensureWarehouse() {
   try {
@@ -54,7 +57,7 @@ if (!process.argv.includes("--serve")) {
   const mcp = createMcp(async (name, input) => {
     const response = await fetch(`${url}/api/tools/${name}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...authHeaders },
       body: JSON.stringify(input),
       signal: AbortSignal.timeout(5000),
     });

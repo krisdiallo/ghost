@@ -20,6 +20,7 @@
     "typecheck": "npm run build -w @ghost/shared && npm run typecheck --workspaces",
     "check": "npm run typecheck && npm run build",
     "start": "node apps/server/dist/index.js --serve",
+    "deploy": "mcp-use deploy --name ghost --dockerfile Dockerfile --port 3001 --branch main --wait-for-ci",
     "test": "npm run build && npm run test:server && npm run test:web",
     "test:server": "node --import tsx --test apps/server/test/*.test.ts",
     "test:web": "tsx --tsconfig apps/web/tsconfig.json --test apps/web/test/*.test.tsx",

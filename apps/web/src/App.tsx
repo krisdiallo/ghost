@@ -154,6 +154,15 @@ export function App() {
     };
   }, [immersive]);
   const [modal, setModal] = useState<"connect" | "help" | "reset" | null>(null);
+  const [privateAccess, setPrivateAccess] = useState(false);
+  const mcpUrl = `${window.location.origin}/mcp`;
+  useEffect(() => {
+    void request<{ authenticated: boolean }>("/api/access")
+      .then((value) => setPrivateAccess(value.authenticated))
+      .catch(() => {
+        /* The connection indicator handles offline status. */
+      });
+  }, []);
   const lastSnapshot = useRef<Snapshot | null>(null);
   const instance = useRef<string | null>(null);
   const currentSelection = useRef(selected);
@@ -235,6 +244,7 @@ export function App() {
     };
     stream.onerror = () => {
       if (alive) setConnection("disconnected");
+      void request("/api/access").catch(() => {});
     };
     const timer = setInterval(() => setTime(Date.now()), 250);
     return () => {
@@ -444,6 +454,13 @@ export function App() {
           >
             <UIIcon name="connect" /> Connect an agent <UIIcon name="arrow" />
           </button>
+          {privateAccess && (
+            <form method="post" action="/auth/logout">
+              <button className="quiet" type="submit">
+                Sign out
+              </button>
+            </form>
+          )}
         </div>
       </header>
       <section className="page-heading">
@@ -1478,51 +1495,70 @@ export function App() {
           </p>
           <h3>Streamable HTTP</h3>
           <p className="control-note">
-            For an agent running in this cloud environment:
+            {privateAccess
+              ? "Connect your MCP client with this URL and your private warehouse access key."
+              : "For an agent that can reach this warehouse:"}
           </p>
           <div className="code-block">
-            <code>http://127.0.0.1:3001/mcp</code>
-            <Copy text="http://127.0.0.1:3001/mcp" />
+            <code>{mcpUrl}</code>
+            <Copy text={mcpUrl} />
           </div>
-          <h3>Stdio client configuration</h3>
-          <div className="code-block">
-            <pre>
-              {JSON.stringify(
-                {
-                  mcpServers: {
-                    ghost: {
-                      command: "node",
-                      args: ["/workspace/ghost/apps/server/dist/index.js"],
+          {privateAccess && (
+            <>
+              <h3>Authentication</h3>
+              <p className="control-note">
+                Set the Authorization header to Bearer followed by your access
+                key. Clients must support custom headers, such as Claude Code or
+                Cursor. ChatGPT connectors require OAuth, which is not
+                configured for this demo.
+              </p>
+            </>
+          )}
+          {!privateAccess && (
+            <>
+              <h3>Stdio client configuration</h3>
+              <div className="code-block">
+                <pre>
+                  {JSON.stringify(
+                    {
+                      mcpServers: {
+                        ghost: {
+                          command: "node",
+                          args: ["/workspace/ghost/apps/server/dist/index.js"],
+                        },
+                      },
                     },
-                  },
-                },
-                null,
-                2,
-              )}
-            </pre>
-            <Copy
-              text={JSON.stringify(
-                {
-                  mcpServers: {
-                    ghost: {
-                      command: "node",
-                      args: ["/workspace/ghost/apps/server/dist/index.js"],
+                    null,
+                    2,
+                  )}
+                </pre>
+                <Copy
+                  text={JSON.stringify(
+                    {
+                      mcpServers: {
+                        ghost: {
+                          command: "node",
+                          args: ["/workspace/ghost/apps/server/dist/index.js"],
+                        },
+                      },
                     },
-                  },
-                },
-                null,
-                2,
-              )}
-            />
-          </div>
+                    null,
+                    2,
+                  )}
+                />
+              </div>
+            </>
+          )}
           <div className="tool-chain">
             discover <span>→</span> possess <span>→</span> observe{" "}
             <span>→</span> act <span>→</span> release
           </div>
           <p className="control-note">
-            Build first with npm run build. Leases are private capabilities.
-            This is a trusted, loopback-only simulation. Remote access needs a
-            private port forward; no public endpoint is enabled.
+            Start with discover, then possess an available body. Keep lease IDs
+            private.
+            {privateAccess
+              ? " All connected agents share this warehouse. Restarting the server resets the world."
+              : " Stdio clients must run in the same environment after npm run build."}
           </p>
         </Modal>
       )}

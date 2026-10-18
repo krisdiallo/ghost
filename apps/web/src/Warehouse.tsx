@@ -9,7 +9,7 @@ import {
 import type { ReactNode } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import type { ThreeEvent } from "@react-three/fiber";
-import { CanvasTexture, Group, Vector3, MOUSE, TOUCH } from "three";
+import { CanvasTexture, Fog, Group, Vector3, MOUSE, TOUCH } from "three";
 import { Box, Cylinder, Beam, Text, Ring } from "./ScenePrimitives";
 import { IndustrialHall } from "./IndustrialHall";
 import { WAREHOUSE } from "@ghost/shared";
@@ -512,7 +512,7 @@ function Controls({
   view: WarehouseView;
   reset: number;
 }) {
-  const { camera, gl, size } = useThree();
+  const { camera, gl, size, scene } = useThree();
   const controls = useMemo(
     () => new OrbitControls(camera, gl.domElement),
     [camera, gl],
@@ -536,7 +536,7 @@ function Controls({
     controls.enableDamping = true;
     controls.maxPolarAngle = Math.PI / 2.12;
     controls.minDistance = 3;
-    controls.maxDistance = 170;
+    controls.maxDistance = 360;
     controls.target.set(0, 0, -12);
     controls.update();
     const interrupt = () => {
@@ -584,7 +584,7 @@ function Controls({
     controls.update();
     controls.enableDamping = true;
     const offset = camera.position.clone().sub(controls.target);
-    offset.setLength(Math.max(3, Math.min(170, offset.length() * zoom.factor)));
+    offset.setLength(Math.max(3, Math.min(360, offset.length() * zoom.factor)));
     goal.current = {
       position: controls.target.clone().add(offset),
       target: controls.target.clone(),
@@ -617,6 +617,13 @@ function Controls({
       }
     }
     controls.update();
+    // Portrait overview pulls back to fit the hall: keep it inside the clear
+    // view rather than hiding it behind the fixed-distance atmospheric fog.
+    if (scene.fog instanceof Fog) {
+      const distance = camera.position.distanceTo(controls.target);
+      scene.fog.near = Math.max(85, distance + 20);
+      scene.fog.far = Math.max(170, distance + 110);
+    }
   });
   return null;
 }
@@ -670,7 +677,7 @@ export function Warehouse({
       <Canvas
         shadows
         dpr={[1, 1.6]}
-        camera={{ position: [44, 38, 44], fov: 42, far: 220 }}
+        camera={{ position: [44, 38, 44], fov: 42, far: 600 }}
         gl={{ antialias: true, alpha: false }}
         fallback={
           <div className="scene-fallback">

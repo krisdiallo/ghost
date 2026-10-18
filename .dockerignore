@@ -1,0 +1,15 @@
+.git
+.github
+node_modules
+**/node_modules
+**/dist
+work
+docs
+.env
+.env.*
+**/.env
+**/.env.*
+.mcp-use
+**/.mcp-use
+coverage
+*.log

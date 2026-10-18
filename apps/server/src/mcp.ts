@@ -1,4 +1,5 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { MCPServer } from "mcp-use";
 import type { ToolName } from "@ghost/shared";
 import { CAMERA_SENSOR } from "@ghost/shared";
 import { schemas } from "./contracts.js";
@@ -15,9 +16,64 @@ const descriptions: Record<ToolName, string> = {
   release:
     "Release a lease and cancel its pending motion. Repeated release is harmless. A drone holds its last altitude, and a held crate stays attached.",
 };
-export function createMcp(
-  dispatch: (name: ToolName, input: unknown) => unknown | Promise<unknown>,
-) {
+type Dispatch = (name: ToolName, input: unknown) => unknown | Promise<unknown>;
+
+async function execute(dispatch: Dispatch, name: ToolName, input: unknown) {
+  try {
+    const result = await dispatch(name, input);
+    return {
+      content: [{ type: "text" as const, text: JSON.stringify(result) }],
+      structuredContent: result as Record<string, unknown>,
+    };
+  } catch (error) {
+    return {
+      isError: true,
+      content: [
+        {
+          type: "text" as const,
+          text: JSON.stringify({
+            code: error instanceof SimError ? error.code : "SERVER_ERROR",
+            message:
+              error instanceof SimError
+                ? error.message
+                : "Could not execute warehouse command.",
+          }),
+        },
+      ],
+    };
+  }
+}
+
+// Manufact's SDK serves HTTP; stdio retains the official SDK adapter below.
+// Both dispatch into the same long-lived Simulation, never a per-request world.
+export function createHttpMcp(dispatch: Dispatch) {
+  const server = new MCPServer({
+    name: "ghost",
+    version: "0.2.0",
+    title: "GHOST — Any agent. Any body.",
+    description: "Possess simulated machines in one live warehouse.",
+    logging: { enabled: false }, // Tool inputs contain private lease capabilities.
+    skills: false,
+  });
+  for (const name of Object.keys(schemas) as ToolName[]) {
+    server.tool(
+      {
+        name,
+        description: descriptions[name],
+        inputSchema: schemas[name],
+        annotations: {
+          readOnlyHint: name === "discover" || name === "observe",
+          openWorldHint: false,
+          destructiveHint: false,
+        },
+      },
+      async (input: unknown) => execute(dispatch, name, input),
+    );
+  }
+  return server;
+}
+
+export function createMcp(dispatch: Dispatch) {
   const server = new McpServer({ name: "ghost", version: "0.1.0" });
   for (const name of Object.keys(schemas) as ToolName[]) {
     server.registerTool(
@@ -31,27 +87,7 @@ export function createMcp(
           destructiveHint: false,
         },
       },
-      async (input: unknown) => {
-        try {
-          const result = await dispatch(name, input);
-          return {
-            content: [{ type: "text" as const, text: JSON.stringify(result) }],
-            structuredContent: result as Record<string, unknown>,
-          };
-        } catch (error) {
-          const failure = {
-            code: error instanceof SimError ? error.code : "SERVER_ERROR",
-            message:
-              error instanceof SimError
-                ? error.message
-                : "Could not execute warehouse command.",
-          };
-          return {
-            isError: true,
-            content: [{ type: "text" as const, text: JSON.stringify(failure) }],
-          };
-        }
-      },
+      async (input: unknown) => execute(dispatch, name, input),
     );
   }
   return server;

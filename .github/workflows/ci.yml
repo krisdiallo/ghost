@@ -8,7 +8,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -24,6 +24,8 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
       - name: Capture the warehouse and run the mobile mission
         run: node scripts/capture-demo.mjs
+      - name: Verify private phone access and an authenticated MCP agent
+        run: node scripts/capture-access.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -31,3 +33,17 @@ jobs:
           path: work/captures
           if-no-files-found: warn
           retention-days: 14
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Build the Manufact image
+        run: docker build -t ghost:ci .
+      - name: Test the production container and its authenticated MCP endpoint
+        run: node scripts/smoke-container.mjs
+        env:
+          GHOST_TEST_IMAGE: ghost:ci

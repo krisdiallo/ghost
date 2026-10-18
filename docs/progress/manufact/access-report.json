@@ -1,0 +1,23 @@
+{
+  "capturedAt": "2026-10-18T00:50:27.331Z",
+  "deployment": "local hosted-mode validation; not a live Manufact deployment",
+  "mobileViewport": "390 × 844",
+  "tools": [
+    "discover",
+    "possess",
+    "observe",
+    "act",
+    "release"
+  ],
+  "inspection": "Seal intact. Label verified. Cleared for dispatch.",
+  "checks": [
+    "private phone login",
+    "authenticated MCP movement and inspection",
+    "shared browser world",
+    "immersive controls",
+    "current-origin connection URL",
+    "logout revokes cookie",
+    "no mobile overflow"
+  ],
+  "browserErrors": []
+}

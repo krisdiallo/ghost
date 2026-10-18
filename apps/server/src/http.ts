@@ -3,13 +3,18 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { resolve, extname, sep } from "node:path";
-import type { Transport } from "@modelcontextprotocol/sdk/shared/transport.js";
-import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { toNodeHandler } from "mcp-use/node";
 import type { ToolName } from "@ghost/shared";
 import { Simulation, SimError } from "./simulation.js";
-import { createMcp } from "./mcp.js";
+import { createHttpMcp } from "./mcp.js";
+import {
+  accessConfig,
+  WarehouseAccess,
+  loginPage,
+  type AccessOptions,
+} from "./access.js";
 
-async function readJson(req: IncomingMessage) {
+async function readBody(req: IncomingMessage) {
   let size = 0;
   const chunks: Buffer[] = [];
   for await (const chunk of req) {
@@ -18,9 +23,13 @@ async function readJson(req: IncomingMessage) {
       throw new SimError("PAYLOAD_TOO_LARGE", "Request exceeds 16 KB.");
     chunks.push(chunk);
   }
+  return Buffer.concat(chunks).toString();
+}
+async function readJson(req: IncomingMessage) {
   try {
-    return JSON.parse(Buffer.concat(chunks).toString() || "{}");
-  } catch {
+    return JSON.parse((await readBody(req)) || "{}");
+  } catch (error) {
+    if (error instanceof SimError) throw error;
     throw new SimError("INVALID_JSON", "Expected a JSON request body.");
   }
 }
@@ -50,10 +59,13 @@ export async function startWarehouse(
   port = 3001,
   host = "127.0.0.1",
   sim = new Simulation(),
+  options: AccessOptions = {},
 ) {
-  const configuredOrigin = process.env.GHOST_ORIGIN
-    ? new URL(process.env.GHOST_ORIGIN).origin
-    : null;
+  const config = accessConfig(host, options);
+  const configuredOrigin = config.origin;
+  const access = new WarehouseAccess(config.token, config.secure);
+  const mcp = createHttpMcp((name, input) => sim.tool(name, input));
+  const handleMcp = toNodeHandler(mcp);
   const allowedHosts = new Set([
     `localhost:${port}`,
     `127.0.0.1:${port}`,
@@ -66,27 +78,35 @@ export async function startWarehouse(
     "http://127.0.0.1:5173",
     ...(configuredOrigin ? [configuredOrigin] : []),
   ]);
-  const streams = new Set<ServerResponse>();
+  const streams = new Map<ServerResponse, IncomingMessage>();
   const unsubscribe = sim.subscribe(() => {
     const event = `data: ${JSON.stringify(sim.snapshot())}\n\n`;
-    for (const res of streams)
-      if (!res.write(event)) {
+    for (const [res, req] of streams)
+      if (!access.authorized(req)) {
+        streams.delete(res);
+        res.end();
+      } else if (!res.write(event)) {
         streams.delete(res);
         res.end();
       }
   });
   const timer = setInterval(() => sim.tick(), 50);
   const heartbeat = setInterval(() => {
-    for (const res of streams) res.write(": heartbeat\n\n");
+    for (const [res, req] of streams) {
+      if (!access.authorized(req)) {
+        streams.delete(res);
+        res.end();
+      } else res.write(": heartbeat\n\n");
+    }
   }, 10_000);
   const server = createServer(async (req, res) => {
     try {
       const url = new URL(req.url ?? "/", "http://localhost");
-      // Loopback service: reject cross-origin browser requests, including DNS-rebinding hosts.
+      // Apply Host/Origin checks before authentication and every transport.
       if (!allowedHosts.has(req.headers.host ?? ""))
         return json(res, 403, {
           code: "INVALID_HOST",
-          message: "Use the loopback warehouse URL.",
+          message: "Use the configured warehouse URL.",
         });
       if (req.headers.origin) {
         if (!allowedOrigins.has(req.headers.origin))
@@ -95,8 +115,55 @@ export async function startWarehouse(
             message: "Cross-origin requests are disabled.",
           });
       }
-      if (url.pathname === "/api/health")
+      if (
+        url.pathname === "/api/health" &&
+        ["GET", "HEAD"].includes(req.method ?? "")
+      )
         return json(res, 200, { service: "ghost", mode: "live" });
+      if (
+        url.pathname === "/auth/login" &&
+        req.method === "POST" &&
+        access.enabled
+      ) {
+        // HTML forms and cookie-authorized writes must carry a same-origin Origin.
+        if (!req.headers.origin)
+          return json(res, 403, { code: "INVALID_ORIGIN" });
+        const contentType = req.headers["content-type"]?.split(";")[0];
+        const body =
+          contentType === "application/x-www-form-urlencoded"
+            ? Object.fromEntries(new URLSearchParams(await readBody(req)))
+            : ((await readJson(req)) as { token?: unknown });
+        const result = access.login(body?.token, res);
+        if (result !== "ok")
+          return loginPage(res, result === "limited" ? 429 : 401, true);
+        res.writeHead(303, { Location: "/", "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      if (!access.authorized(req)) {
+        if (req.method === "GET" && ["/", "/auth/login"].includes(url.pathname))
+          return loginPage(res);
+        res.setHeader("WWW-Authenticate", 'Bearer realm="ghost"');
+        return json(res, 401, {
+          code: "AUTH_REQUIRED",
+          message: "A warehouse access key is required.",
+        });
+      }
+      if (
+        access.enabled &&
+        !access.bearer(req) &&
+        !["GET", "HEAD"].includes(req.method ?? "") &&
+        !req.headers.origin
+      )
+        return json(res, 403, { code: "INVALID_ORIGIN" });
+      if (url.pathname === "/auth/logout" && req.method === "POST") {
+        access.logout(req, res);
+        res.writeHead(303, { Location: "/", "Cache-Control": "no-store" });
+        res.end();
+        return;
+      }
+      if (url.pathname === "/api/access" && req.method === "GET")
+        return json(res, 200, { authenticated: access.enabled });
       if (url.pathname === "/api/snapshot" && req.method === "GET") {
         sim.tick();
         return json(res, 200, sim.snapshot());
@@ -114,7 +181,7 @@ export async function startWarehouse(
           "X-Accel-Buffering": "no",
         });
         res.write(`data: ${JSON.stringify(sim.snapshot())}\n\n`);
-        streams.add(res);
+        streams.set(res, req);
         req.on("close", () => streams.delete(res));
         return;
       }
@@ -148,17 +215,7 @@ export async function startWarehouse(
             code: "METHOD_NOT_ALLOWED",
             message: "Stateless MCP accepts POST requests.",
           });
-        const transport = new StreamableHTTPServerTransport({
-          enableJsonResponse: true,
-        });
-        const mcp = createMcp((name, input) => sim.tool(name, input));
-        res.on("close", () => {
-          void transport.close();
-          void mcp.close();
-        });
-        // SDK HTTP transport declares optional callbacks differently under exactOptionalPropertyTypes.
-        await mcp.connect(transport as Transport);
-        await transport.handleRequest(req, res, await readJson(req));
+        await handleMcp(req, res, await readJson(req));
         return;
       }
       if (url.pathname.startsWith("/api/"))
@@ -182,6 +239,9 @@ export async function startWarehouse(
         res.writeHead(200, {
           "Content-Type": mime[extname(path)] ?? "application/octet-stream",
           "X-Content-Type-Options": "nosniff",
+          "Cache-Control": "no-store",
+          "Referrer-Policy": "same-origin",
+          "X-Frame-Options": "DENY",
         });
         res.end(req.method === "HEAD" ? undefined : data);
       } catch {
@@ -233,7 +293,7 @@ export async function startWarehouse(
     sim,
     close: async () => {
       sim.stopDemo();
-      for (const res of streams) res.end();
+      for (const res of streams.keys()) res.end();
       server.closeAllConnections();
       await new Promise<void>((resolve, reject) =>
         server.close((error) => (error ? reject(error) : resolve())),
