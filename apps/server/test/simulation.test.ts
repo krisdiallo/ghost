@@ -259,8 +259,12 @@ test("expanded warehouse admits long floor and elevated flight routes within sha
     maxAltitude: 12,
   });
   const rover = sim.possess("rover-01", 120).leaseId;
+  sim.act(rover, { type: "move", x: -10, z: 3 });
+  advance(3000);
+  sim.act(rover, { type: "move", x: -10, z: -30 });
+  advance(19000);
   sim.act(rover, { type: "move", x: -28, z: -30 });
-  advance(24000);
+  advance(11000);
   assert.deepEqual(sim.observe(rover).body.position, [-28, 0.45, -30]);
   assert.throws(
     () => sim.act(rover, { type: "move", x: 0, z: -34 }),
@@ -269,6 +273,8 @@ test("expanded warehouse admits long floor and elevated flight routes within sha
   const drone = sim.possess("drone-01", 120).leaseId;
   sim.act(drone, { type: "takeoff" });
   advance(2000);
+  sim.act(drone, { type: "move", x: -4, z: -3, y: 11 });
+  advance(5000);
   sim.act(drone, { type: "move", x: 28, z: -30, y: 11 });
   advance(23000);
   assert.deepEqual(sim.observe(drone).body.position, [28, 11, -30]);

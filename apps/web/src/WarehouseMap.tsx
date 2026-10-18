@@ -1,6 +1,11 @@
 import { useState } from "react";
-import { BOUNDS, surveyCell } from "@ghost/shared";
-import type { Snapshot } from "@ghost/shared";
+import {
+  BOUNDS,
+  surveyCell,
+  STATIC_OBSTACLES,
+  BODY_CLEARANCE,
+} from "@ghost/shared";
+import type { Snapshot, Vec3 } from "@ghost/shared";
 import { BODY_COLORS } from "./Warehouse";
 
 export const destinations = [
@@ -24,6 +29,9 @@ export function WarehouseMap({
   select: (id: string) => void;
 }) {
   const body = snapshot.bodies.find((b) => b.id === selected);
+  const blocked = body?.lastBlocked
+    ? { resourceId: selected, position: body.lastBlocked.position }
+    : null;
   const [showSurvey, setShowSurvey] = useState(true);
   return (
     <div className={`warehouse-map ${navigate ? "can-navigate" : ""}`}>
@@ -74,22 +82,19 @@ export function WarehouseMap({
           }}
         />
         {showSurvey && (
-          <g pointerEvents="none" aria-label="Survey coverage grid">
+          <g pointerEvents="none" aria-label="Observed floor checkpoints">
             {snapshot.survey.rows.flatMap((row, r) =>
               [...row].map((covered, c) => {
                 const cell = surveyCell(c, r);
-                return (
-                  <rect
+                return covered === "x" ? null : (
+                  <circle
                     key={`${r}/${c}`}
-                    x={px(cell.minX)}
-                    y={pz(cell.minZ)}
-                    width={(cell.maxX - cell.minX) * 5}
-                    height={(cell.maxZ - cell.minZ) * 5}
-                    fill={covered === "1" ? "#75dbb2" : "#07151f"}
-                    fillOpacity={covered === "1" ? ".3" : ".42"}
-                    stroke="#a4d5c6"
-                    strokeOpacity=".15"
-                    strokeWidth=".4"
+                    cx={px(cell.center[0])}
+                    cy={pz(cell.center[2])}
+                    r="1.7"
+                    fill={covered === "1" ? "#a2f4cb" : "#13262f"}
+                    stroke={covered === "1" ? "#a2f4cb" : "#67877f"}
+                    strokeWidth=".7"
                   />
                 );
               }),
@@ -102,19 +107,32 @@ export function WarehouseMap({
           stroke="#8c9476"
           strokeWidth=".6"
         >
-          {[-27, -16, -5].flatMap((z) =>
-            [-25, -15, -5, 5, 15, 25]
-              .filter((x) => z !== -5 || Math.abs(x) > 10)
-              .map((x) => (
-                <rect
-                  key={`${x}/${z}`}
-                  x={px(x - 3.8)}
-                  y={pz(z - 1.2)}
-                  width="38"
-                  height="12"
-                />
-              )),
-          )}
+          {STATIC_OBSTACLES.map((obstacle) => {
+            const half =
+              body && (body.kind === "drone" || body.kind === "rover")
+                ? BODY_CLEARANCE[body.kind][1]
+                : 0;
+            const active =
+              body &&
+              body.position[1] + half >= obstacle.min[1] &&
+              body.position[1] - half <= obstacle.max[1];
+            return (
+              <rect
+                key={obstacle.id}
+                x={px(obstacle.min[0])}
+                y={pz(obstacle.min[2])}
+                width={(obstacle.max[0] - obstacle.min[0]) * 5}
+                height={(obstacle.max[2] - obstacle.min[2]) * 5}
+                fill={obstacle.kind === "freight" ? "#9e7954" : "#506471"}
+                fillOpacity={active ? ".8" : ".2"}
+              >
+                <title>
+                  {obstacle.label} · {obstacle.min[1].toFixed(1)}–
+                  {obstacle.max[1].toFixed(1)} m high
+                </title>
+              </rect>
+            );
+          })}
           <path
             d="M110 15V190M210 15V190"
             stroke="#d0bb7f"
@@ -159,6 +177,17 @@ export function WarehouseMap({
             EMBODIMENT BAY
           </text>
         </g>
+        {blocked?.resourceId === selected && body && (
+          <g pointerEvents="none" stroke="#ff907e" strokeWidth="1.5">
+            <path
+              d={`M${px(body.position[0])} ${pz(body.position[2])}L${px(blocked.position[0])} ${pz(blocked.position[2])}`}
+              strokeDasharray="3 2"
+            />
+            <path
+              d={`M${px(blocked.position[0]) - 3} ${pz(blocked.position[2]) - 3}l6 6m-6 0l6 -6`}
+            />
+          </g>
+        )}
         {snapshot.bodies.map((b) => (
           <g
             key={b.id}
@@ -190,6 +219,11 @@ export function WarehouseMap({
           </g>
         ))}
       </svg>
+      {blocked?.resourceId === selected && (
+        <span className="map-route-error">
+          Direct path blocked · choose clear aisle waypoints
+        </span>
+      )}
       <span className="map-caption">
         {navigate
           ? "Tap map to set destination"
@@ -198,8 +232,8 @@ export function WarehouseMap({
       {showSurvey && (
         <span className="map-survey-legend">
           <i />
-          {snapshot.survey.coveredCells}/{snapshot.survey.totalCells} cells
-          surveyed · dark = unknown
+          {snapshot.survey.coveredCells}/{snapshot.survey.totalCells}{" "}
+          checkpoints seen · hollow = unknown
         </span>
       )}
     </div>

@@ -70,10 +70,13 @@ test(
       });
       const structured = observed.structuredContent as {
         limits: { telemetryRange: number };
-        survey: { totalCells: number };
+        survey: { totalCells: number; blockedCells: number };
       };
       assert.equal(structured.limits.telemetryRange, 4);
-      assert.equal(structured.survey.totalCells, 96);
+      assert.equal(
+        structured.survey.totalCells + structured.survey.blockedCells,
+        96,
+      );
       const snapshot = (await (
         await fetch(url + "/api/snapshot")
       ).json()) as Snapshot;

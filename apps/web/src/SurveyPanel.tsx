@@ -17,13 +17,13 @@ export function SurveyPanel({ survey }: { survey: Survey }) {
             <small>%</small>
           </strong>
           <span>
-            {survey.coveredCells} / {survey.totalCells} floor cells surveyed
+            {survey.coveredCells} / {survey.totalCells} floor checkpoints seen
           </span>
         </div>
         <div
           className="survey-progress"
           role="progressbar"
-          aria-label="Floor telemetry survey"
+          aria-label="Floor checkpoint survey"
           aria-valuemin={0}
           aria-valuemax={survey.totalCells}
           aria-valuenow={survey.coveredCells}
@@ -31,9 +31,9 @@ export function SurveyPanel({ survey }: { survey: Survey }) {
           <span style={{ width: `${percent}%` }} />
         </div>
         <p>
-          Stationary telemetry at cargo height. Unknown cells stay dark on the
-          map. Camera images may be occluded; floor coverage does not certify a
-          complete inventory.
+          Line-of-sight checkpoints at cargo height. Hollow dots remain unknown;{" "}
+          {survey.blockedCells} points inside structures are excluded. These
+          samples do not certify whole-area or complete inventory coverage.
         </p>
       </div>
       <div className="survey-ledger">

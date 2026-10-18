@@ -1,0 +1,46 @@
+{
+  "at": "2026-10-18T06:30:51.588Z",
+  "source": "Authority checked after the fresh agent finished control; not supplied during its decisions.",
+  "taggedCargo": 3,
+  "inspectedCargo": 3,
+  "uninspectedCargo": [],
+  "priorityDispatchVerified": true,
+  "visibleCheckpoints": 85,
+  "eligibleCheckpoints": 85,
+  "structuralPointsExcluded": 11,
+  "allLeasesReleased": true,
+  "armHomeAndEmpty": true,
+  "droneLanded": true,
+  "bodiesUsed": [
+    "camera-01",
+    "arm-01",
+    "drone-01"
+  ],
+  "agentViewedImages": 28,
+  "unavailableImageSteps": [],
+  "toolErrors": [
+    {
+      "index": 35,
+      "tool": "act",
+      "result": {
+        "code": "PATH_BLOCKED",
+        "details": {
+          "obstacleId": "rack-7",
+          "position": [
+            -20,
+            2.8,
+            -13.32
+          ],
+          "clearance": [
+            1.45,
+            0.45,
+            1.45
+          ]
+        },
+        "message": "Storage bay 7 blocks the direct path near [-20.00, 2.80, -13.32]. Choose clear aisle waypoints or sufficient flight clearance."
+      }
+    }
+  ],
+  "recorderErrors": [],
+  "exportError": null
+}

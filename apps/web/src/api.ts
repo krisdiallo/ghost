@@ -3,6 +3,7 @@ export class RequestError extends Error {
   constructor(
     public code: string,
     message: string,
+    public details?: Record<string, unknown>,
   ) {
     super(message);
   }
@@ -36,6 +37,7 @@ export async function request<T>(path: string, input?: unknown): Promise<T> {
     throw new RequestError(
       value.code ?? "ERROR",
       value.message ?? "The command could not be completed.",
+      value.details,
     );
   return value as T;
 }

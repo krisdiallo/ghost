@@ -63,7 +63,7 @@ ${timestamp} PT · actual app captures
 
 **Hosted MCP progress:** [Manufact preparation and private phone demo screenshots](../manufact/README.md). See that report for deployment status.
 
-**Real agent:** [Search coverage, cargo ledger and a new fresh-context mission](../survey/README.md). [Initial mission and its incomplete inventory result](../agent/README.md).
+**Navigation and real agent:** [Static collision, occluded sensing, independent drone gimbal and a fresh-context mission](../navigation/README.md). [Earlier search coverage run](../survey/README.md). [Initial mission and its incomplete inventory result](../agent/README.md).
 
 **Body vision:** [Four camera views, actual MCP images, embedded mcp-use card and a short recording](../vision/README.md).
 
@@ -96,7 +96,7 @@ The guided camera → rover → drone → arm mission passed **4 / 4 steps**, re
 
 A separate touch-emulated phone run possessed Scout, moved to the inspection point, scanned Cargo 07, and returned: **“${report.manualRoverInspection}”** It then released the body. No browser runtime/console errors and no mobile horizontal overflow. Rendered-image checks verify orbit, pan, zoom, a two-finger touch gesture, and camera reset. Immersive view fills the window. The phone run sends a destination beyond the old demo bay through the live map, checks it in the authority, stops the body, and completes the inspection.
 
-The simulation now admits travel throughout the larger floor and flight up to 12 m. The boundary tests cover floor and elevated flight routes beyond the original demo area. Storage racks and architectural freight remain scenery; the three tagged crates are sensor objects.
+The simulation now admits travel throughout the larger floor and flight up to 12 m. The boundary tests cover floor and elevated flight routes beyond the original demo area. Static solid rack, freight and building envelopes reject intersecting motions and occlude telemetry. Agents choose clear waypoints; there is no automatic route planner. The survey counts visible floor checkpoints, not whole-cell areas.
 
 These are real Chromium/software-WebGL captures, with a 390 × 844 touch-emulated browser. Physical-device GPU and gesture behavior remain a device check. [Machine-readable run evidence](capture-report.json).
 

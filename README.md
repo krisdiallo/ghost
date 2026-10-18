@@ -84,20 +84,24 @@ The stdio adapter connects to the existing authority at port 3001. If none exist
 
 Default TTL is 60 seconds, bounded to 5–300. Competing possession returns `RESOURCE_BUSY`. Expiry uses a monotonic clock and cancels movement. Observe and act require a valid lease. Commands are validated through strict per-command schemas on both HTTP and MCP paths. Motion returns `running`; poll `observe` for completion. Commands serialize per body. Work that would outlast its lease is rejected.
 
-## Search the warehouse
+## Search and navigate
 
-The warehouse map overlays a shared 12 × 8 floor survey grid. Green cells were fully inside a stationary body's analytic telemetry footprint at cargo height (0.55 m); dark cells remain unknown. Movement polls never credit an entire swept path. Toggle **Survey on/off** to compare the grid with the facility map.
+The warehouse map shows a shared 12 × 8 lattice of floor checkpoints. Filled dots were observed through an unobstructed sightline at cargo height (0.55 m); hollow dots remain unknown. Points inside solid structures are excluded. Coverage measures these sampled points, not whole cell areas or exhaustive inventory. Movement polls do not credit swept paths. Reset/restart clears history.
 
-The **Observed cargo** ledger records only cargo actually returned through a leased observation or successful inspection. It retains last-seen positions and inspection findings across body switches and lease expiry, and clears on warehouse reset/restart. It does not reveal unseen cargo or a ground-truth inventory count. This is shared warehouse knowledge, not private per-agent memory.
+The **Observed cargo** ledger retains only actual leased observations and successful inspections across body switches. Last-seen positions are historical; discovery does not disclose unseen cargo or an expected inventory count.
 
-MCP `discover` includes sensor/inspection ranges, camera angle limits, arm gripper preset positions and grasp reach, drone altitude limits, and the same survey state. `surveyGuide` explains grid row/column coordinates so an agent can choose its own search strategy. `observe` updates that history and returns it alongside the body's live telemetry. Grid coverage concerns the floor telemetry plane; it does not prove visual coverage, elevated-rack coverage, or complete inventory. Images can be occluded while analytic telemetry sees through scenery.
+MCP `discover` exposes the static floorplan as `navigation.obstacles`, with named bounding boxes, sensor/inspection limits and body clearance expressed as X/Y/Z half-extents. Rover and drone commands check the entire straight path using a conservative body envelope. `PATH_BLOCKED` rejects the motion and reports the obstacle and intersection point. A red marker and activity entry show the rejection in every viewer. Choose clear aisle waypoints; drones can climb above racks before crossing and must reach clear floor before landing. No automatic route planner is included.
+
+Packed racks, freight stacks, walls, columns and mezzanine structures also block telemetry and inspection. Mobile proximity telemetry remains radial within range, independently of camera direction. Sentinel uses its aimed field of view. Rendering has finer geometry than the conservative solid envelopes, so the simulation may reject a visible gap inside a packed rack. Other moving bodies and mission cargo are not dynamic collision obstacles.
+
+Wisp's **Camera / Gimbal** controls aim independently of flight, including during a running movement. MCP uses `look` with world pan/tilt degrees (pan 0 toward +Z, 90 toward +X; tilt −90 looks down). Aim persists when the chassis heading changes. Phone presets include **Look down**, **Look ahead**, and **Look behind**. **Climb above racks · 9 m** performs a checked vertical climb before map navigation at that altitude.
 
 ## Model and boundaries
 
 - One server owns all positions, actions, objects, leases and mission progress in memory. Restart resets the world and invalidates tokens.
 - Browser snapshots and SSE use instance IDs and revisions. Reconnect receives a full snapshot; older revisions are ignored. Offline frames are marked stale and controls disabled.
 - Observations include structured cargo telemetry. Set `image: true` for a server-rendered 640 × 360 JPEG through the body's camera. HTTP MCP also returns an embedded viewer through mcp-use's MCP Apps support. Stdio delivers the same image content without the embedded card.
-- Motion is deterministic and kinematic. There is no collision avoidance, path planning, rigid-body physics, or hardware integration. Shelves are scenery.
+- Motion is deterministic and kinematic, with swept static-obstacle collision rejection. There is no automatic avoidance/path planning, rigid-body physics, or real hardware integration.
 - Arm presets are `home`, `reach`, and `drop`; grasping checks reach. Release/expiry cancels motion; suspended drones hold position and held cargo remains attached for the next valid lease.
 - The default server is a **trusted local demo**. Hosted mode adds a shared private access key, not multi-tenant accounts. Lease IDs authorize control; display names are not authentication. Public spectator snapshots contain the whole scene. The loopback API has Origin/Host checks, payload limits and no wildcard CORS.
 
@@ -133,9 +137,9 @@ Tests cover lease contention and expiry, invalid tokens, repeated release, bound
 
 ## See what the agent sees
 
-**Real agent progress:** [A new fresh-context agent inspected all 3 tagged crates, surveyed all 96 floor cells and verified priority dispatch](docs/progress/survey/README.md). The report includes a 30 KB phone preview, short edited highlights, original MCP trace and remaining limits. [Initial run: 2 of 3 crates inspected](docs/progress/agent/README.md). [Run and record agent missions](docs/agent-missions.md).
+**Real agent progress:** [Navigation realism: a fresh agent inspected 3/3 crates, observed 85/85 eligible floor checkpoints and verified priority dispatch](docs/progress/navigation/README.md). Includes a small phone preview, short scripted navigation/gimbal recording, full independent mission, original MCP trace and its recovered blocked-path error. [Earlier survey model](docs/progress/survey/README.md) · [Initial incomplete run](docs/progress/agent/README.md) · [Run agent missions](docs/agent-missions.md).
 
-**Body camera** switches the main warehouse viewer to the selected body's live optics: Sentinel's mounted lens, Scout's mast, Wisp's downward-facing camera, or Atlas's wrist camera. Switch back to **Warehouse view** to orbit, pan and zoom. Mobile bodies initially face into the hall, and cargo has physical labels on its faces.
+**Body camera** switches the main warehouse viewer to the selected body's live optics: Sentinel's mounted lens, Scout's mast, Wisp's independently aimed gimbal, or Atlas's wrist camera. Switch back to **Warehouse view** to orbit, pan and zoom. Mobile bodies initially face into the hall, and cargo has physical labels on its faces.
 
 **Agent vision** displays the last captured image for that body, with its revision and UTC timestamp. This is a frozen image, not a video stream. It is the exact JPEG returned by `observe({ leaseId, image: true })`; the live world can advance after capture. Browser owners can also choose **Capture sensor frame**. Capturing in the console prepares a frame but does not send it to a model on its own.
 
@@ -143,7 +147,7 @@ The server runs one lazy, serial Chromium/software-WebGL renderer using the same
 
 The MCP image content is available to a multimodal agent. In compatible MCP Apps hosts, mcp-use also renders the same image in a compact in-chat card. The standalone console is custom React/Three.js; mcp-use supplies the embedded app runtime, hooks and host bridge. A local MCP Apps host is tested; **a signed-in ChatGPT connection remains unverified and requires the hosted OAuth integration**. This does not add a model or make the scripted tour autonomous.
 
-Images include normal scene occlusion. Structured telemetry and inspection eligibility still use analytic range/FOV checks and can report cargo hidden behind a rack; they are explicitly separate signals. `node scripts/capture-sensors.mjs` verifies all four actual JPEGs, HTTP/stdio delivery, pixel identity in the embedded card, and the phone layout.
+Images include normal scene occlusion. Structured telemetry and inspection now require a clear line of sight through the shared static obstacle model. Mobile proximity telemetry is radial, and images use the aimed optical frustum. Packed-rack envelopes are conservative; this is not pixel-perfect visibility or dynamic-object occlusion. `node scripts/capture-sensors.mjs` verifies all four actual JPEGs, HTTP/stdio delivery, pixel identity in the embedded card, and the phone layout.
 
 ```text
 apps/server/       Simulation, MCP tools, stdio adapter, HTTP/SSE bridge

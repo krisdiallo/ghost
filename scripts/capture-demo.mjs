@@ -566,6 +566,25 @@ try {
   );
   await touch.detach();
   const mapBounds = await phone.locator(".warehouse-map svg").boundingBox();
+  // Reach the clear west aisle first; the old diagonal clips a packed rack.
+  await phone.touchscreen.tap(
+    mapBounds.x + mapBounds.width * (22 / 64),
+    mapBounds.y + mapBounds.height * (37 / 44),
+  );
+  await phone.waitForFunction(() =>
+    document.querySelector(".pilot-dock")?.textContent.includes("IN MOTION"),
+  );
+  await phone.waitForFunction(
+    () =>
+      !document.querySelector(".pilot-dock")?.textContent.includes("IN MOTION"),
+  );
+  const aislePose = authority.sim
+    .snapshot()
+    .bodies.find((b) => b.kind === "rover").position;
+  assert.ok(
+    Math.abs(aislePose[0] + 10) < 0.4 && Math.abs(aislePose[2] - 3) < 0.4,
+    "phone reaches a clear aisle waypoint before moving north",
+  );
   // Destination on the map is beyond the old bay. Check the authority, then stop safely.
   await phone.touchscreen.tap(
     mapBounds.x + mapBounds.width * (22 / 64),

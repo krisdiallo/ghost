@@ -62,6 +62,8 @@ try {
   });
   assert.equal(first.isError, false);
   assert.equal(first.result.limits.telemetryRange, 45);
+  assert.equal(first.result.limits.telemetryOcclusion, true);
+  assert.equal(first.result.survey.coverageModel, "visible-floor-checkpoints");
   assert.ok(first.result.survey.coveredCells > 0);
   assert.ok(first.result.survey.knownCargo.length > 0);
   assert.ok(first.image?.absolutePath);
