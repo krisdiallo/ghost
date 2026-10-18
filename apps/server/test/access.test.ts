@@ -5,8 +5,58 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { startWarehouse } from "../src/http.js";
-import { accessConfig, WarehouseAccess } from "../src/access.js";
-import type { IncomingMessage, ServerResponse } from "node:http";
+import { accessConfig, platformHosts, WarehouseAccess } from "../src/access.js";
+import { request, type IncomingMessage, type ServerResponse } from "node:http";
+
+test("platform hosts are scoped to this deployment's trusted runtime identity", () => {
+  assert.deepEqual(platformHosts(3000, {}), []);
+  assert.deepEqual(platformHosts(3000, { FLY_APP_NAME: "*.flycast" }), []);
+  const hosts = platformHosts(3000, { FLY_APP_NAME: "ghost-runtime-1", FLY_PRIVATE_IP: "fdaa:0:1::2" });
+  assert.ok(hosts.includes("ghost-runtime-1.flycast"));
+  assert.ok(hosts.includes("ghost-runtime-1.internal:3000"));
+  assert.ok(hosts.includes("[fdaa:0:1::2]:3000"));
+  assert.ok(!hosts.includes("other-runtime.flycast"));
+});
+
+test("platform routing preserves authentication and browser origin protection", async () => {
+  const previous = process.env.FLY_APP_NAME;
+  process.env.FLY_APP_NAME = "ghost-runtime-test";
+  let warehouse;
+  try {
+    warehouse = await startWarehouse(0, "127.0.0.1", undefined, {
+      origin: "https://ghost.example",
+      accessToken: "x".repeat(40),
+    });
+  } finally {
+    if (previous === undefined) delete process.env.FLY_APP_NAME;
+    else process.env.FLY_APP_NAME = previous;
+  }
+  const port = (warehouse.server.address() as { port: number }).port;
+  const url = `http://127.0.0.1:${port}`;
+  const headers = { Host: "ghost-runtime-test.flycast" };
+  const status = (path: string, requestHeaders: Record<string, string>) =>
+    new Promise<number>((resolve, reject) => {
+      const req = request(url + path, { headers: requestHeaders }, (res) => {
+        res.resume();
+        resolve(res.statusCode!);
+      });
+      req.on("error", reject);
+      req.end();
+    });
+  try {
+    assert.equal(await status("/api/health", headers), 200);
+    assert.equal(await status("/api/snapshot", headers), 401);
+    assert.equal(await status("/api/snapshot", {
+      ...headers, Authorization: `Bearer ${"x".repeat(40)}`,
+    }), 200);
+    assert.equal(await status("/api/health", { Host: "other-runtime.flycast" }), 403);
+    assert.equal(await status("/api/snapshot", {
+      ...headers, Authorization: `Bearer ${"x".repeat(40)}`, Origin: "https://evil.example",
+    }), 403);
+  } finally {
+    await warehouse.close();
+  }
+});
 
 test("remote configuration fails closed; browser cookies are secure on HTTPS", () => {
   assert.throws(() => accessConfig("0.0.0.0", {}), /Remote binding requires/);
