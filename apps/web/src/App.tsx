@@ -159,10 +159,14 @@ export function App() {
   }, [immersive]);
   const [modal, setModal] = useState<"connect" | "help" | "reset" | null>(null);
   const [privateAccess, setPrivateAccess] = useState(false);
+  const [oauthEnabled, setOauthEnabled] = useState(false);
   const mcpUrl = `${window.location.origin}/mcp`;
   useEffect(() => {
-    void request<{ authenticated: boolean }>("/api/access")
-      .then((value) => setPrivateAccess(value.authenticated))
+    void request<{ authenticated: boolean; oauth?: boolean }>("/api/access")
+      .then((value) => {
+        setPrivateAccess(value.authenticated);
+        setOauthEnabled(!!value.oauth);
+      })
       .catch(() => {
         /* The connection indicator handles offline status. */
       });
@@ -1591,12 +1595,23 @@ export function App() {
           </div>
           {privateAccess && (
             <>
-              <h3>Authentication</h3>
+              {oauthEnabled && (
+                <>
+                  <h3>ChatGPT · OAuth</h3>
+                  <p className="control-note">
+                    Add this MCP URL to ChatGPT with OAuth authentication. Leave
+                    the client ID and secret blank for automatic registration.
+                    On GHOST’s consent page, enter your warehouse key and allow
+                    the connection. Reconnect after eight hours or a server
+                    restart.
+                  </p>
+                </>
+              )}
+              <h3>Bearer key</h3>
               <p className="control-note">
                 Set the Authorization header to Bearer followed by your access
-                key. Clients must support custom headers, such as Claude Code or
-                Cursor. ChatGPT connectors require OAuth, which is not
-                configured for this demo.
+                key in a client that supports custom headers, such as Claude
+                Code or Cursor.
               </p>
             </>
           )}

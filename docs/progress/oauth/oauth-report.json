@@ -1,0 +1,16 @@
+{
+  "capturedAt": "2026-10-18T14:37:07.241Z",
+  "deployment": "local hosted-mode verification",
+  "mode": "official SDK OAuth and real browser; not a signed-in ChatGPT session",
+  "checks": [
+    "discovery and confidential client registration",
+    "S256 PKCE",
+    "mobile consent and cross-origin return navigation",
+    "state and issuer validation",
+    "all five MCP tools advertise OAuth",
+    "authenticated discover",
+    "refresh rotation",
+    "revocation rejects access"
+  ],
+  "browserErrors": []
+}

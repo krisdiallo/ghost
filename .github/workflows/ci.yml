@@ -28,6 +28,8 @@ jobs:
         run: node scripts/capture-navigation.mjs
       - name: Verify private phone access and an authenticated MCP agent
         run: node scripts/capture-access.mjs
+      - name: Verify OAuth discovery, browser consent and scoped MCP access
+        run: node scripts/capture-oauth.mjs
       - name: Verify all body images, stdio images and the embedded MCP App
         run: node scripts/capture-sensors.mjs
       - name: Verify agent recorder privacy and interleaved body observations

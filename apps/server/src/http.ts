@@ -8,6 +8,7 @@ import type { ToolName, Observation, SensorFrame } from "@ghost/shared";
 import { Simulation, SimError } from "./simulation.js";
 import { createHttpMcp } from "./mcp.js";
 import { SensorRenderer } from "./renderer.js";
+import { GhostOAuth } from "./oauth.js";
 import {
   accessConfig,
   WarehouseAccess,
@@ -66,6 +67,10 @@ export async function startWarehouse(
   const config = accessConfig(host, options);
   const configuredOrigin = config.origin;
   const access = new WarehouseAccess(config.token, config.secure);
+  const oauth =
+    config.origin && config.token
+      ? new GhostOAuth(config.origin, config.token, access)
+      : undefined;
   const renderer = new SensorRenderer();
   const frames = new Map<string, SensorFrame>();
   const dispatch = async (name: ToolName, input: unknown) => {
@@ -80,7 +85,7 @@ export async function startWarehouse(
     frames.set(observation.body.id, frame);
     return { ...observation, frame };
   };
-  const mcp = createHttpMcp(dispatch);
+  const mcp = createHttpMcp(dispatch, !!oauth);
   const handleMcp = toNodeHandler(mcp);
   const allowedHosts = new Set([
     `localhost:${port}`,
@@ -119,13 +124,20 @@ export async function startWarehouse(
   const server = createServer(async (req, res) => {
     try {
       const url = new URL(req.url ?? "/", "http://localhost");
-      // Apply Host/Origin checks before authentication and every transport.
+      // Enforce trusted hosts everywhere. OAuth routes apply their own CORS/consent checks.
       if (!allowedHosts.has(req.headers.host ?? "")) {
-        console.error("GHOST rejected host", JSON.stringify((req.headers.host ?? "").slice(0, 200)));
+        console.error(
+          "GHOST rejected host",
+          JSON.stringify((req.headers.host ?? "").slice(0, 200)),
+        );
         return json(res, 403, {
           code: "INVALID_HOST",
           message: "Use the configured warehouse URL.",
         });
+      }
+      if (oauth?.paths.has(url.pathname)) {
+        oauth.handle(req, res);
+        return;
       }
       if (req.headers.origin) {
         if (!allowedOrigins.has(req.headers.origin))
@@ -159,10 +171,17 @@ export async function startWarehouse(
         res.end();
         return;
       }
-      if (!access.authorized(req)) {
+      const oauthAuthorized =
+        !!oauth && url.pathname === "/mcp" && (await oauth.authorized(req));
+      if (!access.authorized(req) && !oauthAuthorized) {
         if (req.method === "GET" && ["/", "/auth/login"].includes(url.pathname))
           return loginPage(res);
-        res.setHeader("WWW-Authenticate", 'Bearer realm="ghost"');
+        res.setHeader(
+          "WWW-Authenticate",
+          url.pathname === "/mcp" && oauth
+            ? oauth.challenge()
+            : 'Bearer realm="ghost"',
+        );
         return json(res, 401, {
           code: "AUTH_REQUIRED",
           message: "A warehouse access key is required.",
@@ -171,6 +190,7 @@ export async function startWarehouse(
       if (
         access.enabled &&
         !access.bearer(req) &&
+        !oauthAuthorized &&
         !["GET", "HEAD"].includes(req.method ?? "") &&
         !req.headers.origin
       )
@@ -182,7 +202,10 @@ export async function startWarehouse(
         return;
       }
       if (url.pathname === "/api/access" && req.method === "GET")
-        return json(res, 200, { authenticated: access.enabled });
+        return json(res, 200, {
+          authenticated: access.enabled,
+          oauth: !!oauth,
+        });
       if (url.pathname === "/api/snapshot" && req.method === "GET") {
         sim.tick();
         return json(res, 200, sim.snapshot());
