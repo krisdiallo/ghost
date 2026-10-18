@@ -2,6 +2,8 @@
 
 Oct 17, 2026, 5:12 PM PT · actual app captures
 
+**Latest update:** [Manufact preparation and private phone demo screenshots](../manufact/README.md). The hosted endpoint is not live yet; network access and Manufact authorization are still needed.
+
 ## A corner-mounted warehouse camera
 
 **Sentinel is mounted 10 m high on the southwest corner column.** A short bolted bracket replaces the freestanding floor pole. It looks inward across the open inspection and dispatch area at 104° pan / −16° tilt, with a 45 m sensor range. Both the renderer and simulation use the same fixed location.

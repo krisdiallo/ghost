@@ -55,7 +55,7 @@ Point an MCP client running in the same environment at:
 http://127.0.0.1:3001/mcp
 ```
 
-Independent clients share one warehouse. The endpoint is stateless at the transport layer; leases are opaque capabilities and are held by the simulation, not by HTTP sessions.
+Independent clients share one warehouse. The endpoint uses mcp-use and is stateless at the transport layer; leases are opaque capabilities and are held by the simulation, not by HTTP sessions.
 
 ### Stdio
 
@@ -91,19 +91,17 @@ Default TTL is 60 seconds, bounded to 5–300. Competing possession returns `RES
 - Camera observations use orientation and field of view; rover and drone inspections enforce range. Observations are **structured simulation data**, not images.
 - Motion is deterministic and kinematic. There is no collision avoidance, path planning, rigid-body physics, or hardware integration. Shelves are scenery.
 - Arm presets are `home`, `reach`, and `drop`; grasping checks reach. Release/expiry cancels motion; suspended drones hold position and held cargo remains attached for the next valid lease.
-- The server is a **trusted local demo**, not a multi-tenant service. Lease IDs authorize control; display names are not authentication. Public spectator snapshots contain the whole scene. The loopback API has Origin/Host checks, payload limits and no wildcard CORS.
+- The default server is a **trusted local demo**. Hosted mode adds a shared private access key, not multi-tenant accounts. Lease IDs authorize control; display names are not authentication. Public spectator snapshots contain the whole scene. The loopback API has Origin/Host checks, payload limits and no wildcard CORS.
 
-## Cloud access
+## Manufact Cloud
 
-The default listener is loopback-only. To use a platform-provided **private, authenticated** port forward, configure `GHOST_HOST` if needed and `GHOST_ORIGIN` to its exact browser origin. Host/Origin checks accept only the configured origin plus local development URLs. Example variables (substitute the platform's actual private URL):
+The deployment target is **Manufact Cloud**, following the [official YC starter](https://github.com/mcp-use/hack-yc). HTTP MCP uses mcp-use. A Node 24 Dockerfile builds and serves the console, API/SSE and MCP from one authority. **The public deployment is not live yet:** this executor blocks Manufact's API and a Manufact account still needs to be connected. See [deployment status and configuration](docs/manufact-deployment.md).
 
-```text
-GHOST_HOST=0.0.0.0
-GHOST_ORIGIN=https://your-private-forward.example
-GHOST_PORT=3001
-```
+The default listener stays loopback-only with no key required. Remote binding requires `GHOST_HOST=0.0.0.0`, an exact HTTPS `GHOST_ORIGIN`, and a random `GHOST_ACCESS_TOKEN` of at least 32 characters in the hosting platform's secret settings. The process refuses an incomplete remote configuration. `PORT` is supported; `GHOST_PORT` overrides it.
 
-Do not expose this unauthenticated control API on a public port. Publishing the cloud environment does not itself publish the web app. No public tunnel or new hosting infrastructure is created here.
+Hosted browsers enter through a private login page with an eight-hour HttpOnly, Secure cookie. MCP clients use the HTTPS `/mcp` URL with an Authorization bearer header. All control and spectator endpoints are protected; only the health probe is anonymous. The access key never enters URLs, public snapshots, or JavaScript storage. Sign out revokes the browser session. This supports header-capable MCP clients; **ChatGPT connectors need OAuth, which is not implemented**.
+
+Keep exactly one running replica. Restarts and scale-to-zero reset the in-memory warehouse, leases and sessions. Publishing the cloud workspace alone does not publish the app. No Manufact service or public URL has been provisioned yet.
 
 ## Development and validation
 

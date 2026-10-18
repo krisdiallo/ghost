@@ -61,6 +61,8 @@ await writeFile(
 
 ${timestamp} PT · actual app captures
 
+**Hosted MCP progress:** [Manufact preparation and private phone demo screenshots](../manufact/README.md). See that report for deployment status.
+
 ## A corner-mounted warehouse camera
 
 **Sentinel is mounted 10 m high on the southwest corner column.** A short bolted bracket replaces the freestanding floor pole. It looks inward across the open inspection and dispatch area at 104° pan / −16° tilt, with a 45 m sensor range. Both the renderer and simulation use the same fixed location.
@@ -93,6 +95,8 @@ A separate touch-emulated phone run possessed Scout, moved to the inspection poi
 The simulation now admits travel throughout the larger floor and flight up to 12 m. The boundary tests cover floor and elevated flight routes beyond the original demo area. Storage racks and architectural freight remain scenery; the three tagged crates are sensor objects.
 
 These are real Chromium/software-WebGL captures, with a 390 × 844 touch-emulated browser. Physical-device GPU and gesture behavior remain a device check. [Machine-readable run evidence](capture-report.json).
+
+${report.replayedCaptures?.length ? `The live video records the original tour. These brief checkpoint stills were captured in a separate replay through the real HTTP tools, holding each actual body pose until the screenshot completed: ${report.replayedCaptures.join(", ")}.` : ""}
 `,
 );
 console.log("Updated the lightweight visual report in docs/progress/latest.");

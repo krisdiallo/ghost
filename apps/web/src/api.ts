@@ -28,6 +28,10 @@ export async function request<T>(path: string, input?: unknown): Promise<T> {
     );
   }
   const value = await response.json();
+  if (response.status === 401 && value.code === "AUTH_REQUIRED") {
+    sessionStorage.removeItem("ghost-leases");
+    window.location.replace("/");
+  }
   if (!response.ok)
     throw new RequestError(
       value.code ?? "ERROR",

@@ -25,5 +25,5 @@ Read `README.md` for current functionality, `docs/design-plan.md` for the implem
 - Preserve focused tests for leases, command validation, cancellation, and state synchronization.
 - Public snapshots are spectator views. Agent observations use per-body sensor visibility and range.
 - This is kinematic simulation, without collision avoidance, realistic physics, or real hardware.
-- Keep the API loopback-only by default. A private authenticated forward may use `GHOST_HOST` and exact `GHOST_ORIGIN`; this is not an authenticated public service.
+- Keep the API loopback-only by default. Remote binding requires a private `GHOST_ACCESS_TOKEN` and exact HTTPS `GHOST_ORIGIN`; browser sessions and MCP bearer headers protect every endpoint except the health probe. This is a shared-key demo, not per-user OAuth. See `docs/manufact-deployment.md` for the Manufact deployment and current access blockers. Use one replica for the in-memory authority.
 - Avoid extra frameworks, databases, hardware integrations, model providers, or deployment infrastructure unless requested.
