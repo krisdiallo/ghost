@@ -6,7 +6,7 @@ GHOST targets **Manufact Cloud**, matching the [official YC starter](https://git
 
 ## Service configuration
 
-Import the existing private `krisdiallo/ghost` repository through the Manufact GitHub App. Use `main`, repository root `.`, Dockerfile `Dockerfile`, port `3001`, and enable **Wait for CI**. The image builds all three workspaces with Node 24 and serves the web console, API/SSE, and `/mcp` in one process as an unprivileged user. Pushes to the production branch can then deploy automatically.
+Import the existing private `krisdiallo/ghost` repository through the Manufact GitHub App. Use `main`, repository root `.`, Dockerfile `Dockerfile`, port `3000`, and enable **Wait for CI**. The image builds all three workspaces with Node 24 and serves the web console, API/SSE, and `/mcp` in one process as an unprivileged user. Pushes to the production branch can then deploy automatically.
 
 Set runtime variables through Manufact's environment/secret settings:
 
@@ -15,7 +15,7 @@ Set runtime variables through Manufact's environment/secret settings:
 | `GHOST_ORIGIN`       | Exact assigned HTTPS browser origin, without `/mcp` or another path               |
 | `GHOST_ACCESS_TOKEN` | Random private access key, at least 32 characters; generate and store as a secret |
 | `GHOST_HOST`         | `0.0.0.0` (already set by the image)                                              |
-| `PORT`               | `3001` (already set by the image; `GHOST_PORT` takes precedence)                  |
+| `PORT`               | `3000` (already set by the image; `GHOST_PORT` takes precedence)                  |
 
 The process refuses remote binding without both authentication and an exact HTTPS origin. Health checks use `GET /api/health`, which returns service status only and does not require a key. Everything else, including static scene assets, snapshots, SSE, resets, guided tours and MCP, requires the key or a valid browser session.
 

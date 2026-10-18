@@ -20,14 +20,14 @@ try {
     "--name",
     name,
     "--publish",
-    "127.0.0.1::3001",
+    "127.0.0.1::3000",
     "--env",
     "GHOST_ACCESS_TOKEN",
     "--env",
     "GHOST_ORIGIN=https://ghost.example",
     image,
   );
-  const address = (await docker("port", name, "3001/tcp")).stdout.trim();
+  const address = (await docker("port", name, "3000/tcp")).stdout.trim();
   const url = `http://${address}`;
   const headers = { Host: "ghost.example" };
   // Node fetch intentionally replaces Host; use HTTP to exercise the gateway host.
