@@ -7,6 +7,8 @@ import { toNodeHandler } from "mcp-use/node";
 import type { ToolName, Observation, SensorFrame } from "@ghost/shared";
 import { Simulation, SimError } from "./simulation.js";
 import { createHttpMcp } from "./mcp.js";
+import { ExperimentLab } from "./lab.js";
+import { schemas } from "./contracts.js";
 import { SensorRenderer } from "./renderer.js";
 import { GhostOAuth } from "./oauth.js";
 import {
@@ -22,8 +24,8 @@ async function readBody(req: IncomingMessage) {
   const chunks: Buffer[] = [];
   for await (const chunk of req) {
     size += chunk.length;
-    if (size > 16_384)
-      throw new SimError("PAYLOAD_TOO_LARGE", "Request exceeds 16 KB.");
+    if (size > 131_072)
+      throw new SimError("PAYLOAD_TOO_LARGE", "Request exceeds 128 KB.");
     chunks.push(chunk);
   }
   return Buffer.concat(chunks).toString();
@@ -72,17 +74,34 @@ export async function startWarehouse(
       ? new GhostOAuth(config.origin, config.token, access)
       : undefined;
   const renderer = new SensorRenderer();
+  const lab = new ExperimentLab(sim);
   const frames = new Map<string, SensorFrame>();
   const dispatch = async (name: ToolName, input: unknown) => {
-    const result = sim.tool(name, input);
-    if (name !== "observe" || !(input as { image?: boolean }).image)
-      return result;
+    const result = lab.tool(name, input);
+    const args = input as Record<string, unknown>;
+    if (
+      name === "experiment_inspect" &&
+      typeof args.imageResourceId === "string"
+    ) {
+      const world = lab.runWorld(String(args.runId));
+      const snapshot = world.snapshot();
+      if (!snapshot.bodies.some((b) => b.id === args.imageResourceId))
+        throw new SimError(
+          "RESOURCE_NOT_FOUND",
+          "That device is not in this trial.",
+        );
+      const frame = await renderer.capture(snapshot, args.imageResourceId);
+      return { ...(result as object), frame };
+    }
+    if (name !== "observe" || !args.image) return result;
     const observation = result as Observation;
-    const snapshot = sim.snapshot();
+    const world = lab.worldFor("observe", args);
+    const snapshot = world.snapshot();
     const frame = await renderer.capture(snapshot, observation.body.id);
-    // A revoked/expired capability must never receive an in-flight image.
-    sim.validateLease((input as { leaseId: string }).leaseId);
-    frames.set(observation.body.id, frame);
+    world.validateLease(String(args.leaseId));
+    // Only live-body frames have a polling endpoint. Draft frames are returned
+    // directly, so deleting drafts cannot accumulate orphaned cached JPEGs.
+    if (world === sim) frames.set(observation.body.id, frame);
     return { ...observation, frame };
   };
   const mcp = createHttpMcp(dispatch, !!oauth);
@@ -112,7 +131,10 @@ export async function startWarehouse(
         res.end();
       }
   });
-  const timer = setInterval(() => sim.tick(), 50);
+  const timer = setInterval(() => {
+    sim.tick();
+    lab.tick();
+  }, 50);
   const heartbeat = setInterval(() => {
     for (const [res, req] of streams) {
       if (!access.authorized(req)) {
@@ -236,9 +258,7 @@ export async function startWarehouse(
       }
       if (url.pathname.startsWith("/api/tools/") && req.method === "POST") {
         const name = url.pathname.slice("/api/tools/".length);
-        if (
-          !["discover", "possess", "observe", "act", "release"].includes(name)
-        )
+        if (!Object.hasOwn(schemas, name))
           return json(res, 404, {
             code: "UNKNOWN_TOOL",
             message: "Unknown tool.",
@@ -348,8 +368,10 @@ export async function startWarehouse(
   return {
     server,
     sim,
+    lab,
     close: async () => {
       sim.stopDemo();
+      lab.close();
       await renderer.close();
       for (const res of streams.keys()) res.end();
       server.closeAllConnections();

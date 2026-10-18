@@ -62,7 +62,9 @@ try {
   assert.equal(await page.locator(".scene-fallback").isVisible(), false);
   assert.equal(
     await page.evaluate(
-      () => document.documentElement.scrollWidth <= innerWidth,
+      () =>
+        document.documentElement.scrollWidth <=
+        (visualViewport?.width ?? innerWidth) + 1,
     ),
     true,
     "private mobile header fits",
@@ -120,6 +122,25 @@ try {
     path: join(output, "ghost-private-warehouse.jpg"),
     quality: 78,
   });
+  assert.equal(
+    await page.locator(".viewport-actions button").evaluateAll((buttons) =>
+      buttons.every((button) => {
+        const box = button.getBoundingClientRect();
+        const hit = document.elementFromPoint(
+          box.x + box.width / 2,
+          box.y + box.height / 2,
+        );
+        return (
+          box.left >= 0 &&
+          box.right <= (visualViewport?.width ?? innerWidth) + 1 &&
+          !!hit &&
+          button.contains(hit)
+        );
+      }),
+    ),
+    true,
+    "all mobile toolbar actions fit and receive their own touches",
+  );
   await page
     .getByRole("button", { name: "Exit immersive view", exact: true })
     .click();
@@ -159,6 +180,7 @@ try {
           "current-origin connection URL",
           "logout revokes cookie",
           "no mobile overflow",
+          "all toolbar actions fit the visual viewport and receive their own touches",
         ],
         browserErrors: errors,
       },

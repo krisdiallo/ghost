@@ -138,10 +138,11 @@ export function blockingObstacle(
   from: Vec3,
   to: Vec3,
   clearance: Vec3 = [0, 0, 0],
+  obstacles: Obstacle[] = STATIC_OBSTACLES,
 ) {
   let first: { obstacle: Obstacle; fraction: number; point: Vec3 } | null =
     null;
-  for (const obstacle of STATIC_OBSTACLES) {
+  for (const obstacle of obstacles) {
     const fraction = segmentBoxHit(from, to, obstacle, clearance);
     if (fraction !== null && (!first || fraction < first.fraction))
       first = {

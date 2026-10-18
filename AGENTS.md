@@ -14,11 +14,21 @@ Read `README.md` for current functionality, `docs/design-plan.md` for the implem
 - The stdio adapter reuses the authority; if it starts an embedded authority, that authority lives only as long as the owning stdio client. Use the standalone server for stable multi-client demos.
 - No secrets, LLM provider, or external services are required. The guided demo is scripted, not an LLM agent.
 - UI interactions are tested in JSDOM and in real headless Chromium with software WebGL. `npm run capture` records the full mission, captures desktop/mobile screenshots, and runs a touch-emulated rover inspection. Physical phone/GPU behavior is a separate check.
-- The user is traveling on mobile: continuously integrate and merge passing changes without asking them to review PRs. Send visual progress reports with actual screenshots, short demo recordings, and concrete examples. Keep `docs/progress/latest` current with selected captures; CI archives every capture run. Do not substitute code-review links for visual reports.
+- The user expects continuous integration: integrate and merge passing changes without asking them to review PRs. Send visual progress reports with actual screenshots, short demo recordings, and concrete examples. Keep `docs/progress/latest` current with selected captures; CI archives every capture run. Do not substitute code-review links for visual reports.
+
+## Experiment lab
+
+- Read docs/experiment-lab.md for operator tools and model assumptions.
+- ExperimentLab owns bounded draft definitions and separate run forks. Never route a trial command into the live warehouse or another trial.
+- Freeze report inputs/source revisions, preserve errors, keep results independent of playback and require comparable conditions before performance deltas.
+- Operator tools expose full scenario cargo intentionally; do not describe those evaluations as blind discovery. Body tools retain sensor privacy.
+- Scale affects both rendered and checked geometry. Dwell is an explicit timing assumption; inspection/arm commands are otherwise instantaneous.
+- Keep revision checks, cancellation/timeout cleanup, bounded memory and JSON export/import. Add no user-code execution, database, provider or automatic planner.
+- The UI is at /#lab. Its recorder uses real MCP/browser actions; publish passing captures only.
 
 ## Boundaries
 
-- `apps/server`: single authoritative simulation, lease manager, typed command validation, HTTP/SSE and MCP transports.
+- `apps/server`: authoritative per-world simulations in one process, lease manager, typed command validation, HTTP/SSE and MCP transports.
 - `apps/web`: presentation, manual controls, sensor output, scene interpolation. Never decide command success in browser animation.
 - `packages/shared`: contracts and body/capability definitions used by both applications.
 - Preserve token privacy: lease IDs never go in public snapshots or logs. Agent display names are not authentication.

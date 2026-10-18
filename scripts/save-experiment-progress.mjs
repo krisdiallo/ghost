@@ -1,0 +1,211 @@
+// Publish only validated captures and independently verified MCP evidence.
+import assert from "node:assert/strict";
+import { readFile, writeFile, copyFile, mkdir, stat } from "node:fs/promises";
+import { join, resolve } from "node:path";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { createHash } from "node:crypto";
+const visual = resolve(
+  process.env.GHOST_LAB_CAPTURE_DIR ?? "work/captures/lab",
+);
+const agent = resolve(process.env.GHOST_LAB_AGENT_DIR ?? "work/lab-agent-01");
+const out = resolve("docs/progress/experiments");
+const read = async (dir, name) =>
+  JSON.parse(await readFile(join(dir, name), "utf8"));
+const checks = await read(visual, "verification.json");
+for (const key of [
+  "mainWarehouseUnchanged",
+  "isolatedClones",
+  "standardBlocked",
+  "compactCompleted",
+  "comparableInputs",
+  "frozenRunInputs",
+  "temporaryDeviceEditing",
+  "layoutEditing",
+  "definitionExportImport",
+  "phoneWorkflowRun",
+  "phoneNoOverflow",
+])
+  assert.equal(checks[key], true, key);
+assert.deepEqual(checks.browserErrors, []);
+const proof = await read(agent, "parent-verification.json");
+assert.ok(
+  proof.liveWarehouseUntouched &&
+    proof.draftDeleted &&
+    proof.retainedReportsMatchExports &&
+    proof.allTrialLeasesReleased &&
+    proof.allTrialEndStatesSafe,
+);
+const exported = await read(agent, "independent-rover-trial.json");
+const a = exported.baselineReport.result.run,
+  b = exported.candidateReport.result.run;
+assert.equal(a.status, "completed");
+assert.equal(b.status, "completed");
+assert.equal(a.scenarioHash, b.scenarioHash);
+assert.equal(a.workflowHash, b.workflowHash);
+assert.equal(a.metrics.completedSteps, 13);
+assert.equal(b.metrics.completedSteps, 13);
+assert.equal(exported.comparison.result.comparable, true);
+await mkdir(join(out, "validation"), { recursive: true });
+await mkdir(join(out, "agent"), { recursive: true });
+const names = [
+  "lab-empty.jpg",
+  "lab-comparison-desktop.jpg",
+  "comparison-table.jpg",
+  "lab-blocked-run.jpg",
+  "trial-camera.jpg",
+  "trial-sensor-ui.jpg",
+  "device-editor.jpg",
+  "device-focus.jpg",
+  "workflow-editor.jpg",
+  "lab-mobile-preview.jpg",
+  "lab-mobile-result.jpg",
+  "exported-sandbox.json",
+  "experiment-lab-2x.mp4",
+  "verification.json",
+];
+for (const name of names)
+  await copyFile(join(visual, name), join(out, "validation", name));
+for (const name of [
+  "independent-rover-trial.json",
+  "trace.jsonl",
+  "schemas.json",
+  "parent-verification.json",
+  "agent-attestation.json",
+])
+  await copyFile(join(agent, name), join(out, "agent", name));
+for (const image of proof.images) {
+  const bytes = await readFile(join(agent, image.file));
+  assert.equal(createHash("sha256").update(bytes).digest("hex"), image.sha256);
+  await copyFile(join(agent, image.file), join(out, "agent", image.file));
+}
+assert.equal(
+  createHash("sha256")
+    .update(await readFile(join(visual, "trial-camera.jpg")))
+    .digest("hex"),
+  checks.trialSensorImageSha256,
+);
+await promisify(execFile)("ffmpeg", [
+  "-loglevel",
+  "error",
+  "-y",
+  "-i",
+  join(out, "validation/lab-comparison-desktop.jpg"),
+  "-vf",
+  "scale=756:-2",
+  "-q:v",
+  "5",
+  join(out, "preview.jpg"),
+]);
+const kb = async (p) => Math.round((await stat(join(out, p))).size / 1024);
+const accessCapture = resolve(
+  process.env.GHOST_ACCESS_CAPTURE_DIR ?? "work/captures",
+);
+const accessProof = await read(accessCapture, "access-report.json");
+assert.deepEqual(accessProof.browserErrors, []);
+assert.ok(accessProof.checks.includes("no mobile overflow"));
+await copyFile(
+  join(accessCapture, "ghost-private-warehouse.jpg"),
+  join(out, "validation/phone-immersive.jpg"),
+);
+await copyFile(
+  join(accessCapture, "access-report.json"),
+  join(out, "validation/access-report.json"),
+);
+const date = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/Los_Angeles",
+  dateStyle: "long",
+}).format(new Date());
+const report = [
+  "# GHOST · warehouse experiments",
+  "",
+  date + " · Actual app captures and independently verified MCP trials.",
+  "",
+  "Clone a warehouse, configure temporary device candidates, bind workflows, run isolated trials and compare evidence. Eleven experiment tools join the original five body tools. Open **Experiment lab** at /#lab.",
+  "",
+  "![Actual experiment lab — " +
+    (await kb("preview.jpg")) +
+    " KB](preview.jpg)",
+  "",
+  "[Continuous scripted UI demo, 2× — " +
+    (await kb("validation/experiment-lab-2x.mp4")) +
+    " KB](validation/experiment-lab-2x.mp4?raw=true) · [Full desktop](validation/lab-comparison-desktop.jpg) · [Phone preview](validation/lab-mobile-preview.jpg) · [Phone result](validation/lab-mobile-result.jpg)",
+  "",
+  "## What works",
+  "",
+  "- Clone live state or saved definitions; import/export versioned JSON. Drafts and trial forks stay isolated.",
+  "- Edit solid structures, temporary device placements, scale, speed, sensing and arm payload. Scale changes both rendered and checked geometry.",
+  "- Bind named actors to devices; author typed sequential workflows, dwell, budgets and safe endings.",
+  "- Watch real server state with orbit/pan/zoom, top view, device focus and body cameras. Capture actual trial sensor JPEGs.",
+  "- Preserve exact input revisions, step errors, metrics and assumptions. Cancel trials, release leases, retain reports and compare controlled variants.",
+  "",
+  "## Scripted UI regression",
+  "",
+  "The standard drone cannot pass a 2.4 m gap with its configured 2.9 m conservative envelope. The 70% scale candidate completes the same six-step inspection, lands, and releases leases. Both share scenario/workflow fingerprints. The failed run is retained and is never treated as a speed improvement.",
+  "",
+  "[Comparison table](validation/comparison-table.jpg) · [Original blocked error](validation/lab-blocked-run.jpg) · [Device editor](validation/device-editor.jpg) · [Focus view](validation/device-focus.jpg) · [Workflow editor](validation/workflow-editor.jpg)",
+  "",
+  "![Actual frozen trial camera JPEG](validation/trial-camera.jpg)",
+  "",
+  "[Sensor image in UI](validation/trial-sensor-ui.jpg) · [Exported sandbox](validation/exported-sandbox.json) · [Browser/MCP assertions](validation/verification.json)",
+  "",
+  "The recording uses scripted browser actions and real MCP SDK calls. It also verifies editing devices/layout preserves earlier reports, JSON download/import, phone workflow replay, no phone horizontal overflow and no browser errors. It is separate from the independent evaluation below.",
+  "",
+  "## Independent agent-designed trial",
+  "",
+  "A fresh context-free evaluator chose a temporary rover and its own 13-step, three-cargo inspection loop from disclosed operator scenario geometry. It received no route or expected outcome, used no starter template, and received no parent steering during control. It read actual MCP schemas, its own tool results and two returned JPEGs. This is an operator experiment, not a blind inventory benchmark.",
+  "",
+  "| Candidate assumption | Result | Route | Simulated time |",
+  "| --- | --- | --- | --- |",
+  "| Rover at 1.8 m/s | 13/13 steps, 3 cargo inspected | 107.708 m | 65.838 s |",
+  "| Same rover at 3 m/s | 13/13 steps, 3 cargo inspected | 107.708 m | 41.903 s |",
+  "",
+  "Only configured speed changed. Both ended safely with no failed/blocked steps and all leases released; 10/85 floor checkpoints were observed. Controlled comparison returned true. The 23.935 s difference is a sensitivity result under assumed speeds, not measured hardware performance.",
+  "",
+  "The evaluator verified that editing the draft preserved the earlier run, then deleted its draft. After all decisions ended, the parent checked retained reports against exports, verified image hashes and confirmed the live warehouse remained untouched.",
+  "",
+  "[Exact definitions, workflows and full reports](agent/independent-rover-trial.json) · [Original 12-call MCP trace](agent/trace.jsonl) · [Actual schemas](agent/schemas.json) · [Context/source attestation](agent/agent-attestation.json) · [Authority verification](agent/parent-verification.json)",
+  "",
+  ...proof.images.map(
+    (i, n) =>
+      "[Agent-viewed sensor image " + (n + 1) + "](agent/" + i.file + ")",
+  ),
+  "",
+  "There is no continuous video of the independent agent run. Its evidence is the original MCP trace, returned sensor images and authority-checked exports; the UI video above is scripted.",
+  "",
+  "[Authenticated phone immersive view](validation/phone-immersive.jpg) · [Access and touch verification](validation/access-report.json). The mobile header and toolbar wrap to keep all actions on the visible screen. Real browser login, MCP inspection, ordinary Exit touch and logout passed.",
+  "",
+  "## Current limits",
+  "",
+  "Structures can be edited/imported inside the existing 64 × 44 m hall. Automatic CAD/photo reconstruction and arbitrary building footprints are not implemented. Device candidates are hypothetical uniform scales and bounded profiles, not calibrated vendor models.",
+  "",
+  "Motion is kinematic with static solid obstacles and conservative swept clearance. No battery, acceleration/braking, airflow, radio, moving-device/cargo collision or real hardware calibration. Explicit dwell adds assumed task time; inspection and arm presets otherwise have no calibrated duration. Workflow execution is sequential typed commands, with no automatic planner or model provider.",
+  "",
+  "Eight drafts, four active trials and the last 32 reports live in process memory; restart clears them. Export JSON for retention. This supports feasibility exploration and test design; physical safety and purchasing decisions require real hardware validation.",
+  "",
+  "[Tool contracts and usage](../../experiment-lab.md) · [Earlier navigation evidence](../navigation/README.md) · [Earlier survey](../survey/README.md)",
+  "",
+].join("\n");
+await writeFile(join(out, "README.md"), report);
+await writeFile(
+  "docs/progress/latest/README.md",
+  [
+    "# GHOST · latest visual progress",
+    "",
+    "[Warehouse experiment lab: isolated candidates, workflows and actual MCP trials](../experiments/README.md)",
+    "",
+    "![Actual experiment lab — " +
+      (await kb("preview.jpg")) +
+      " KB](../experiments/preview.jpg)",
+    "",
+    "[Short UI demo, 2×](../experiments/validation/experiment-lab-2x.mp4?raw=true) · [Phone](../experiments/validation/lab-mobile-preview.jpg) · [Independent agent evidence](../experiments/README.md#independent-agent-designed-trial)",
+    "",
+    "Also: [Rack tops and exposed storage tiers](../racks/README.md).",
+  "",
+  "Earlier: [Navigation realism](../navigation/README.md) · [Shared survey](../survey/README.md) · [MCP Apps and cameras](../vision/README.md).",
+    "",
+  ].join("\n"),
+);
+console.log(
+  "Published verified experiment UI captures, original independent MCP evidence and latest visual report.",
+);

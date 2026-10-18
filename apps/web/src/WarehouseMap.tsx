@@ -107,10 +107,10 @@ export function WarehouseMap({
           stroke="#8c9476"
           strokeWidth=".6"
         >
-          {STATIC_OBSTACLES.map((obstacle) => {
+          {(snapshot.layout?.obstacles ?? STATIC_OBSTACLES).map((obstacle) => {
             const half =
               body && (body.kind === "drone" || body.kind === "rover")
-                ? BODY_CLEARANCE[body.kind][1]
+                ? BODY_CLEARANCE[body.kind][1] * (body.profile?.scale ?? 1)
                 : 0;
             const active =
               body &&

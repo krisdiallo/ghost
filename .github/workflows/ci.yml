@@ -8,7 +8,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 18
+    timeout-minutes: 22
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -26,6 +26,8 @@ jobs:
         run: node scripts/capture-demo.mjs
       - name: Verify swept navigation, occlusion and in-flight drone camera controls
         run: node scripts/capture-navigation.mjs
+      - name: Verify isolated experiments, MCP reports, export/import and phone UI
+        run: node scripts/capture-lab.mjs
       - name: Verify private phone access and an authenticated MCP agent
         run: node scripts/capture-access.mjs
       - name: Verify OAuth discovery, browser consent and scoped MCP access

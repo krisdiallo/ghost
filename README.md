@@ -43,6 +43,16 @@ The warehouse is a 64 × 44 m industrial hall with 16 four-tier storage bays, si
 
 See [the demo playbook](docs/demo-playbook.md) for individual commands and recovery steps.
 
+## Experiment with a warehouse
+
+Open **Experiment lab** to clone the warehouse, add temporary candidate devices, edit structures, assign workflows and compare independent runs. Trial motion, leases, cargo and observations remain separate from the live warehouse. Change scale, speed or sensor range, then inspect the exact command trace and actual camera images.
+
+**Run aisle fit comparison** demonstrates a standard drone rejected at a rack gap and a compact candidate completing the same scripted inspection. Reports retain failures, simulated time, route distance, inspection results and cleanup. Every result freezes its definition and workflow, so editing a draft cannot rewrite an earlier run.
+
+Eleven new MCP tools cover sandbox creation/editing, temporary devices, workflows, cancellation, inspection and comparison. Embodiment tools also operate draft devices using sandboxId on discover/possess. See the [experiment lab guide](docs/experiment-lab.md) for examples, limits and assumptions.
+
+State is in memory. Export versioned JSON to retain definitions and reports. The model tests configured geometry, visibility and command logic in the existing hall; it does not predict calibrated hardware or battery performance.
+
 ## Connect any MCP agent
 
 Keep `npm run dev` or `npm start` running as the shared authority when using multiple clients.
@@ -136,6 +146,8 @@ Tests cover lease contention and expiry, invalid tokens, repeated release, bound
 **Verification limit:** Desktop and mobile-emulated browser runs are verified; physical phone/GPU behavior and pinch gestures remain a target-device check. Vite's large Three.js bundle warning is non-fatal.
 
 ## See what the agent sees
+
+**Experiment lab evidence:** [Actual desktop/phone UI, short demo video and an independent agent-designed 13-step rover comparison](docs/progress/experiments/README.md).
 
 **Real agent progress:** [Navigation realism: a fresh agent inspected 3/3 crates, observed 85/85 eligible floor checkpoints and verified priority dispatch](docs/progress/navigation/README.md). Includes a small phone preview, short scripted navigation/gimbal recording, full independent mission, original MCP trace and its recovered blocked-path error. [Earlier survey model](docs/progress/survey/README.md) · [Initial incomplete run](docs/progress/agent/README.md) · [Run agent missions](docs/agent-missions.md).
 

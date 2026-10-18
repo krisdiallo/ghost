@@ -8,18 +8,22 @@ export class RequestError extends Error {
     super(message);
   }
 }
-export async function request<T>(path: string, input?: unknown): Promise<T> {
+export async function request<T>(
+  path: string,
+  input?: unknown,
+  timeoutMs = 6000,
+): Promise<T> {
   let response: Response;
   try {
     response = await fetch(
       path,
       input === undefined
-        ? { signal: AbortSignal.timeout(6000) }
+        ? { signal: AbortSignal.timeout(timeoutMs) }
         : {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(input),
-            signal: AbortSignal.timeout(6000),
+            signal: AbortSignal.timeout(timeoutMs),
           },
     );
   } catch {
@@ -41,5 +45,14 @@ export async function request<T>(path: string, input?: unknown): Promise<T> {
     );
   return value as T;
 }
-export const tool = <T>(name: ToolName, input: unknown) =>
-  request<T>(`/api/tools/${name}`, input);
+export const tool = <T>(name: ToolName, input: unknown) => {
+  const args = input as { image?: boolean; imageResourceId?: string };
+  return request<T>(
+    `/api/tools/${name}`,
+    input,
+    (name === "observe" && args?.image) ||
+      (name === "experiment_inspect" && args?.imageResourceId)
+      ? 45000
+      : 6000,
+  );
+};

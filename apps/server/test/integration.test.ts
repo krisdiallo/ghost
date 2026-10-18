@@ -33,13 +33,27 @@ test(
       clients.push(a);
       const b = await connect(url);
       clients.push(b);
-      assert.deepEqual((await a.listTools()).tools.map((t) => t.name).sort(), [
-        "act",
-        "discover",
-        "observe",
-        "possess",
-        "release",
-      ]);
+      assert.deepEqual(
+        (await a.listTools()).tools.map((t) => t.name).sort(),
+        [
+          "act",
+          "discover",
+          "observe",
+          "possess",
+          "release",
+          "sandbox_add_device",
+          "sandbox_create",
+          "sandbox_delete",
+          "sandbox_inspect",
+          "sandbox_list",
+          "sandbox_update",
+          "experiment_cancel",
+          "experiment_compare",
+          "experiment_inspect",
+          "experiment_run",
+          "experiment_templates",
+        ].sort(),
+      );
       const discovery = decode(
         await a.callTool({ name: "discover", arguments: {} }),
       );

@@ -126,7 +126,7 @@ try {
     }),
   );
   const tools = (await client.listTools()).tools;
-  assert.equal(tools.length, 5);
+  assert.equal(tools.length, 16);
   assert(
     tools.every((tool) => JSON.stringify(tool._meta).includes("ghost:control")),
   );
@@ -172,7 +172,7 @@ try {
           "S256 PKCE",
           "mobile consent and cross-origin return navigation",
           "state and issuer validation",
-          "all five MCP tools advertise OAuth",
+          "all sixteen MCP tools advertise OAuth",
           "authenticated discover",
           "refresh rotation",
           "revocation rejects access",

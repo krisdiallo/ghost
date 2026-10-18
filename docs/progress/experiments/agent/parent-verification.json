@@ -1,0 +1,66 @@
+{
+  "verifiedAt": "2026-10-18T15:08:02.974Z",
+  "source": "Authority checked after the independent evaluator finished all control; no parent guidance during decisions.",
+  "liveWarehouseUntouched": true,
+  "draftDeleted": true,
+  "retainedReportsMatchExports": true,
+  "allTrialLeasesReleased": true,
+  "allTrialEndStatesSafe": true,
+  "actualMcpCalls": 12,
+  "images": [
+    {
+      "file": "sensor-1792335709439-e8627f.jpg",
+      "sha256": "ba76f43d0c8b1fd93aa9a7c37bfbbf4780282e46726b570b7d4774714c82c6d5",
+      "viewedByAgent": true
+    },
+    {
+      "file": "sensor-1792335721117-646324.jpg",
+      "sha256": "ba76f43d0c8b1fd93aa9a7c37bfbbf4780282e46726b570b7d4774714c82c6d5",
+      "viewedByAgent": true
+    }
+  ],
+  "runs": [
+    {
+      "id": "run-53b4997c",
+      "sourceRevision": 2,
+      "metrics": {
+        "simulatedSeconds": 65.838,
+        "distanceMeters": 107.708,
+        "completedSteps": 13,
+        "totalSteps": 13,
+        "failedSteps": 0,
+        "blockedMoves": 0,
+        "inspectedCargo": [
+          "crate-07",
+          "crate-12",
+          "crate-18"
+        ],
+        "observedCheckpoints": 10,
+        "eligibleCheckpoints": 85,
+        "allLeasesReleased": true,
+        "safeEndState": true
+      }
+    },
+    {
+      "id": "run-ec672338",
+      "sourceRevision": 3,
+      "metrics": {
+        "simulatedSeconds": 41.903,
+        "distanceMeters": 107.708,
+        "completedSteps": 13,
+        "totalSteps": 13,
+        "failedSteps": 0,
+        "blockedMoves": 0,
+        "inspectedCargo": [
+          "crate-07",
+          "crate-12",
+          "crate-18"
+        ],
+        "observedCheckpoints": 10,
+        "eligibleCheckpoints": 85,
+        "allLeasesReleased": true,
+        "safeEndState": true
+      }
+    }
+  ]
+}

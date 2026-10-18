@@ -442,6 +442,7 @@ export function App() {
           WAREHOUSE / 01
         </span>
         <div className="topbar-actions">
+          <a className="quiet lab-nav-link" href="#lab">Experiment lab ↗</a>
           <span className={`connection ${connection}`} role="status">
             <i />
             {connection === "live"

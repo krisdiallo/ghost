@@ -7,6 +7,9 @@ import {
   ARM_PRESETS,
   SENSOR_LIMITS,
   bodyLimits,
+  bodyClearance,
+  armPresets,
+  defaultProfile,
   telemetryVisible,
   STATIC_OBSTACLES,
   BODY_CLEARANCE,
@@ -22,7 +25,8 @@ import type {
   ResourceKind,
   SceneObject,
   Snapshot,
-  ToolName,
+  BodyToolName,
+  WarehouseDefinition,
   Vec3,
 } from "@ghost/shared";
 import { schemas } from "./contracts.js";
@@ -72,8 +76,10 @@ export class Simulation {
   constructor(
     private clock = () => performance.now(),
     private wallClock = () => Date.now(),
+    private initialDefinition?: WarehouseDefinition,
   ) {
     this.initialize();
+    this.survey = new SurveyTracker(this.obstacles);
   }
 
   private initialize() {
@@ -125,6 +131,71 @@ export class Simulation {
         inspectedBy: [],
       },
     ];
+    if (this.initialDefinition) {
+      this.bodies = this.initialDefinition.devices.map((r) => ({
+        ...structuredClone(r),
+        heading:
+          r.heading ?? (r.kind === "rover" || r.kind === "drone" ? Math.PI : 0),
+        pan:
+          r.pan ??
+          (r.kind === "camera"
+            ? CAMERA_SENSOR.homePan
+            : r.kind === "drone"
+              ? 180
+              : 0),
+        tilt:
+          r.tilt ??
+          (r.kind === "camera"
+            ? CAMERA_SENSOR.homeTilt
+            : r.kind === "drone"
+              ? -35
+              : 0),
+        airborne:
+          r.kind === "drone" &&
+          (r.airborne ?? r.position[1] > 0.4 * r.profile.scale + 0.001),
+        preset: "home",
+        heldObjectId: null,
+        lease: null,
+        action: null,
+        lastBlocked: null,
+      }));
+      this.objects = this.initialDefinition.cargo.map((o) => ({
+        ...structuredClone(o),
+        heldBy: null,
+        inspectedBy: [],
+      }));
+    }
+  }
+  get obstacles() {
+    return this.initialDefinition?.obstacles ?? STATIC_OBSTACLES;
+  }
+  recognizesLease(id: string) {
+    return this.leases.has(id) || this.retired.has(id);
+  }
+  definition(name: string): WarehouseDefinition {
+    return {
+      version: 1,
+      name,
+      obstacles: structuredClone(this.obstacles),
+      devices: this.bodies.map((b) => ({
+        id: b.id,
+        kind: b.kind,
+        label: b.label,
+        position: [...b.position],
+        heading: b.heading,
+        pan: b.pan,
+        tilt: b.tilt,
+        airborne: b.airborne,
+        profile: structuredClone(b.profile ?? defaultProfile(b.kind)),
+      })),
+      cargo: this.objects.map((o) => ({
+        id: o.id,
+        label: o.label,
+        position: [...o.position],
+        condition: o.condition,
+        massKg: o.massKg ?? 1,
+      })),
+    };
   }
   subscribe(listener: () => void) {
     this.listeners.add(listener);
@@ -152,6 +223,9 @@ export class Simulation {
   }
   snapshot(): Snapshot {
     return structuredClone({
+      ...(this.initialDefinition
+        ? { layout: { obstacles: this.obstacles } }
+        : {}),
       instanceId: this.instanceId,
       revision: this.revision,
       at: this.wallClock(),
@@ -160,35 +234,37 @@ export class Simulation {
       activity: this.activity,
       demo: this.demo,
       survey: this.survey.snapshot(),
-      mission: [
-        {
-          id: "camera",
-          body: "camera",
-          label: "Locate cargo with Sentinel",
-          complete: this.target().inspectedBy.includes("camera-01"),
-        },
-        {
-          id: "rover",
-          body: "rover",
-          label: "Inspect the seal with Scout",
-          complete: this.target().inspectedBy.includes("rover-01"),
-        },
-        {
-          id: "drone",
-          body: "drone",
-          label: "Survey from above with Wisp",
-          complete: this.target().inspectedBy.includes("drone-01"),
-        },
-        {
-          id: "arm",
-          body: "arm",
-          label: "Stage cargo with Atlas",
-          complete:
-            this.target().heldBy === null &&
-            this.target().position[0] > 5 &&
-            this.target().position[2] > 1,
-        },
-      ],
+      mission: this.initialDefinition
+        ? []
+        : [
+            {
+              id: "camera",
+              body: "camera",
+              label: "Locate cargo with Sentinel",
+              complete: this.target().inspectedBy.includes("camera-01"),
+            },
+            {
+              id: "rover",
+              body: "rover",
+              label: "Inspect the seal with Scout",
+              complete: this.target().inspectedBy.includes("rover-01"),
+            },
+            {
+              id: "drone",
+              body: "drone",
+              label: "Survey from above with Wisp",
+              complete: this.target().inspectedBy.includes("drone-01"),
+            },
+            {
+              id: "arm",
+              body: "arm",
+              label: "Stage cargo with Atlas",
+              complete:
+                this.target().heldBy === null &&
+                this.target().position[0] > 5 &&
+                this.target().position[2] > 1,
+            },
+          ],
     });
   }
   private target() {
@@ -256,7 +332,7 @@ export class Simulation {
       mode: "live",
       bounds: { ...BOUNDS },
       navigation: {
-        obstacles: structuredClone(STATIC_OBSTACLES),
+        obstacles: structuredClone(this.obstacles),
         model:
           "static AABB swept-volume collision rejection; no automatic path planning",
         units: "meters",
@@ -312,7 +388,7 @@ export class Simulation {
   }
   private visible(body: Body, object: SceneObject) {
     if (object.heldBy && object.heldBy !== body.id) return false;
-    return telemetryVisible(body, object.position);
+    return telemetryVisible(body, object.position, this.obstacles);
   }
   validateLease(id: string) {
     this.authorize(id);
@@ -396,6 +472,7 @@ export class Simulation {
       status: "completed",
       target: null,
     };
+    const profile = body.profile ?? defaultProfile(body.kind);
     let target: Vec3 | null = null;
     switch (command.type) {
       case "move":
@@ -411,7 +488,9 @@ export class Simulation {
           );
         target = [
           command.x,
-          body.kind === "rover" ? 0.45 : (command.y ?? body.position[1]),
+          body.kind === "rover"
+            ? 0.45 * profile.scale
+            : (command.y ?? body.position[1]),
           command.z,
         ];
         if (
@@ -420,7 +499,7 @@ export class Simulation {
           target[2] < BOUNDS.minZ ||
           target[2] > BOUNDS.maxZ ||
           (body.kind === "drone" &&
-            (target[1] < 0.8 || target[1] > BOUNDS.maxAltitude))
+            (target[1] < 0.8 * profile.scale || target[1] > BOUNDS.maxAltitude))
         )
           throw new SimError(
             "OUT_OF_BOUNDS",
@@ -433,12 +512,12 @@ export class Simulation {
             "ALREADY_AIRBORNE",
             "The drone is already airborne.",
           );
-        target = [body.position[0], 2.8, body.position[2]];
+        target = [body.position[0], 2.8 * profile.scale, body.position[2]];
         break;
       case "land":
         if (!body.airborne)
           throw new SimError("NOT_AIRBORNE", "The drone is already landed.");
-        target = [body.position[0], 0.4, body.position[2]];
+        target = [body.position[0], 0.4 * profile.scale, body.position[2]];
         break;
       case "look":
         if (body.kind === "camera" && command.tilt < -80)
@@ -454,7 +533,7 @@ export class Simulation {
         if (
           !this.visible(body, object) ||
           distance(body.position, object.position) >
-            (SENSOR_LIMITS[body.kind].inspectRange ?? 0)
+            (bodyLimits(body).inspectRange ?? 0)
         )
           throw new SimError(
             "OUT_OF_REACH",
@@ -490,11 +569,16 @@ export class Simulation {
           );
         if (
           body.preset !== "reach" ||
-          distance(this.gripper(body), object.position) > 0.9
+          distance(this.gripper(body), object.position) > 0.9 * profile.scale
         )
           throw new SimError(
             "OUT_OF_REACH",
             "Move the arm to the reach preset near the cargo first.",
+          );
+        if ((object.massKg ?? 1) > (profile.payloadKg ?? 0))
+          throw new SimError(
+            "PAYLOAD_EXCEEDED",
+            "Cargo exceeds configured arm payload.",
           );
         body.heldObjectId = object.id;
         object.heldBy = body.id;
@@ -518,8 +602,13 @@ export class Simulation {
         break;
     }
     if (target) {
-      const clearance = BODY_CLEARANCE[body.kind as "rover" | "drone"];
-      const blocked = blockingObstacle(body.position, target, clearance);
+      const clearance = bodyClearance(body);
+      const blocked = blockingObstacle(
+        body.position,
+        target,
+        clearance,
+        this.obstacles,
+      );
       if (blocked) {
         body.lastBlocked = {
           obstacleId: blocked.obstacle.id,
@@ -545,9 +634,7 @@ export class Simulation {
       }
       const duration = Math.max(
         450,
-        (distance(body.position, target) /
-          (body.kind === "drone" ? 2.4 : 1.8)) *
-          1000,
+        (distance(body.position, target) / profile.speed) * 1000,
       );
       if (this.clock() + duration >= lease.deadline)
         throw new SimError(
@@ -584,10 +671,10 @@ export class Simulation {
     };
   }
   private gripper(body: Body): Vec3 {
-    return [...ARM_PRESETS[body.preset]] as Vec3;
+    return [...armPresets(body)[body.preset]] as Vec3;
   }
 
-  tool(name: ToolName, input: unknown): unknown {
+  tool(name: BodyToolName, input: unknown): unknown {
     const parsed = schemas[name].safeParse(input);
     if (!parsed.success)
       throw new SimError(
@@ -619,7 +706,7 @@ export class Simulation {
     for (const id of this.leases.keys()) this.endLease(id, "LEASE_RELEASED");
     this.motions.clear();
     this.inspections.clear();
-    this.survey = new SurveyTracker();
+    this.survey = new SurveyTracker(this.obstacles);
     this.initialize();
     this.demo = { running: false, phase: "Ready to begin", error: null };
     this.log("Warehouse reset · all leases released", "system");

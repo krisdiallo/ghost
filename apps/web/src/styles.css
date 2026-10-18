@@ -2749,3 +2749,40 @@ dialog::backdrop {
   font-size: 9px;
   color: #ffb3a5;
 }
+
+.lab-nav-link { color: #c9b6eb; text-decoration: none; font-size: 11px; padding: 8px 10px; border: 1px solid #584c67; border-radius: 5px; white-space: nowrap; }
+
+@media (max-width: 720px) {
+  /* Keep every toolbar action inside the touch viewport, including hosted
+     mode's tour action. Intrinsic flex widths must not push Exit offscreen. */
+  .viewport-toolbar {
+    min-width: 0;
+  }
+  .viewport-toolbar .viewport-actions {
+    flex: 1 1 100%;
+    min-width: 0;
+    max-width: 100%;
+    justify-content: flex-end;
+    gap: 7px;
+  }
+  .viewport-actions .immersive-toggle {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+@media (max-width: 720px) {
+  .topbar {
+    height: auto;
+    min-height: 68px;
+    padding: 14px 0;
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+  .topbar-actions {
+    flex: 1 1 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 8px;
+  }
+}

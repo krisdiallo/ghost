@@ -83,3 +83,12 @@ The shared hall layout supplies packed rack bays, freight positions and structur
 Telemetry and inspection require line of sight from the body's sensor origin. The survey now counts visible floor checkpoints, with structural points excluded, rather than claiming whole-cell visibility through shadows. Previous 96-cell reports are historical examples from the earlier model. Drone world pan/tilt controls a visible gimbal and the shared optical rig, can be changed during flight, and never replaces a running movement.
 
 The [navigation mission](progress/navigation/README.md) independently verified this model: a fresh-context agent inspected 3/3 tagged crates, observed all 85 eligible checkpoints, staged priority cargo and released every lease. It recovered from a rejected inter-rack move by overflying racks at 9 m. The report preserves that error, all 28 actually viewed images, the original MCP trace and recording. Full checkpoint coverage is not a proof of exhaustive inventory.
+
+
+## Isolated workflow experiments
+
+The [experiment lab](experiment-lab.md) adds operator tools alongside embodiment. A bounded ExperimentLab manager holds saved draft definitions and independent run Simulation instances, while the live warehouse stays separate. The existing command implementation validates workflow actions. A deterministic simulated clock separates playback from results.
+
+Definitions include edited structures, configurable temporary devices, cargo/mass and a role-bound sequential workflow. Scale drives rendering, clearance and mounting offsets. Actual trial images use the frozen-snapshot renderer. Reports retain source revision, inputs, errors, metrics and assumptions. Comparisons check fingerprints; aborted runs cannot win on elapsed time.
+
+The lab UI provides drafts, a live 3D viewer, device/layout/workflow editing, traces, comparison and JSON export/import on desktop/phone. State is in memory. Operator definitions disclose the whole scenario and are separate from blind sensing. Physics, arbitrary-building reconstruction, hardware calibration and battery modeling remain outside this version.
