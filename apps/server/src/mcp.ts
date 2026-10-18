@@ -8,7 +8,7 @@ import { SimError } from "./simulation.js";
 
 const descriptions: Record<ToolName, string> = {
   operations:
-    "Manage live local-autonomy jobs and operator incidents. status lists tasks, open incidents and placed boxes. start/pause control background device jobs. watch waits up to 25 seconds for an incident afterSequence (default 0); it returns immediately for an existing newer incident. ChatGPT must actively call watch: this is not unsolicited wake-up. place_box adds a simulated floor obstruction at x/z or ahead of Scout. For recovery, possess the affected body (local autonomy yields), observe with image:true, approach within 4m, then recover_box with incidentId and that body's leaseId. This dispatches Mule, a physical pallet-handling vehicle, to approach, lift, carry and set the SAME box down in staging. Poll status until recovery.phase is parked; the box remains visible and collidable throughout. clear_box is a compatibility alias for the same physical transfer, never deletion. Reposition/verify using act and observe, then resume with incidentId/leaseId. Resume checks the remaining route, releases the lease and returns work to local autonomy. Permanent structures cannot be removed. Experiments remain isolated; use sandbox/experiment tools separately.",
+    "Manage live local-autonomy jobs and operator incidents. status lists tasks, open incidents and placed boxes. start/pause control background device jobs. watch waits up to 25 seconds for an incident afterSequence (default 0); it returns immediately for an existing newer incident. ChatGPT must actively call watch: this is not unsolicited wake-up. place_box adds a simulated floor obstruction at x/z or ahead of Scout. For recovery, possess the affected body (local autonomy yields), observe with image:true, stop the affected device, then recover_box with incidentId and that body's leaseId. This dispatches Mule, a physical pallet-handling vehicle, to approach, lift, carry and set the SAME box down in staging. Poll status until recovery.phase is parked; the box remains visible and collidable throughout. clear_box is a compatibility alias for the same physical transfer, never deletion. Reposition/verify using act and observe, then resume with incidentId/leaseId. Resume checks the remaining route, releases the lease and returns work to local autonomy. Permanent structures cannot be removed. Experiments remain isolated; use sandbox/experiment tools separately.",
   discover:
     "Pass sandboxId to explore a sandbox; omit it for the live warehouse. Discover live warehouse bodies, availability, sensor/inspection and handling limits, lease limits and bounds. Start here. Coordinates are in meters; y is up. Includes shared survey grid history and known cargo from actual observations; use unknown checkpoints and static navigation geometry to plan your own search. Read surveyGuide before interpreting coverage.",
   possess:
@@ -93,7 +93,7 @@ async function execute(dispatch: Dispatch, name: ToolName, input: unknown) {
 export function createHttpMcp(dispatch: Dispatch, oauthEnabled = false) {
   const server = new MCPServer({
     name: "ghost",
-    version: "0.2.0",
+    version: "0.3.0",
     title: "GHOST — Any agent. Any body.",
     description: "Possess simulated machines in one live warehouse.",
     logging: { enabled: false }, // Tool inputs contain private lease capabilities.

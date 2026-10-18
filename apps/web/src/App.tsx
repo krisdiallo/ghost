@@ -390,6 +390,18 @@ export function App() {
         );
     });
   };
+  const acquireIncidentBody = async (resourceId: string) => {
+    const result = await tool<Possession>("possess", {
+      resourceId,
+      ttlSeconds: 300,
+      owner: "You · browser",
+    });
+    setTokens((previous) => ({
+      ...previous,
+      [resourceId]: { leaseId: result.leaseId, expiresAt: result.expiresAt },
+    }));
+    return result.leaseId;
+  };
   const possess = () => {
     void perform(async () => {
       for (const [id, other] of Object.entries(tokens))
@@ -435,6 +447,19 @@ export function App() {
       x,
       z,
       ...(body?.kind === "drone" ? { y: Number(altitude) } : {}),
+    });
+  };
+  const resetForRecording = () => {
+    void perform(async () => {
+      await request("/api/reset", {});
+      setTokens({});
+      setObservation(null);
+      setNavigation(false);
+      setPlacingBox(false);
+      await tool("operations", { action: "start" });
+      setSelected("rover-01");
+      setFollowing(true);
+      setBodyCamera(false);
     });
   };
   const demo = () => {
@@ -569,6 +594,7 @@ export function App() {
         </div>
       )}
       <FleetOperations
+        acquire={acquireIncidentBody}
         snapshot={snapshot}
         disabled={!live || busy}
         placing={placingBox}
@@ -655,6 +681,12 @@ export function App() {
             <div className="viewport-actions">
               <button
                 className="immersive-toggle"
+                disabled={!live || busy}
+                onClick={resetForRecording}
+              >Reset demo</button>
+
+              <button
+                className="immersive-toggle"
                 aria-pressed={bodyCamera}
                 onClick={() => setBodyCamera((value) => !value)}
               >
@@ -694,6 +726,7 @@ export function App() {
           >
             {immersive && (
               <FleetOperations
+                acquire={acquireIncidentBody}
                 compact
                 snapshot={snapshot}
                 disabled={!live || busy}

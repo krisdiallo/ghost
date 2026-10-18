@@ -9,6 +9,7 @@ export function FleetOperations({
   setPlacing,
   focus,
   leaseId,
+  acquire,
   compact = false,
 }: {
   snapshot: Snapshot | null;
@@ -17,6 +18,7 @@ export function FleetOperations({
   setPlacing: (v: boolean) => void;
   focus: (id: string) => void;
   leaseId?: string | undefined;
+  acquire: (resourceId: string) => Promise<string>;
   compact?: boolean;
 }) {
   const [busy, setBusy] = useState(false),
@@ -24,7 +26,10 @@ export function FleetOperations({
     [copied, setCopied] = useState(false);
   const ops = snapshot?.operations;
   const incident = ops?.incidents.find((i) => !i.resolvedAt);
-  const recovery = ops?.recovery;
+  const recovery =
+    ops?.recovery?.incidentId === incident?.id ? ops?.recovery : null;
+  const affected = snapshot?.bodies.find((b) => b.id === incident?.resourceId);
+  const anotherOperator = !!affected?.lease && !leaseId;
   const recovering =
     recovery && !["parked", "interrupted"].includes(recovery.phase);
   const previous = ops?.incidents.find((i) => i.resolvedAt);
@@ -35,6 +40,26 @@ export function FleetOperations({
       await tool<OperationsState>("operations", input);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Operation failed.");
+    } finally {
+      setBusy(false);
+    }
+  }
+  async function recover(action: "recover_box" | "resume") {
+    if (!incident) return;
+    setBusy(true);
+    setError("");
+    try {
+      const capability = leaseId ?? (await acquire(incident.resourceId));
+      if (action === "recover_box" && affected?.action?.status === "running")
+        await tool("act", { leaseId: capability, command: { type: "stop" } });
+      await tool("operations", {
+        action,
+        incidentId: incident.id,
+        leaseId: capability,
+      });
+      focus(action === "recover_box" ? "handler-01" : incident.resourceId);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Recovery failed.");
     } finally {
       setBusy(false);
     }
@@ -173,39 +198,33 @@ export function FleetOperations({
             >
               {copied ? "Prompt copied" : "Copy ChatGPT recovery prompt"}
             </button>
-            {leaseId && (
-              <>
-                <button
-                  disabled={
-                    busy || !!recovering || recovery?.phase === "parked"
-                  }
-                  onClick={() =>
-                    void run({
-                      action: "recover_box",
-                      incidentId: incident.id,
-                      leaseId,
-                    })
-                  }
-                >
-                  {recovering
-                    ? "Mule is recovering the box…"
-                    : recovery?.phase === "parked"
-                      ? "Box parked in staging"
-                      : "Dispatch Mule to move the box"}
-                </button>
-                <button
-                  disabled={busy || !!recovering}
-                  onClick={() =>
-                    void run({
-                      action: "resume",
-                      incidentId: incident.id,
-                      leaseId,
-                    })
-                  }
-                >
-                  Return to autonomy
-                </button>
-              </>
+            <button
+              disabled={
+                disabled ||
+                busy ||
+                anotherOperator ||
+                !!recovering ||
+                recovery?.phase === "parked"
+              }
+              onClick={() => void recover("recover_box")}
+            >
+              {recovering
+                ? "Mule is recovering the box…"
+                : recovery?.phase === "parked"
+                  ? "Box parked in staging"
+                  : "Dispatch Mule to move the box"}
+            </button>
+            <button
+              disabled={disabled || busy || anotherOperator || !!recovering}
+              onClick={() => void recover("resume")}
+            >
+              Return to autonomy
+            </button>
+            {anotherOperator && (
+              <small>
+                Controlled by {affected?.lease?.owner}. That operator must
+                release Scout before browser recovery.
+              </small>
             )}
           </div>
         </div>

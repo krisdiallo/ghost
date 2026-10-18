@@ -433,17 +433,6 @@ export class Operations {
             "NOT_REMOVABLE",
             "This is a permanent structure. Choose a different route.",
           );
-        const center = o.min.map((v, n) => (v + o.max[n]!) / 2) as Vec3;
-        if (
-          Math.hypot(
-            center[0] - observation.body.position[0],
-            center[2] - observation.body.position[2],
-          ) > 4
-        )
-          throw new SimError(
-            "OUT_OF_REACH",
-            "Approach within 4 m of the obstruction.",
-          );
         if (observation.body.action?.status === "running")
           throw new SimError(
             "ACTION_BUSY",

@@ -28,7 +28,7 @@ Operations actions:
 - `status`: jobs, commands, detected incidents and operator-placed boxes.
 - `start` / `pause`: start local task controllers or stop their own pending actions. An external operator's lease is preserved.
 - `place_box`: add a bounded simulated box at x/z, or omit both coordinates for a position ahead of Scout.
-- `recover_box` (`clear_box` compatibility alias): supply incidentId and a valid leaseId for the affected body. The body must be stopped within 4 m. This dispatches the physical Mule handling vehicle. Read status until recovery.phase is parked. The box is never deleted; its ID is unchanged and its staged position stays collidable. Scout has no gripper. Permanent structures cannot be moved.
+- `recover_box` (`clear_box` compatibility alias): supply incidentId and a valid leaseId for the affected body. The affected body must be stopped; Mule navigates to the box from its own position. This dispatches the physical Mule handling vehicle. Read status until recovery.phase is parked. The box is never deleted; its ID is unchanged and its staged position stays collidable. Scout has no gripper. Permanent structures cannot be moved.
 - `resume`: supply incidentId and the affected body leaseId. The body must be stationary and the remaining route clear. The action resolves the incident, releases the operator lease and returns work to the local controller.
 - Optional `watch`: bounded wait up to 25 seconds after a sequence cursor. The primary demo uses a human noticing the incident and messaging ChatGPT. There is no unsolicited ChatGPT wake-up.
 
