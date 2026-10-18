@@ -124,19 +124,45 @@ function Drone({ airborne }: { airborne: boolean }) {
     </>
   );
 }
-function Camera({ pan, tilt }: { pan: number; tilt: number }) {
+function Camera({
+  pan,
+  tilt,
+  active,
+}: {
+  pan: number;
+  tilt: number;
+  active: boolean;
+}) {
   return (
     <>
-      <Cylinder
-        position={[0, -1.3, 0]}
-        radius={0.11}
-        height={2.6}
-        color="#839f9a"
+      {/* Mount bolts to the inward face of the southwest structural column. */}
+      <Box position={[-0.6, 0, 0]} size={[0.12, 1.1, 0.65]} color={dark} />
+      {[-0.38, 0.38].flatMap((y) =>
+        [-0.21, 0.21].map((z) => (
+          <Box
+            key={`${y}/${z}`}
+            position={[-0.53, y, z]}
+            size={[0.04, 0.075, 0.075]}
+            color="#a5b8bb"
+          />
+        )),
+      )}
+      <Beam
+        from={[-0.6, -0.4, 0]}
+        to={[0, -0.4, 0]}
+        width={0.16}
+        color="#819a9e"
+      />
+      <Beam
+        from={[-0.6, -0.4, 0]}
+        to={[-0.6, 0.3, 0]}
+        width={0.16}
+        color="#819a9e"
       />
       <Cylinder
-        position={[0, -2.47, 0]}
-        radius={0.4}
-        height={0.15}
+        position={[0, -0.25, 0]}
+        radius={0.12}
+        height={0.35}
         color={dark}
       />
       <group rotation={[0, (pan * Math.PI) / 180, 0]}>
@@ -162,16 +188,18 @@ function Camera({ pan, tilt }: { pan: number; tilt: number }) {
               emissiveIntensity={0.4}
             />
           </mesh>
-          <mesh position={[0, 0, 2.3]} rotation={[-Math.PI / 2, 0, 0]}>
-            <coneGeometry args={[1.6, 3.5, 4, 1, true]} />
-            <meshBasicMaterial
-              color="#a3b1ff"
-              transparent
-              opacity={0.055}
-              depthWrite={false}
-              side={2}
-            />
-          </mesh>
+          {active && (
+            <mesh position={[0, 0, 2.3]} rotation={[-Math.PI / 2, 0, 0]}>
+              <coneGeometry args={[1.6, 3.5, 4, 1, true]} />
+              <meshBasicMaterial
+                color="#a3b1ff"
+                transparent
+                opacity={0.055}
+                depthWrite={false}
+                side={2}
+              />
+            </mesh>
+          )}
         </group>
       </group>
     </>
@@ -312,17 +340,23 @@ function BodyMesh({
         ) : body.kind === "drone" ? (
           <Drone airborne={body.airborne} />
         ) : body.kind === "camera" ? (
-          <Camera pan={body.pan} tilt={body.tilt} />
+          <Camera
+            pan={body.pan}
+            tilt={body.tilt}
+            active={selected || !!body.lease}
+          />
         ) : (
           <Arm preset={body.preset} />
         )}
       </group>
-      <Ring
-        position={[body.position[0], 0.035, body.position[2]]}
-        radius={selected ? 1.25 : 1}
-        color={color}
-        opacity={selected ? 1 : 0.25}
-      />
+      {body.kind !== "camera" && (
+        <Ring
+          position={[body.position[0], 0.035, body.position[2]]}
+          radius={selected ? 1.25 : 1}
+          color={color}
+          opacity={selected ? 1 : 0.25}
+        />
+      )}
       {body.lease && (
         <GhostSignal
           position={[
@@ -332,7 +366,7 @@ function BodyMesh({
           ]}
         />
       )}
-      {body.lease && (
+      {body.lease && body.kind !== "camera" && (
         <Ring
           position={[body.position[0], 0.04, body.position[2]]}
           radius={1.4}
@@ -527,7 +561,9 @@ function Controls({
         ? new Vector3(0, 0.8, 0)
         : new Vector3(0, 0, -12);
     const offset = focus
-      ? new Vector3(0, 14, 17)
+      ? followId === "camera-01"
+        ? new Vector3(10, 6, 10)
+        : new Vector3(0, 14, 17)
       : view === "mission"
         ? new Vector3(17, 14, 20)
         : view === "top"

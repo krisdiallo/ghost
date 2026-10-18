@@ -1,5 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { BOUNDS, CAPABILITIES, DEMO_RESOURCES } from "@ghost/shared";
+import {
+  BOUNDS,
+  CAPABILITIES,
+  CAMERA_SENSOR,
+  DEMO_RESOURCES,
+} from "@ghost/shared";
 import type {
   Action,
   Activity,
@@ -65,8 +70,8 @@ export class Simulation {
     this.bodies = DEMO_RESOURCES.map((r) => ({
       ...structuredClone(r),
       heading: 0,
-      pan: 30,
-      tilt: -12,
+      pan: r.kind === "camera" ? CAMERA_SENSOR.homePan : 0,
+      tilt: r.kind === "camera" ? CAMERA_SENSOR.homeTilt : 0,
       preset: "home",
       heldObjectId: null,
       airborne: false,
@@ -281,7 +286,11 @@ export class Simulation {
           180) /
         Math.PI;
       const delta = Math.abs(((pan - body.pan + 540) % 360) - 180);
-      return d < 18 && delta <= 35 && Math.abs(tilt - body.tilt) <= 30;
+      return (
+        d < CAMERA_SENSOR.range &&
+        delta <= CAMERA_SENSOR.horizontalFov / 2 &&
+        Math.abs(tilt - body.tilt) <= CAMERA_SENSOR.verticalFov / 2
+      );
     }
     return d <= (body.kind === "rover" ? 4 : body.kind === "drone" ? 9 : 2.8);
   }
@@ -408,7 +417,11 @@ export class Simulation {
         if (
           !this.visible(body, object) ||
           distance(body.position, object.position) >
-            (body.kind === "rover" ? 2.3 : body.kind === "drone" ? 5 : 18)
+            (body.kind === "rover"
+              ? 2.3
+              : body.kind === "drone"
+                ? 5
+                : CAMERA_SENSOR.range)
         )
           throw new SimError(
             "OUT_OF_REACH",
@@ -627,7 +640,11 @@ export class Simulation {
     };
     try {
       phase("01 / Sentinel · locating priority cargo");
-      await act("camera", { type: "look", pan: 63, tilt: -13 });
+      await act("camera", {
+        type: "look",
+        pan: CAMERA_SENSOR.homePan,
+        tilt: CAMERA_SENSOR.homeTilt,
+      });
       await act("camera", { type: "inspect", objectId: "crate-07" });
       await delay(2500); // Give the opening possession time to read in the live tour.
       release("camera");

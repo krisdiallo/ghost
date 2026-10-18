@@ -11,7 +11,7 @@ export const DEMO_RESOURCES: ResourceDefinition[] = [
     id: "camera-01",
     kind: "camera",
     label: "Sentinel",
-    position: [-6, 2.6, -4],
+    position: [-30.2, 10, 8],
   },
   { id: "rover-01", kind: "rover", label: "Scout", position: [-6, 0.45, 3] },
   { id: "arm-01", kind: "arm", label: "Atlas", position: [4, 0.5, 0] },
@@ -29,6 +29,13 @@ export const BOUNDS = {
   minZ: -33,
   maxZ: 9,
   maxAltitude: 12,
+};
+export const CAMERA_SENSOR = {
+  range: 45,
+  horizontalFov: 70,
+  verticalFov: 60,
+  homePan: 104,
+  homeTilt: -16,
 };
 export const CAPABILITIES: Record<ResourceKind, string[]> = {
   camera: ["look", "inspect"],

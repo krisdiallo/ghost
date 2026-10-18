@@ -37,7 +37,7 @@ Node serves production static assets and the API on loopback port 3001. Developm
 
 | Body              | Commands                                                | Observation                                         |
 | ----------------- | ------------------------------------------------------- | --------------------------------------------------- |
-| Camera / Sentinel | `look` pan/tilt, `inspect`                              | 70° horizontal / 60° vertical view; cargo under 18m |
+| Camera / Sentinel | `look` pan/tilt, `inspect`                              | 70° horizontal / 60° vertical view; cargo under 45m |
 | Rover / Scout     | floor `move`, `inspect`, `stop`                         | Cargo within 4m; inspect within 2.3m                |
 | Arm / Atlas       | `preset` home/reach/drop, `grasp`, `place`              | Cargo within 2.8m; grasp checks gripper reach       |
 | Drone / Wisp      | `takeoff`, bounded 3D `move`, `inspect`, `land`, `stop` | Cargo within 9m; aerial inspect within 5m           |
@@ -55,3 +55,5 @@ Focused simulation tests cover leases, contention, schema validation, bounds, ca
 Actual WebGL rendering and desktop/mobile layouts are checked by a repeatable Chromium capture run. It records the complete mission and performs a rover inspection through touch-emulated controls. CI retains the screenshots, video, and machine-readable report. Physical device/GPU behavior and pinch gestures remain target-device QA. No real hardware, persistence, accounts, images, model provider, collision/path planning, public hosting or extra infrastructure has been added. Loopback Host/Origin checks and private-forward configuration support a trusted demo; this is not an authenticated public service.
 
 The facility overview frames the full industrial hall. Starting the guided mission or selecting a body frames that body at its actual location. Follow mode tracks translation while preserving the viewing angle. Visible Orbit/Pan and zoom buttons support mouse and touch controls; two fingers pan and zoom. A whole-warehouse map supplies destinations and fleet positions. Immersive mode fills the viewport while retaining a compact possession/action dock, fleet switcher, map, and tour controls. Preset transitions stop when the user takes over the camera. Repeated storage and structural parts use instanced geometry so scene detail does not add hundreds of individual draw calls. Report pages load one small JPEG by default, with larger captures and video available on demand for mobile users.
+
+Sentinel is fixed to the southwest structural column at X −30.2 / Y 10 / Z 8, with a visible bracket rather than a floor stand. Its 104° pan / −16° tilt home pose watches the open inspection and dispatch forecourt. The camera has a 45 m analytic sensor range and 70° × 60° field of view; rack occlusion is not simulated. The viewer frames the wall mount from inside the building when Sentinel is selected.

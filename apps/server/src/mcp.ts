@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { ToolName } from "@ghost/shared";
+import { CAMERA_SENSOR } from "@ghost/shared";
 import { schemas } from "./contracts.js";
 import { SimError } from "./simulation.js";
 
@@ -10,7 +11,7 @@ const descriptions: Record<ToolName, string> = {
     "Acquire an exclusive expiring lease on a body. Keep the returned opaque leaseId private. Default 60s, range 5–300s. Set owner to an agent display name.",
   observe:
     "Observe through the possessed body's sensors. Returns pose, visible cargo and distance, last inspection and action completion. Structured simulation data, not an image.",
-  act: "Control a possessed body with a typed command. move: rover x/z or airborne drone x/y/z. look: camera pan/tilt in degrees. inspect: visible nearby cargo. arm: preset home/reach/drop, grasp objectId, place. Drone: takeoff/land. stop cancels motion. Poll observe for completion. Mission: camera look 63/-13 and inspect crate-07; rover move 1/1.4 and inspect; drone takeoff, move 1/3.4/-1.5 and inspect, land; arm reach, grasp crate-07, drop, place.",
+  act: `Control a possessed body with a typed command. move: rover x/z or airborne drone x/y/z. look: camera pan/tilt in degrees. inspect: visible nearby cargo. arm: preset home/reach/drop, grasp objectId, place. Drone: takeoff/land. stop cancels motion. Poll observe for completion. Mission: the camera is fixed 10 m high in the southwest corner, with ${CAMERA_SENSOR.range} m range; look ${CAMERA_SENSOR.homePan}/${CAMERA_SENSOR.homeTilt} and inspect crate-07; rover move 1/1.4 and inspect; drone takeoff, move 1/3.4/-1.5 and inspect, land; arm reach, grasp crate-07, drop, place.`,
   release:
     "Release a lease and cancel its pending motion. Repeated release is harmless. A drone holds its last altitude, and a held crate stays attached.",
 };

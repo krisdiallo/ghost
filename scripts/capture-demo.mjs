@@ -223,6 +223,25 @@ try {
   assert.equal(immersiveBounds.height, 1280);
   await screenshot(page, "ghost-immersive.png");
   const sceneBounds = await page.locator(".scene").boundingBox();
+  await page
+    .getByRole("button", { name: "Select Sentinel", exact: true })
+    .click();
+  await wait(1200);
+  await page.getByRole("button", { name: "Zoom in", exact: true }).click();
+  await wait(1200);
+  await screenshot(page, "ghost-camera-mount.png");
+  const cameraMount = authority.sim
+    .snapshot()
+    .bodies.find((body) => body.kind === "camera");
+  assert.deepEqual(
+    cameraMount.position,
+    [-30.2, 10, 8],
+    "camera is fixed high in the southwest corner",
+  );
+  await page
+    .getByRole("button", { name: "Reset warehouse view", exact: true })
+    .click();
+  await wait(1000);
   await page.getByRole("button", { name: "Run tour", exact: true }).click();
   const start = Date.now();
   const frames = [];
@@ -479,6 +498,11 @@ try {
     mission: final.mission,
     durationSeconds: (frames.at(-1).at - start) / 1000,
     frameCount: frames.length,
+    cameraMount: {
+      position: cameraMount.position,
+      pan: cameraMount.pan,
+      tilt: cameraMount.tilt,
+    },
     cameraReset: { orbitDifference, resetDifference },
     cameraTools: {
       panDifference,

@@ -35,13 +35,25 @@ await promisify(execFile)("ffmpeg", [
   "8",
   join(destination, "ghost-navigation-small.jpg"),
 ]);
+await promisify(execFile)("ffmpeg", [
+  "-loglevel",
+  "error",
+  "-y",
+  "-i",
+  join(input, "ghost-camera-mount.png"),
+  "-vf",
+  "scale=720:-1",
+  "-q:v",
+  "8",
+  join(destination, "ghost-camera-mount-small.jpg"),
+]);
 const timestamp = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/Los_Angeles",
   dateStyle: "medium",
   timeStyle: "short",
 }).format(new Date(report.capturedAt));
 const previewKB = Math.round(
-  (await stat(join(destination, "ghost-navigation-small.jpg"))).size / 1024,
+  (await stat(join(destination, "ghost-camera-mount-small.jpg"))).size / 1024,
 );
 await writeFile(
   join(destination, "README.md"),
@@ -49,14 +61,15 @@ await writeFile(
 
 ${timestamp} PT · actual app captures
 
-## Bodies navigating the warehouse
+## A corner-mounted warehouse camera
 
-**64 × 44 m · 2,816 m² · 12 m clear height.** Scout now travels down the west storage aisle to Z −18. Wisp flies above the racks at 9 m and surveys the loading docks at Z −30. The camera follows the moving body through the hall.
+**Sentinel is mounted 10 m high on the southwest corner column.** A short bolted bracket replaces the freestanding floor pole. It looks inward across the open inspection and dispatch area at 104° pan / −16° tilt, with a 45 m sensor range. Both the renderer and simulation use the same fixed location.
 
-![Actual Scout traversal in the storage aisle — ${previewKB} KB](ghost-navigation-small.jpg)
+![Actual high corner camera mount — ${previewKB} KB](ghost-camera-mount-small.jpg)
 
 This page loads only the lightweight ${previewKB} KB preview. Larger images and video below are optional downloads.
 
+- [Full-size corner camera mount](ghost-camera-mount.png?raw=true)
 - [Immersive warehouse controls](ghost-immersive.png?raw=true)
 - [Scout in the storage aisle](ghost-rover-aisle.png?raw=true)
 - [Wisp at the loading docks](ghost-drone-docks.png?raw=true)
@@ -70,6 +83,8 @@ This page loads only the lightweight ${previewKB} KB preview. Larger images and 
 - [Phone inspection result](ghost-mobile-observation.png?raw=true)
 
 ## What actually ran
+
+Sentinel successfully inspects Cargo 07 from its elevated corner, about 34.5 m from the crate. Wrong pan/tilt and beyond-range targets remain rejected.
 
 The guided camera → rover → drone → arm mission passed **4 / 4 steps**, releasing every lease. It is a scripted tour through the live command interface. The rover also inspects Cargo 12 in storage; the drone scans Cargo 18 at the north loading docks. These are actual server-owned movements and sensor results.
 

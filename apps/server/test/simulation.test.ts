@@ -151,7 +151,27 @@ test("camera field of view, airborne drone, and arm cargo transfer", () => {
     () => sim.act(camera, { type: "inspect", objectId: "crate-07" }),
     fails("OUT_OF_REACH"),
   );
-  sim.act(camera, { type: "look", pan: 63, tilt: -13 });
+  const mounted = sim.observe(camera).body;
+  assert.deepEqual(mounted.position, [-30.2, 10, 8]);
+  assert.ok(
+    Math.hypot(
+      2 - mounted.position[0],
+      0.55 - mounted.position[1],
+      -mounted.position[2],
+    ) > 30,
+  );
+  sim.act(camera, { type: "look", pan: 104, tilt: 30 });
+  assert.throws(
+    () => sim.act(camera, { type: "inspect", objectId: "crate-07" }),
+    fails("OUT_OF_REACH"),
+  );
+  // Even correctly aimed, the far north-dock cargo is beyond the fixed sensor's range.
+  sim.act(camera, { type: "look", pan: 134, tilt: -10 });
+  assert.throws(
+    () => sim.act(camera, { type: "inspect", objectId: "crate-18" }),
+    fails("OUT_OF_REACH"),
+  );
+  sim.act(camera, { type: "look", pan: 104, tilt: -16 });
   sim.act(camera, { type: "inspect", objectId: "crate-07" });
   const drone = sim.possess("drone-01").leaseId;
   assert.throws(

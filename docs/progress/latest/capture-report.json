@@ -1,5 +1,5 @@
 {
-  "capturedAt": "2026-10-17T23:52:40.380Z",
+  "capturedAt": "2026-10-18T00:12:20.426Z",
   "facility": {
     "width": 64,
     "depth": 44,
@@ -41,20 +41,29 @@
       "complete": true
     }
   ],
-  "durationSeconds": 84.696,
-  "frameCount": 27,
+  "durationSeconds": 84.315,
+  "frameCount": 23,
+  "cameraMount": {
+    "position": [
+      -30.2,
+      10,
+      8
+    ],
+    "pan": 104,
+    "tilt": -16
+  },
   "cameraReset": {
-    "orbitDifference": 0.09067733864379085,
-    "resetDifference": 0.00002967984068627451
+    "orbitDifference": 0.090960733251634,
+    "resetDifference": 0.000016276041666666666
   },
   "cameraTools": {
-    "panDifference": 0.08664534824346405,
-    "zoomDifference": 0.1253759446486928,
-    "touchDifference": 0.07583167381535948,
+    "panDifference": 0.08674715328839869,
+    "zoomDifference": 0.12541168811274508,
+    "touchDifference": 0.07268975949754902,
     "immersive": true
   },
   "warehouseTravel": {
-    "roverFarthestZ": -17.554837067233628,
+    "roverFarthestZ": -18,
     "droneFarthestZ": -30,
     "droneMaxY": 9
   },
@@ -65,6 +74,7 @@
     "ghost-overview-small.jpg",
     "ghost-mission-bay.png",
     "ghost-immersive.png",
+    "ghost-camera-mount.png",
     "ghost-camera.png",
     "ghost-rover.png",
     "ghost-rover-aisle.png",
