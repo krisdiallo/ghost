@@ -6,7 +6,7 @@ Oct 17, 2026, 11:20 PM PDT · actual app and MCP captures
 
 ![Actual drone sensor after aiming sideways — 29 KB](validation/drone-side.jpg)
 
-Only this 29 KB preview loads automatically. It is from the scripted validation, not the independent agent. [Watch the scripted navigation/gimbal check at 4× — 8 seconds, 106 KB](validation/navigation-check-4x.mp4?raw=true). [Watch the full fresh-agent mission at 4× — 157 seconds, 1139 KB](agent-mission-4x.mp4?raw=true).
+Only this 29 KB preview loads automatically. It is from the scripted validation, not the independent agent. [Watch the scripted navigation/gimbal check at 4× — 7 seconds, 102 KB](validation/navigation-check-4x.mp4?raw=true). [Watch the full fresh-agent mission at 4× — 157 seconds, 1139 KB](agent-mission-4x.mp4?raw=true).
 
 - [Same drone pose, camera aimed down — actual JPEG](validation/drone-down.jpg?raw=true)
 - [Actual phone gimbal controls](validation/mobile-gimbal.jpg?raw=true)
@@ -18,7 +18,7 @@ Only this 29 KB preview loads automatically. It is from the scripted validation,
 
 ## What is enforced
 
-Rover/drone motions sweep a conservative body envelope over the entire straight segment. Packed rack bays, freight, walls, columns and mezzanine structures reject intersecting paths, including vertical descent and landing. A rejected move leaves the body in place, returns PATH_BLOCKED with obstacle/position/clearance, and publishes a red map marker plus activity event. Static floorplan geometry is available through MCP; it does not reveal hidden cargo IDs or an inventory count. Agents choose their own waypoints. Discovery and body limits label clearance as X/Y/Z half-extents, so clients can account for the full wheel/rotor footprint. There is no automatic path planner or rigid-body physics.
+Rover/drone motions sweep a conservative body envelope over the entire straight segment. Packed rack bays, freight, walls, columns and mezzanine structures reject intersecting paths, including vertical descent and landing. A rejected move leaves the body in place, returns PATH_BLOCKED with obstacle/position/clearance, and publishes a red map marker plus activity event. Static floorplan geometry is available through MCP; it does not reveal hidden cargo IDs or an inventory count. Agents choose their own waypoints. Discovery and body limits label clearance as X/Y/Z half-extents, so clients can account for the full wheel/rotor footprint. There is no automatic path planner or rigid-body physics. Phone map taps have limited coordinate precision; use coordinate inputs or named waypoints for narrow aisles.
 
 Telemetry and inspection now require line of sight through the same static solid envelopes. Mobile proximity telemetry is radial; rendered images use the aimed optical frustum and finer geometry. The model can conservatively reject a visible gap inside a packed rack. Other moving bodies and mission cargo are not dynamic collision obstacles, and analytic inspection text is not a visible damage texture.
 

@@ -226,7 +226,7 @@ export function WarehouseMap({
       )}
       <span className="map-caption">
         {navigate
-          ? "Tap map to set destination"
+          ? "Tap for a direct move · use clear waypoints"
           : "Live fleet positions · 64 × 44 m"}
       </span>
       {showSurvey && (
