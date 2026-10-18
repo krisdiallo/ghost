@@ -81,7 +81,7 @@ for (const [bay, [x, z]] of bays.entries()) {
       );
     }
   }
-  add(frame, [x, 7.95, z], [7.6, 0.2, 2.3], steel);
+  // The highest boxes are exposed; there is no shelf or cap above them.
 }
 // A high north wall, side wall, loading doors and a mezzanine establish the scale.
 add(frame, [0, 7.2, -33.9], [64, 14.4, 0.3], "#394e5a");
