@@ -190,7 +190,7 @@ test("OAuth discovery, consent, PKCE, scoped MCP access, refresh rotation and re
       }),
     );
     const tools = (await client.listTools()).tools;
-    assert.equal(tools.length, 5);
+    assert.equal(tools.length, 16);
     assert(
       tools.every((tool) => JSON.stringify(tool._meta).includes(OAUTH_SCOPE)),
     );

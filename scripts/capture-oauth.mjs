@@ -126,7 +126,7 @@ try {
     }),
   );
   const tools = (await client.listTools()).tools;
-  assert.equal(tools.length, 5);
+  assert.equal(tools.length, 16);
   assert(
     tools.every((tool) => JSON.stringify(tool._meta).includes("ghost:control")),
   );
