@@ -567,7 +567,7 @@ export function App() {
         <aside className="fleet panel">
           <div className="section-heading">
             <h2>Available bodies</h2>
-            <span className="count">04</span>
+            <span className="count">{String(snapshot?.bodies.length ?? 4).padStart(2, "0")}</span>
           </div>
           <p className="section-description">Choose a host. Make it yours.</p>
           <div className="fleet-list" role="group" aria-label="Select a body">

@@ -9,6 +9,7 @@ import {
   type Vec3,
 } from "@ghost/shared";
 import { Simulation, SimError } from "./simulation.js";
+import { BoxRecovery } from "./recovery.js";
 import { schemas } from "./contracts.js";
 type Task = {
   resourceId: string;
@@ -118,6 +119,7 @@ function tasks(): Task[] {
 }
 export class Operations {
   private jobs = tasks();
+  private recovery: BoxRecovery;
   private running = false;
   private sequence = 0;
   private watchers = 0;
@@ -129,6 +131,7 @@ export class Operations {
     private clock = () => performance.now(),
     private wall = () => Date.now(),
   ) {
+    this.recovery = new BoxRecovery(sim, () => this.publish(), clock);
     this.publish();
   }
   state(): OperationsState {
@@ -137,6 +140,7 @@ export class Operations {
       sequence: this.sequence,
       watchers: this.watchers,
       mode: "local-autonomy",
+      recovery: this.recovery.state(),
       jobs: this.jobs.map((j) => ({
         resourceId: j.resourceId,
         label: j.label,
@@ -156,6 +160,15 @@ export class Operations {
     };
   }
   private publish() {
+    const recovery = this.recovery.state();
+    if (recovery?.phase === "parked") {
+      const incident = this.incidents.find(
+        (i) => i.id === recovery.incidentId && !i.resolvedAt,
+      );
+      if (incident)
+        incident.resolution =
+          "Mule physically relocated the box to staging. Awaiting route verification and handback.";
+    }
     this.sim.publishOperations(this.state());
   }
   private event() {
@@ -185,6 +198,7 @@ export class Operations {
   }
   reset() {
     this.pause();
+    this.recovery.reset();
     for (const o of this.state().obstructions) this.sim.removeObstruction(o.id);
     this.jobs = tasks();
     this.incidents = [];
@@ -247,6 +261,7 @@ export class Operations {
     }
   }
   tick() {
+    this.recovery.tick();
     if (!this.running || this.closed || this.sim.snapshot().demo.running)
       return;
     let changed = false;
@@ -391,6 +406,7 @@ export class Operations {
         this.publish();
         return { placed: obstacle, ...this.state() };
       }
+      case "recover_box":
       case "clear_box": {
         if (!a.incidentId || !a.leaseId)
           throw new SimError(
@@ -433,13 +449,18 @@ export class Operations {
             "ACTION_BUSY",
             "Stop the affected body before operator clearance.",
           );
-        this.sim.removeObstruction(o.id);
+        this.recovery.dispatch(i);
         i.resolution =
-          "Operator removed simulated obstruction; awaiting route verification.";
+          "Mule dispatched to physically relocate the box. Await recovery before resuming.";
         this.event();
         return this.state();
       }
       case "resume": {
+        if (this.recovery.active())
+          throw new SimError(
+            "RECOVERY_IN_PROGRESS",
+            "Wait for Mule to set the box down, then verify the route before resuming.",
+          );
         if (!a.incidentId || !a.leaseId)
           throw new SimError(
             "INVALID_COMMAND",
@@ -520,6 +541,7 @@ export class Operations {
   }
   close() {
     this.closed = true;
+    this.recovery.close();
     this.pause();
     for (const w of this.wake) w();
   }

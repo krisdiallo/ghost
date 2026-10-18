@@ -321,7 +321,12 @@ export class ExperimentLab {
         "LAB_LIMIT",
         "Eight sandboxes are already open. Export and delete a draft first.",
       );
-    if (!raw && !sourceId && this.live.snapshot().objects.some((o) => o.heldBy))
+    if (
+      !raw &&
+      !sourceId &&
+      (this.live.snapshot().objects.some((o) => o.heldBy) ||
+        this.live.snapshot().bodies.some((b) => b.heldObjectId))
+    )
       throw new SimError(
         "SOURCE_NOT_SETTLED",
         "Place held cargo before cloning the live warehouse.",

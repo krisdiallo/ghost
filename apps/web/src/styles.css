@@ -2824,3 +2824,7 @@ dialog::backdrop {
 .enter-live {display:inline-flex;align-items:center;gap:10px;padding:14px 18px;min-height:46px;font-size:13px}
 .legacy-tour {background:transparent!important;border:1px solid #405345!important;color:#b0c7b6!important;font-size:11px!important;box-shadow:none!important}
 @media(max-width:720px){.heading-actions{flex-wrap:wrap;gap:12px}.enter-live{flex:1 1 100%;justify-content:center}.legacy-tour{min-height:40px!important}}
+
+.ops-physical-recovery { display: grid; gap: 8px; padding: 12px; margin: 10px 0; border: 1px solid #b7ceaa55; border-radius: 9px; background: #8bbca612; }
+.ops-physical-recovery strong { color: #c1efca; letter-spacing: .07em; }
+.ops-physical-recovery button { justify-self: start; }

@@ -14,6 +14,7 @@ export interface ResourceDefinition {
   kind: ResourceKind;
   label: string;
   position: Vec3;
+  attachment?: "pallet-handler" | undefined;
 }
 export const DEMO_RESOURCES: ResourceDefinition[] = [
   {
@@ -70,6 +71,7 @@ export interface Action {
 }
 export interface Body extends ResourceDefinition {
   profile?: DeviceProfile;
+  handling?: { extension: number; lift: number };
   heading: number;
   pan: number;
   tilt: number;
@@ -237,6 +239,7 @@ export const ARM_PRESETS: Record<Body["preset"], Vec3> = {
   drop: [6, 0.8, 2],
 };
 export function bodyClearance(body: Body): Vec3 {
+  if (body.attachment === "pallet-handler") return [0.9, 1.05, 0.9];
   const base =
     body.kind === "rover" || body.kind === "drone"
       ? BODY_CLEARANCE[body.kind]

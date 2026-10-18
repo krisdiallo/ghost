@@ -50,3 +50,7 @@ Before publishing a success report, verify the assigned endpoint: anonymous requ
 References: [Manufact deployment](https://docs.manufact.com/cli/deploy), [device login](https://docs.manufact.com/cli/login), [server settings](https://docs.manufact.com/dashboard/settings), [build runtimes](https://docs.manufact.com/dashboard/build-runtimes).
 
 The full tour recorder observes warehouse travel independently of screenshot speed. If a brief camera/body moment falls between software-rendered frames, it captures the missing still in a separate replay through real HTTP tools, holding the actual pose until rendering finishes. `capture-report.json` identifies those replayed stills; the video remains the original uninterrupted tour. Set `GHOST_CAPTURE_REPLAY_STILLS=1` to exercise every replay checkpoint during validation.
+
+### Demo deployment cadence
+
+Pushes and merges run the `Check` workflow with strict typechecking and production builds. The long browser recordings, test suites and container rehearsal are retained as the manually invoked `Full QA (manual)` workflow so they do not delay demo deployments.

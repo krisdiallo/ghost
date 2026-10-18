@@ -1,0 +1,64 @@
+name: Full QA (manual)
+on: workflow_dispatch
+concurrency:
+  group: ghost-check-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - name: Install visual test browser
+        run: npx playwright install --with-deps chromium
+      - name: Install video encoder
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Capture the warehouse and run the mobile mission
+        run: node scripts/capture-demo.mjs
+      - name: Verify swept navigation, occlusion and in-flight drone camera controls
+        run: node scripts/capture-navigation.mjs
+      - name: Verify ongoing work, obstruction incident and MCP operator handoff
+        run: node scripts/capture-operations.mjs
+      - name: Verify isolated experiments, MCP reports, export/import and phone UI
+        run: node scripts/capture-lab.mjs
+      - name: Verify private phone access and an authenticated MCP agent
+        run: node scripts/capture-access.mjs
+      - name: Verify OAuth discovery, browser consent and scoped MCP access
+        run: node scripts/capture-oauth.mjs
+      - name: Verify all body images, stdio images and the embedded MCP App
+        run: node scripts/capture-sensors.mjs
+      - name: Verify agent recorder privacy and interleaved body observations
+        run: node scripts/smoke-agent-recorder.mjs
+        env:
+          GHOST_AGENT_TEST_DIR: work/captures/recorder-smoke
+          GHOST_AGENT_CAPTURE_MOBILE: "1"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ghost-visual-progress
+          path: work/captures
+          if-no-files-found: warn
+          retention-days: 14
+  container:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Build the Manufact image
+        run: docker build -t ghost:ci .
+      - name: Test the production container and its authenticated MCP endpoint
+        run: node scripts/smoke-container.mjs
+        env:
+          GHOST_TEST_IMAGE: ghost:ci

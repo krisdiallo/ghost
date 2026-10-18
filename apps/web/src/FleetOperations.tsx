@@ -24,6 +24,9 @@ export function FleetOperations({
     [copied, setCopied] = useState(false);
   const ops = snapshot?.operations;
   const incident = ops?.incidents.find((i) => !i.resolvedAt);
+  const recovery = ops?.recovery;
+  const recovering =
+    recovery && !["parked", "interrupted"].includes(recovery.phase);
   const previous = ops?.incidents.find((i) => i.resolvedAt);
   async function run(input: OperationsInput) {
     setBusy(true);
@@ -37,7 +40,7 @@ export function FleetOperations({
     }
   }
   const prompt =
-    "There seems to be an incident in the warehouse. Use GHOST to investigate it, possess the affected body, inspect its actual camera image, clear the simulated obstruction, verify the route and return the device to local autonomy. Then confirm work has resumed.";
+    "There seems to be an incident in the warehouse. Use GHOST to investigate it, possess the affected body, inspect its actual camera image, dispatch Mule with operations recover_box to physically lift and relocate the box, wait until recovery is parked, verify the route and return the device to local autonomy. Then confirm work has resumed.";
   return (
     <section
       className={
@@ -139,6 +142,18 @@ export function FleetOperations({
             <strong>INCIDENT · {incident.code}</strong>
             <span>{incident.message}</span>
             <span>{incident.resolution}</span>
+            {recovery?.incidentId === incident.id && (
+              <div className="ops-physical-recovery" role="status">
+                <strong>MULE / {recovery.phase.toUpperCase()}</strong>
+                <span>{recovery.message}</span>
+                <small>
+                  The same box stays in the world throughout recovery.
+                </small>
+                <button onClick={() => focus(recovery.resourceId)}>
+                  Follow recovery vehicle
+                </button>
+              </div>
+            )}
             <small>
               {incident.id} ·{" "}
               {snapshot?.bodies.find((b) => b.id === incident.resourceId)?.lease
@@ -161,19 +176,25 @@ export function FleetOperations({
             {leaseId && (
               <>
                 <button
-                  disabled={busy}
+                  disabled={
+                    busy || !!recovering || recovery?.phase === "parked"
+                  }
                   onClick={() =>
                     void run({
-                      action: "clear_box",
+                      action: "recover_box",
                       incidentId: incident.id,
                       leaseId,
                     })
                   }
                 >
-                  Clear simulated obstruction
+                  {recovering
+                    ? "Mule is recovering the box…"
+                    : recovery?.phase === "parked"
+                      ? "Box parked in staging"
+                      : "Dispatch Mule to move the box"}
                 </button>
                 <button
-                  disabled={busy}
+                  disabled={busy || !!recovering}
                   onClick={() =>
                     void run({
                       action: "resume",
@@ -206,8 +227,8 @@ export function FleetOperations({
       )}
       <p className="ops-disclosure">
         Local jobs use deterministic task loops and real simulation commands.
-        External ChatGPT supplies incident reasoning. Box clearance is a
-        simulated operator action.
+        External ChatGPT supplies incident reasoning. Mule physically lifts,
+        carries and stages the box inside the simulation.
       </p>
     </section>
   );

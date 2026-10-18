@@ -59,6 +59,63 @@ function Rover() {
     </>
   );
 }
+function PalletHandler({ body }: { body: Body }) {
+  const extension = body.handling?.extension ?? 0;
+  const lift = body.handling?.lift ?? 0;
+  return (
+    <>
+      <Box size={[1.5, 0.55, 1.5]} color="#e9ad36" />
+      <Box
+        position={[0, 0.35, -0.3]}
+        size={[1.25, 0.22, 0.7]}
+        color="#293635"
+      />
+      <Box position={[0, 0.47, 0]} size={[1.38, 0.08, 1.3]} color="#e3c571" />
+      {[-1, 1].flatMap((x) =>
+        [-0.5, 0.5].map((z) => (
+          <Cylinder
+            key={`${x}/${z}`}
+            position={[x * 0.7, -0.14, z]}
+            radius={0.28}
+            height={0.18}
+            rotation={[0, 0, Math.PI / 2]}
+            color="#17262a"
+          />
+        )),
+      )}
+      {[-0.48, 0.48].map((x) => (
+        <group key={x}>
+          <Box
+            position={[x, 0.1 + lift, extension / 2]}
+            size={[0.16, 0.12, 1.5 + extension]}
+            color="#b4c2bd"
+          />
+          <Box
+            position={[x, 0.12, 0]}
+            size={[0.1, 0.65, 0.1]}
+            color="#273d3c"
+          />
+        </group>
+      ))}
+      <Cylinder
+        position={[0, 0.7, -0.45]}
+        radius={0.09}
+        height={0.35}
+        color="#ffcc5c"
+      />
+      <Box
+        position={[0, 0.85, -0.45]}
+        size={[0.3, 0.16, 0.2]}
+        color="#263f3c"
+      />
+      <Box
+        position={[0, 0.1, 0.77]}
+        size={[0.9, 0.06, 0.025]}
+        color="#c7f6d7"
+      />
+    </>
+  );
+}
 function Drone({ body }: { body: Body }) {
   const airborne = body.airborne;
   const rotors = useRef<Group>(null);
@@ -368,7 +425,11 @@ function BodyMesh({
       >
         <group scale={body.profile?.scale ?? 1}>
           {body.kind === "rover" ? (
-            <Rover />
+            body.attachment === "pallet-handler" ? (
+              <PalletHandler body={body} />
+            ) : (
+              <Rover />
+            )
           ) : body.kind === "drone" ? (
             <Drone body={body} />
           ) : body.kind === "camera" ? (
@@ -810,7 +871,13 @@ export function Warehouse({
                   />
                   <Text
                     position={[0, 1.5, 0]}
-                    text="ROUTE OBSTRUCTION"
+                    text={
+                      snapshot.operations?.recovery?.obstacleId === o.id
+                        ? snapshot.operations.recovery.phase === "parked"
+                          ? "BOX STAGED · AISLE CLEAR"
+                          : "MULE · LOAD IN TRANSIT"
+                        : "ROUTE OBSTRUCTION"
+                    }
                     width={3.1}
                     color="#ffcf8d"
                   />

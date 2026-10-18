@@ -92,6 +92,64 @@ export class Simulation {
     this.changed();
   }
 
+  ensureHandler() {
+    if (!this.bodies.some((b) => b.id === "handler-01")) {
+      this.bodies.push({
+        id: "handler-01",
+        kind: "rover",
+        label: "Mule",
+        attachment: "pallet-handler",
+        position: [0, 0.45, 4],
+        heading: 0,
+        pan: 0,
+        tilt: 0,
+        profile: { ...defaultProfile("rover"), speed: 3.2 },
+        preset: "home",
+        heldObjectId: null,
+        airborne: false,
+        lease: null,
+        action: null,
+        lastBlocked: null,
+      });
+      this.changed();
+    }
+    return this.snapshot().bodies.find((b) => b.id === "handler-01")!;
+  }
+  transferObstruction(
+    id: string,
+    center: Vec3,
+    handlerId: string,
+    carried: boolean,
+  ) {
+    const o = this.extraObstacles.find((o) => o.id === id);
+    if (!o)
+      throw new SimError("OBJECT_NOT_FOUND", "Recovery box no longer exists.");
+    const half = o.min.map((v, i) => (o.max[i]! - v) / 2);
+    o.min = center.map((v, i) => Number((v - half[i]!).toFixed(6))) as Vec3;
+    o.max = center.map((v, i) => Number((v + half[i]!).toFixed(6))) as Vec3;
+    const handler = this.body(handlerId);
+    handler.heldObjectId = carried ? id : null;
+    handler.handling = carried ? {
+      extension: Math.hypot(
+        center[0] - handler.position[0],
+        center[2] - handler.position[2],
+      ),
+      lift: Math.max(0, center[1] - 0.65),
+    } : { extension: 0, lift: 0 };
+    this.changed();
+  }
+  orientHandler(leaseId: string, target: Vec3) {
+    const { body } = this.authorize(leaseId);
+    body.heading = Math.atan2(
+      target[0] - body.position[0],
+      target[2] - body.position[2],
+    );
+    this.changed();
+  }
+  private collisionObstacles(body: Body) {
+    return this.obstacles.filter((o) => o.id !== body.heldObjectId);
+  }
+
   private survey = new SurveyTracker();
   private revision = 0;
   private bodies: Body[] = [];
@@ -228,6 +286,7 @@ export class Simulation {
         tilt: b.tilt,
         airborne: b.airborne,
         profile: structuredClone(b.profile ?? defaultProfile(b.kind)),
+        ...(b.attachment ? { attachment: b.attachment } : {}),
       })),
       cargo: this.objects.map((o) => ({
         id: o.id,
@@ -267,7 +326,14 @@ export class Simulation {
       ...(this.initialDefinition
         ? { layout: { obstacles: this.obstacles } }
         : {}),
-      ...(this.operationsState ? { operations: this.operationsState } : {}),
+      ...(this.operationsState
+        ? {
+            operations: {
+              ...this.operationsState,
+              obstructions: this.extraObstacles,
+            },
+          }
+        : {}),
       instanceId: this.instanceId,
       revision: this.revision,
       at: this.wallClock(),
@@ -346,7 +412,7 @@ export class Simulation {
         body.position,
         next,
         bodyClearance(body),
-        this.extraObstacles,
+        this.extraObstacles.filter((o) => o.id !== body.heldObjectId),
       );
       if (hit) {
         this.cancel(body);
@@ -367,6 +433,15 @@ export class Simulation {
       body.position = motion.from.map(
         (v, i) => v + (motion.target[i]! - v) * t,
       ) as Vec3;
+      if (body.attachment === "pallet-handler" && body.heldObjectId) {
+        const o = this.extraObstacles.find((o) => o.id === body.heldObjectId);
+        if (o) {
+          const center: Vec3 = [body.position[0], 1.55, body.position[2]];
+          const half = o.min.map((v, i) => (o.max[i]! - v) / 2);
+          o.min = center.map((v, i) => Number((v - half[i]!).toFixed(6))) as Vec3;
+          o.max = center.map((v, i) => Number((v + half[i]!).toFixed(6))) as Vec3;
+        }
+      }
       if (t === 1) {
         this.motions.delete(body.id);
         body.action!.status = "completed";
@@ -397,7 +472,15 @@ export class Simulation {
     this.tick();
     return {
       mode: "live",
-      ...(this.operationsState ? {operations:{running:this.operationsState.running,incidents:structuredClone(this.operationsState.incidents),operatorTool:"operations"}} : {}),
+      ...(this.operationsState
+        ? {
+            operations: {
+              running: this.operationsState.running,
+              incidents: structuredClone(this.operationsState.incidents),
+              operatorTool: "operations",
+            },
+          }
+        : {}),
       bounds: { ...BOUNDS },
       navigation: {
         obstacles: structuredClone(this.obstacles),
@@ -686,7 +769,7 @@ export class Simulation {
         body.position,
         target,
         clearance,
-        this.obstacles,
+        this.collisionObstacles(body),
       );
       if (blocked) {
         body.lastBlocked = {

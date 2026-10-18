@@ -28,6 +28,7 @@ export interface OperationsState {
   jobs: FleetJob[];
   incidents: FleetIncident[];
   obstructions: Obstacle[];
+  recovery: FleetRecovery | null;
   mode: "local-autonomy";
 }
 export interface OperationsInput {
@@ -37,6 +38,7 @@ export interface OperationsInput {
     | "pause"
     | "place_box"
     | "clear_box"
+    | "recover_box"
     | "resume"
     | "watch";
   x?: number;
@@ -50,4 +52,19 @@ export interface FleetStep {
   label: string;
   command: Command;
   dwell: number;
+}
+
+export interface FleetRecovery {
+  incidentId: string;
+  resourceId: string;
+  obstacleId: string;
+  phase:
+    | "approaching"
+    | "loading"
+    | "transporting"
+    | "unloading"
+    | "parked"
+    | "interrupted";
+  message: string;
+  destination: Vec3;
 }

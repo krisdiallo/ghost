@@ -8,9 +8,9 @@ Production starts local device jobs automatically. Scout inspects aisle B, Wisp 
 2. Choose **Drop box ahead of Scout**, or **Place a box on the floor** and click clear space on the floor/map. Placement rejects device and structure intersections. A box in Scout's route stops it before contact, cancels its motion, and raises an amber incident. Other jobs continue.
 3. In ChatGPT, say:
 
-> There seems to be an incident in the warehouse. Investigate it and get operations moving again. Read the incident, possess the affected device, inspect its actual camera image, clear the simulated obstruction, verify a short forward move, then explicitly return it to local autonomy. Confirm that its assigned work has resumed.
+> There seems to be an incident in the warehouse. Investigate it and get operations moving again. Read the incident, possess the affected device, inspect its actual camera image, dispatch Mule to move the obstruction, verify a short forward move, then explicitly return it to local autonomy. Confirm that its assigned work has resumed.
 
-4. Watch the device change from **Needs assistance** to **Operator control**. The box disappears only after an authorized simulated clearance. The operator can move the device, then hand it back. **Return to autonomy** verifies the remaining route and releases the capability. The job continues and the incident remains in history.
+4. Watch the device change from **Needs assistance** to **Operator control**. Mule drives to the box, lifts it onto its platform, carries it through the aisles and sets it down in staging. The same box remains in the world. Follow recovery vehicle to watch. Wait for recovery phase parked. The operator can move the device, then hand it back. **Return to autonomy** verifies the remaining route and releases the capability. The job continues and the incident remains in history.
 5. Continue the same ChatGPT conversation:
 
 > Before we change the routine inspection workflow, test alternatives in a sandbox. Clone the current warehouse, use the aisle-fit inspection starter, compare standard and compact drone candidates under matching conditions, preserve the blocked attempt and show actual trial sensor images. Run sequentially at 1× so we can watch. Explain the result and assumptions; leave live operations alone.
@@ -28,7 +28,7 @@ Operations actions:
 - `status`: jobs, commands, detected incidents and operator-placed boxes.
 - `start` / `pause`: start local task controllers or stop their own pending actions. An external operator's lease is preserved.
 - `place_box`: add a bounded simulated box at x/z, or omit both coordinates for a position ahead of Scout.
-- `clear_box`: supply incidentId and a valid leaseId for the affected body. The body must be stopped within 4 m. This simulates operator removal; Scout has no gripper. Permanent structures cannot be cleared.
+- `recover_box` (`clear_box` compatibility alias): supply incidentId and a valid leaseId for the affected body. The body must be stopped within 4 m. This dispatches the physical Mule handling vehicle. Read status until recovery.phase is parked. The box is never deleted; its ID is unchanged and its staged position stays collidable. Scout has no gripper. Permanent structures cannot be moved.
 - `resume`: supply incidentId and the affected body leaseId. The body must be stationary and the remaining route clear. The action resolves the incident, releases the operator lease and returns work to the local controller.
 - Optional `watch`: bounded wait up to 25 seconds after a sequence cursor. The primary demo uses a human noticing the incident and messaging ChatGPT. There is no unsolicited ChatGPT wake-up.
 
@@ -46,4 +46,4 @@ All jobs, boxes and incident history are in memory. The standalone server starts
 
 ## Evidence
 
-Run node scripts/capture-operations.mjs after building. It runs a continuous real browser/official MCP SDK rehearsal, verifies the stop, capability handoff, actual image, simulated clearance, manual motion, resumed cargo inspection and sandbox comparison, and checks the phone layout. Its recording is scripted QA, not a recorded autonomous ChatGPT session.
+Run node scripts/capture-operations.mjs after building. It runs a continuous real browser/official MCP SDK rehearsal, verifies the stop, capability handoff, actual image, physical box transfer, manual motion, resumed cargo inspection and sandbox comparison, and checks the phone layout. Its recording is scripted QA, not a recorded autonomous ChatGPT session.

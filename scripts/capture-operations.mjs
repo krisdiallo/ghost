@@ -137,10 +137,42 @@ try {
   await page.waitForTimeout(500);
   await shot("operator-possessed");
   await call("operations", {
-    action: "clear_box",
+    action: "recover_box",
     incidentId: incident.id,
     leaseId: lease.leaseId,
   });
+  await page
+    .locator(".scene .fleet-ops")
+    .getByRole("button", { name: "Follow recovery vehicle", exact: true })
+    .click();
+  await wait(() => w.operations.state().recovery?.phase === "loading", 70000);
+  await page.waitForTimeout(1700);
+  await shot("mule-loading");
+  await wait(() => w.operations.state().recovery?.phase === "transporting");
+  await page.waitForTimeout(1300);
+  await shot("mule-carrying");
+  await wait(() => w.operations.state().recovery?.phase === "parked", 70000);
+  await page.waitForTimeout(500);
+  await shot("box-staged");
+  assert.equal(w.operations.state().obstructions[0].id, incident.obstacleId);
+  const stagedCenter = w.operations
+    .state()
+    .obstructions[0].min.map(
+      (v, i) => (v + w.operations.state().obstructions[0].max[i]) / 2,
+    );
+  assert.ok(
+    stagedCenter.every(
+      (v, i) =>
+        Math.abs(v - w.operations.state().recovery.destination[i]) < 1e-6,
+    ),
+  );
+  console.log(
+    "Recorded Mule approaching, loading, transporting and staging the same box.",
+  );
+  await page
+    .locator(".scene .fleet-ops")
+    .getByRole("button", { name: "Focus affected device", exact: true })
+    .click();
   const target = [-10, halted[1], Math.max(-18, halted[2] - 2)];
   await call("act", {
     leaseId: lease.leaseId,
@@ -163,7 +195,7 @@ try {
       .lease?.owner.startsWith("Local autonomy"),
   );
   assert.ok(w.operations.state().incidents[0].resolvedAt);
-  assert.equal(w.operations.state().obstructions.length, 0);
+  assert.equal(w.operations.state().obstructions.length, 1);
   await page.waitForTimeout(900);
   await shot("operations-restored");
   await wait(() =>
@@ -194,7 +226,7 @@ try {
       runs.some((r) => r.status === "completed"),
   );
   assert.equal(w.lab.compare(runs.map((r) => r.id)).comparable, true);
-  assert.equal(w.operations.state().obstructions.length, 0);
+  assert.equal(w.operations.state().obstructions.length, 1);
   assert.ok(w.operations.state().running);
   assert.deepEqual(errors, []);
   await cdp.send("Page.stopScreencast");
@@ -265,6 +297,8 @@ try {
     operatorPossession: true,
     actualSensorImage: true,
     operatorClearance: true,
+    physicalRecoveryVehicle: true,
+    sameBoxPersistedInStaging: true,
     manualMotionVerification: true,
     autonomyResumed: true,
     subsequentCargoInspection: true,

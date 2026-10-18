@@ -68,6 +68,7 @@ const vec = z.tuple([
 ]);
 export const deviceSchema = z
   .object({
+    attachment: z.literal("pallet-handler").optional(),
     id,
     kind: z.enum(["camera", "rover", "arm", "drone"]),
     label,
@@ -157,6 +158,7 @@ export const schemas = {
           "pause",
           "place_box",
           "clear_box",
+          "recover_box",
           "resume",
           "watch",
         ])
