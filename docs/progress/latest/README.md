@@ -2,7 +2,7 @@
 
 Oct 17, 2026, 5:12 PM PT · actual app captures
 
-**Latest update:** [See what the agent sees: four body cameras, actual MCP images, an embedded mcp-use viewer, and a 33-second recording](../vision/README.md). The hosted endpoint is not live yet; network access and Manufact authorization are still needed.
+**Latest update:** [A fresh agent chose its own mission actions, staged Cargo 07 and reported an exception; real trace and recording](../agent/README.md). [Camera integration report](../vision/README.md). The hosted endpoint is not live yet; network access and Manufact authorization are still needed.
 
 ![Actual embedded MCP sensor card — 62 KB](../vision/ghost-mcp-app.jpg)
 

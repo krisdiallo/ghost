@@ -1,0 +1,2096 @@
+{
+  "driver": "Fresh Codex multimodal agent, no parent chat or repository context",
+  "objective": "Find and inspect tagged warehouse cargo, report condition exceptions, stage cleared priority cargo in dispatch using suitable bodies, and verify the result using cameras and structured observations.",
+  "startedAt": "2026-10-18T02:33:58.108Z",
+  "endedAt": "2026-10-18T02:40:16.254Z",
+  "scriptedMission": false,
+  "events": [
+    {
+      "index": 1,
+      "at": "2026-10-18T02:34:11.556Z",
+      "tool": "discover",
+      "input": {},
+      "note": "Find available sensor and cargo handling bodies.",
+      "isError": false,
+      "result": {
+        "mode": "live",
+        "bounds": {
+          "minX": -31,
+          "maxX": 31,
+          "minZ": -33,
+          "maxZ": 9,
+          "maxAltitude": 12
+        },
+        "leaseLimits": {
+          "default": 60,
+          "min": 5,
+          "max": 300
+        },
+        "resources": [
+          {
+            "id": "camera-01",
+            "kind": "camera",
+            "label": "Sentinel",
+            "position": [
+              -30.2,
+              10,
+              8
+            ],
+            "heading": 0,
+            "pan": 104,
+            "tilt": -16,
+            "preset": "home",
+            "heldObjectId": null,
+            "airborne": false,
+            "lease": null,
+            "action": null,
+            "available": true,
+            "capabilities": [
+              "look",
+              "inspect"
+            ]
+          },
+          {
+            "id": "rover-01",
+            "kind": "rover",
+            "label": "Scout",
+            "position": [
+              -6,
+              0.45,
+              3
+            ],
+            "heading": 3.141592653589793,
+            "pan": 0,
+            "tilt": 0,
+            "preset": "home",
+            "heldObjectId": null,
+            "airborne": false,
+            "lease": null,
+            "action": null,
+            "available": true,
+            "capabilities": [
+              "move",
+              "inspect",
+              "stop"
+            ]
+          },
+          {
+            "id": "arm-01",
+            "kind": "arm",
+            "label": "Atlas",
+            "position": [
+              4,
+              0.5,
+              0
+            ],
+            "heading": 0,
+            "pan": 0,
+            "tilt": 0,
+            "preset": "home",
+            "heldObjectId": null,
+            "airborne": false,
+            "lease": null,
+            "action": null,
+            "available": true,
+            "capabilities": [
+              "preset",
+              "grasp",
+              "place"
+            ]
+          },
+          {
+            "id": "drone-01",
+            "kind": "drone",
+            "label": "Wisp",
+            "position": [
+              -4,
+              0.4,
+              -3
+            ],
+            "heading": 3.141592653589793,
+            "pan": 0,
+            "tilt": 0,
+            "preset": "home",
+            "heldObjectId": null,
+            "airborne": false,
+            "lease": null,
+            "action": null,
+            "available": true,
+            "capabilities": [
+              "takeoff",
+              "move",
+              "inspect",
+              "land",
+              "stop"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "index": 2,
+      "at": "2026-10-18T02:34:17.149Z",
+      "tool": "possess",
+      "input": {
+        "resourceId": "camera-01",
+        "ttlSeconds": 300,
+        "owner": "Cargo mission"
+      },
+      "note": "Use the elevated camera to survey the warehouse.",
+      "isError": false,
+      "result": {
+        "resource": {
+          "id": "camera-01",
+          "kind": "camera",
+          "label": "Sentinel",
+          "position": [
+            -30.2,
+            10,
+            8
+          ],
+          "heading": 0,
+          "pan": 104,
+          "tilt": -16,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291157146
+          },
+          "action": null
+        },
+        "expiresAt": 1792291157146
+      }
+    },
+    {
+      "index": 3,
+      "at": "2026-10-18T02:34:24.779Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "camera-01",
+        "image": true
+      },
+      "note": "Read the overview image and visible cargo telemetry.",
+      "isError": false,
+      "result": {
+        "at": 1792290860879,
+        "revision": 1,
+        "body": {
+          "id": "camera-01",
+          "kind": "camera",
+          "label": "Sentinel",
+          "position": [
+            -30.2,
+            10,
+            8
+          ],
+          "heading": 0,
+          "pan": 104,
+          "tilt": -16,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291157146
+          },
+          "action": null
+        },
+        "objects": [
+          {
+            "id": "crate-07",
+            "label": "Priority cargo · 07",
+            "position": [
+              2,
+              0.55,
+              0
+            ],
+            "distance": 34.5
+          }
+        ],
+        "inspection": null,
+        "frame": {
+          "id": "7b0e3b7f-fc43-438b-8035-709930256066",
+          "instanceId": "8bca290c-f094-4a5c-845a-febb9640e147",
+          "resourceId": "camera-01",
+          "revision": 1,
+          "at": 1792290860879,
+          "width": 640,
+          "height": 360,
+          "mimeType": "image/jpeg"
+        }
+      },
+      "image": {
+        "path": "frames/sensor-003-camera-01.jpg",
+        "sha256": "e6047e8d1559078708a2948daea4b378f3c776b92476f2a8a77283837579219b",
+        "bytes": 35963
+      }
+    },
+    {
+      "index": 4,
+      "at": "2026-10-18T02:34:32.546Z",
+      "tool": "possess",
+      "input": {
+        "resourceId": "rover-01",
+        "ttlSeconds": 300,
+        "owner": "Cargo mission"
+      },
+      "note": "Use the rover for close cargo inspection near the handling arm.",
+      "isError": false,
+      "result": {
+        "resource": {
+          "id": "rover-01",
+          "kind": "rover",
+          "label": "Scout",
+          "position": [
+            -6,
+            0.45,
+            3
+          ],
+          "heading": 3.141592653589793,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291172543
+          },
+          "action": null
+        },
+        "expiresAt": 1792291172543
+      }
+    },
+    {
+      "index": 5,
+      "at": "2026-10-18T02:34:37.122Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "rover-01",
+        "image": true
+      },
+      "note": "Check the rover's forward view before moving toward the priority tag.",
+      "isError": false,
+      "result": {
+        "at": 1792290875438,
+        "revision": 2,
+        "body": {
+          "id": "rover-01",
+          "kind": "rover",
+          "label": "Scout",
+          "position": [
+            -6,
+            0.45,
+            3
+          ],
+          "heading": 3.141592653589793,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291172543
+          },
+          "action": null
+        },
+        "objects": [],
+        "inspection": null,
+        "frame": {
+          "id": "9d70a800-1a76-4fbc-9baf-1d550d499b51",
+          "instanceId": "8bca290c-f094-4a5c-845a-febb9640e147",
+          "resourceId": "rover-01",
+          "revision": 2,
+          "at": 1792290875439,
+          "width": 640,
+          "height": 360,
+          "mimeType": "image/jpeg"
+        }
+      },
+      "image": {
+        "path": "frames/sensor-005-rover-01.jpg",
+        "sha256": "1c2b04539e46eb7250c139dc1cf4b0cd6d0a3de012cef875b955f2718966e21f",
+        "bytes": 35720
+      }
+    },
+    {
+      "index": 6,
+      "at": "2026-10-18T02:34:44.026Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "rover-01",
+        "command": {
+          "type": "move",
+          "x": 1,
+          "z": 2
+        }
+      },
+      "note": "Approach the observed priority cargo across the open dispatch floor.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "f86ee81c-9e4a-44ae-95df-adb3f6530a97",
+          "type": "move",
+          "status": "running",
+          "target": [
+            1,
+            0.45,
+            2
+          ]
+        },
+        "revision": 3
+      }
+    },
+    {
+      "index": 7,
+      "at": "2026-10-18T02:34:48.114Z",
+      "tool": "wait",
+      "input": {
+        "leaseRef": "rover-01"
+      },
+      "polls": 13,
+      "isError": false,
+      "result": {
+        "at": 1792290888099,
+        "revision": 94,
+        "body": {
+          "id": "rover-01",
+          "kind": "rover",
+          "label": "Scout",
+          "position": [
+            1,
+            0.45,
+            2
+          ],
+          "heading": 1.7126933813990606,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291172543
+          },
+          "action": {
+            "id": "f86ee81c-9e4a-44ae-95df-adb3f6530a97",
+            "type": "move",
+            "status": "completed",
+            "target": [
+              1,
+              0.45,
+              2
+            ]
+          }
+        },
+        "objects": [
+          {
+            "id": "crate-07",
+            "label": "Priority cargo · 07",
+            "position": [
+              2,
+              0.55,
+              0
+            ],
+            "distance": 2.24
+          }
+        ],
+        "inspection": null
+      }
+    },
+    {
+      "index": 8,
+      "at": "2026-10-18T02:34:53.271Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "rover-01",
+        "command": {
+          "type": "inspect",
+          "objectId": "crate-07"
+        }
+      },
+      "note": "Read the priority cargo tag and assess its condition before staging.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "63a13236-ff8d-474d-a26a-4eb018f6ba93",
+          "type": "inspect",
+          "status": "completed",
+          "target": null
+        },
+        "revision": 95,
+        "inspection": {
+          "objectId": "crate-07",
+          "condition": "Seal intact. Label verified. Cleared for dispatch."
+        }
+      }
+    },
+    {
+      "index": 9,
+      "at": "2026-10-18T02:34:59.063Z",
+      "tool": "possess",
+      "input": {
+        "resourceId": "arm-01",
+        "ttlSeconds": 300,
+        "owner": "Cargo mission"
+      },
+      "note": "Acquire the nearby cargo handling arm for the cleared priority crate.",
+      "isError": false,
+      "result": {
+        "resource": {
+          "id": "arm-01",
+          "kind": "arm",
+          "label": "Atlas",
+          "position": [
+            4,
+            0.5,
+            0
+          ],
+          "heading": 0,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291199056
+          },
+          "action": null
+        },
+        "expiresAt": 1792291199056
+      }
+    },
+    {
+      "index": 10,
+      "at": "2026-10-18T02:35:03.873Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "arm-01",
+        "image": true
+      },
+      "note": "Confirm the priority crate and dispatch workspace from the arm camera.",
+      "isError": false,
+      "result": {
+        "at": 1792290902783,
+        "revision": 96,
+        "body": {
+          "id": "arm-01",
+          "kind": "arm",
+          "label": "Atlas",
+          "position": [
+            4,
+            0.5,
+            0
+          ],
+          "heading": 0,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291199056
+          },
+          "action": null
+        },
+        "objects": [
+          {
+            "id": "crate-07",
+            "label": "Priority cargo · 07",
+            "position": [
+              2,
+              0.55,
+              0
+            ],
+            "distance": 2
+          }
+        ],
+        "inspection": null,
+        "frame": {
+          "id": "b0b914a0-4a0e-4538-b48a-e653492596f5",
+          "instanceId": "8bca290c-f094-4a5c-845a-febb9640e147",
+          "resourceId": "arm-01",
+          "revision": 96,
+          "at": 1792290902783,
+          "width": 640,
+          "height": 360,
+          "mimeType": "image/jpeg"
+        }
+      },
+      "image": {
+        "path": "frames/sensor-010-arm-01.jpg",
+        "sha256": "6abb130a9c8fd14f4dd10b83f1b55bcd4175113072d1efa5eeca7258580cdbbe",
+        "bytes": 18529
+      }
+    },
+    {
+      "index": 11,
+      "at": "2026-10-18T02:35:11.687Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "arm-01",
+        "command": {
+          "type": "preset",
+          "preset": "reach"
+        }
+      },
+      "note": "Position the arm to pick up inspected cargo 07.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "78c2b3c9-1de9-4430-8b98-88df249b2aa8",
+          "type": "preset",
+          "status": "completed",
+          "target": null
+        },
+        "revision": 97
+      }
+    },
+    {
+      "index": 12,
+      "at": "2026-10-18T02:35:14.651Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "arm-01",
+        "command": {
+          "type": "grasp",
+          "objectId": "crate-07"
+        }
+      },
+      "note": "Grasp the cleared priority crate.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "1b9cdb6f-eb38-40db-b2d0-0da2dbe380e3",
+          "type": "grasp",
+          "status": "completed",
+          "target": null
+        },
+        "revision": 98
+      }
+    },
+    {
+      "index": 13,
+      "at": "2026-10-18T02:35:19.153Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "arm-01",
+        "image": true
+      },
+      "note": "Verify cargo attachment before moving the arm to dispatch.",
+      "isError": false,
+      "result": {
+        "at": 1792290917896,
+        "revision": 98,
+        "body": {
+          "id": "arm-01",
+          "kind": "arm",
+          "label": "Atlas",
+          "position": [
+            4,
+            0.5,
+            0
+          ],
+          "heading": 0,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "reach",
+          "heldObjectId": "crate-07",
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291199056
+          },
+          "action": {
+            "id": "1b9cdb6f-eb38-40db-b2d0-0da2dbe380e3",
+            "type": "grasp",
+            "status": "completed",
+            "target": null
+          }
+        },
+        "objects": [
+          {
+            "id": "crate-07",
+            "label": "Priority cargo · 07",
+            "position": [
+              2,
+              0.75,
+              0
+            ],
+            "distance": 2.02
+          }
+        ],
+        "inspection": null,
+        "frame": {
+          "id": "ef3d37ad-c22b-40d5-91d2-16b7acf52f74",
+          "instanceId": "8bca290c-f094-4a5c-845a-febb9640e147",
+          "resourceId": "arm-01",
+          "revision": 98,
+          "at": 1792290917897,
+          "width": 640,
+          "height": 360,
+          "mimeType": "image/jpeg"
+        }
+      },
+      "image": {
+        "path": "frames/sensor-013-arm-01.jpg",
+        "sha256": "06bb4abb71c4f78051d3e38696992aa5b7be32705661945d95c51cde5ac77f85",
+        "bytes": 8573
+      }
+    },
+    {
+      "index": 14,
+      "at": "2026-10-18T02:35:27.539Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "arm-01",
+        "command": {
+          "type": "preset",
+          "preset": "drop"
+        }
+      },
+      "note": "Carry cargo 07 to the arm's dispatch drop position.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "bd48c276-7208-4bb3-b043-e957ffbf9bb1",
+          "type": "preset",
+          "status": "completed",
+          "target": null
+        },
+        "revision": 99
+      }
+    },
+    {
+      "index": 15,
+      "at": "2026-10-18T02:35:30.749Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "arm-01",
+        "command": {
+          "type": "place"
+        }
+      },
+      "note": "Place cleared priority cargo in dispatch.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "9a82773b-b021-4ada-9284-9cf085020a63",
+          "type": "place",
+          "status": "completed",
+          "target": null
+        },
+        "revision": 100
+      }
+    },
+    {
+      "index": 16,
+      "at": "2026-10-18T02:35:35.014Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "arm-01",
+        "image": true
+      },
+      "note": "Verify the released crate's dispatch position and the empty gripper.",
+      "isError": false,
+      "result": {
+        "at": 1792290933832,
+        "revision": 100,
+        "body": {
+          "id": "arm-01",
+          "kind": "arm",
+          "label": "Atlas",
+          "position": [
+            4,
+            0.5,
+            0
+          ],
+          "heading": 0,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "drop",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291199056
+          },
+          "action": {
+            "id": "9a82773b-b021-4ada-9284-9cf085020a63",
+            "type": "place",
+            "status": "completed",
+            "target": null
+          }
+        },
+        "objects": [],
+        "inspection": null,
+        "frame": {
+          "id": "d6ab5eaa-c070-479f-9fce-65a52dd3ea58",
+          "instanceId": "8bca290c-f094-4a5c-845a-febb9640e147",
+          "resourceId": "arm-01",
+          "revision": 100,
+          "at": 1792290933832,
+          "width": 640,
+          "height": 360,
+          "mimeType": "image/jpeg"
+        }
+      },
+      "image": {
+        "path": "frames/sensor-016-arm-01.jpg",
+        "sha256": "1c254529d9cfa39254c9599062165fe6e6b89cd8e1ef5f90eaac528869ec2d6f",
+        "bytes": 14572
+      }
+    },
+    {
+      "index": 17,
+      "at": "2026-10-18T02:35:44.739Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "arm-01",
+        "command": {
+          "type": "preset",
+          "preset": "home"
+        }
+      },
+      "note": "Return the empty handling arm to its safe home pose.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "99152700-6f7f-40f0-8c46-14009d069cb3",
+          "type": "preset",
+          "status": "completed",
+          "target": null
+        },
+        "revision": 101
+      }
+    },
+    {
+      "index": 18,
+      "at": "2026-10-18T02:35:49.582Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "camera-01",
+        "image": true
+      },
+      "note": "Check cargo 07's staged location from an independent camera.",
+      "isError": false,
+      "result": {
+        "at": 1792290948073,
+        "revision": 101,
+        "body": {
+          "id": "camera-01",
+          "kind": "camera",
+          "label": "Sentinel",
+          "position": [
+            -30.2,
+            10,
+            8
+          ],
+          "heading": 0,
+          "pan": 104,
+          "tilt": -16,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291157146
+          },
+          "action": null
+        },
+        "objects": [
+          {
+            "id": "crate-07",
+            "label": "Priority cargo · 07",
+            "position": [
+              6,
+              0.55,
+              2
+            ],
+            "distance": 37.89
+          }
+        ],
+        "inspection": null,
+        "frame": {
+          "id": "862bc6cd-ed36-4e04-9d14-bc83115611aa",
+          "instanceId": "8bca290c-f094-4a5c-845a-febb9640e147",
+          "resourceId": "camera-01",
+          "revision": 101,
+          "at": 1792290948077,
+          "width": 640,
+          "height": 360,
+          "mimeType": "image/jpeg"
+        }
+      },
+      "image": {
+        "path": "frames/sensor-018-camera-01.jpg",
+        "sha256": "fa82078cccc6778810f9926b3e47f8efa294d56b840ca3eefe46ae5466aab1dd",
+        "bytes": 35756
+      }
+    },
+    {
+      "index": 19,
+      "at": "2026-10-18T02:36:23.136Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "camera-01",
+        "image": false
+      },
+      "note": "Recover from the timed-out camera render using its current telemetry.",
+      "isError": false,
+      "result": {
+        "at": 1792290983131,
+        "revision": 101,
+        "body": {
+          "id": "camera-01",
+          "kind": "camera",
+          "label": "Sentinel",
+          "position": [
+            -30.2,
+            10,
+            8
+          ],
+          "heading": 0,
+          "pan": 104,
+          "tilt": -16,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291157146
+          },
+          "action": null
+        },
+        "objects": [
+          {
+            "id": "crate-07",
+            "label": "Priority cargo · 07",
+            "position": [
+              6,
+              0.55,
+              2
+            ],
+            "distance": 37.89
+          }
+        ],
+        "inspection": null
+      }
+    },
+    {
+      "index": 20,
+      "at": "2026-10-18T02:36:29.121Z",
+      "tool": "possess",
+      "input": {
+        "resourceId": "drone-01",
+        "ttlSeconds": 300,
+        "owner": "Cargo mission"
+      },
+      "note": "Survey the storage aisles for additional tagged cargo.",
+      "isError": false,
+      "result": {
+        "resource": {
+          "id": "drone-01",
+          "kind": "drone",
+          "label": "Wisp",
+          "position": [
+            -4,
+            0.4,
+            -3
+          ],
+          "heading": 3.141592653589793,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291289116
+          },
+          "action": null
+        },
+        "expiresAt": 1792291289116
+      }
+    },
+    {
+      "index": 21,
+      "at": "2026-10-18T02:36:34.524Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "drone-01",
+        "command": {
+          "type": "takeoff"
+        }
+      },
+      "note": "Lift the drone in its current open inspection-floor location.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "a8f5cfbf-50ef-4bd4-8c9b-0469a16e77d6",
+          "type": "takeoff",
+          "status": "running",
+          "target": [
+            -4,
+            2.8,
+            -3
+          ]
+        },
+        "revision": 103
+      }
+    },
+    {
+      "index": 22,
+      "at": "2026-10-18T02:36:37.270Z",
+      "tool": "wait",
+      "input": {
+        "leaseRef": "drone-01"
+      },
+      "polls": 1,
+      "isError": false,
+      "result": {
+        "at": 1792290997261,
+        "revision": 124,
+        "body": {
+          "id": "drone-01",
+          "kind": "drone",
+          "label": "Wisp",
+          "position": [
+            -4,
+            2.8,
+            -3
+          ],
+          "heading": 3.141592653589793,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": true,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291289116
+          },
+          "action": {
+            "id": "a8f5cfbf-50ef-4bd4-8c9b-0469a16e77d6",
+            "type": "takeoff",
+            "status": "completed",
+            "target": [
+              -4,
+              2.8,
+              -3
+            ]
+          }
+        },
+        "objects": [],
+        "inspection": null
+      }
+    },
+    {
+      "index": 23,
+      "at": "2026-10-18T02:36:42.266Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "drone-01",
+        "image": true
+      },
+      "note": "Inspect aisle geometry from the drone before choosing a survey route.",
+      "isError": false,
+      "result": {
+        "at": 1792291000627,
+        "revision": 124,
+        "body": {
+          "id": "drone-01",
+          "kind": "drone",
+          "label": "Wisp",
+          "position": [
+            -4,
+            2.8,
+            -3
+          ],
+          "heading": 3.141592653589793,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": true,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291289116
+          },
+          "action": {
+            "id": "a8f5cfbf-50ef-4bd4-8c9b-0469a16e77d6",
+            "type": "takeoff",
+            "status": "completed",
+            "target": [
+              -4,
+              2.8,
+              -3
+            ]
+          }
+        },
+        "objects": [],
+        "inspection": null,
+        "frame": {
+          "id": "14cf6b41-5054-4754-b972-da530d2993ff",
+          "instanceId": "8bca290c-f094-4a5c-845a-febb9640e147",
+          "resourceId": "drone-01",
+          "revision": 124,
+          "at": 1792291000627,
+          "width": 640,
+          "height": 360,
+          "mimeType": "image/jpeg"
+        }
+      },
+      "image": {
+        "path": "frames/sensor-023-drone-01.jpg",
+        "sha256": "c4152eb3db4be75b034e4f7b215c2e323fb4382ef629ee612349f57618d32bdd",
+        "bytes": 17503
+      }
+    },
+    {
+      "index": 24,
+      "at": "2026-10-18T02:36:50.879Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "drone-01",
+        "command": {
+          "type": "move",
+          "x": -4,
+          "y": 9,
+          "z": -3
+        }
+      },
+      "note": "Ascend vertically above the open inspection zone for a storage overview.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "218b1c5a-8ef4-406c-bd1a-c0dbe37c7677",
+          "type": "move",
+          "status": "running",
+          "target": [
+            -4,
+            9,
+            -3
+          ]
+        },
+        "revision": 125
+      }
+    },
+    {
+      "index": 25,
+      "at": "2026-10-18T02:36:54.126Z",
+      "tool": "wait",
+      "input": {
+        "leaseRef": "drone-01"
+      },
+      "polls": 1,
+      "isError": false,
+      "result": {
+        "at": 1792291014118,
+        "revision": 177,
+        "body": {
+          "id": "drone-01",
+          "kind": "drone",
+          "label": "Wisp",
+          "position": [
+            -4,
+            9,
+            -3
+          ],
+          "heading": 3.141592653589793,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": true,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291289116
+          },
+          "action": {
+            "id": "218b1c5a-8ef4-406c-bd1a-c0dbe37c7677",
+            "type": "move",
+            "status": "completed",
+            "target": [
+              -4,
+              9,
+              -3
+            ]
+          }
+        },
+        "objects": [],
+        "inspection": null
+      }
+    },
+    {
+      "index": 26,
+      "at": "2026-10-18T02:36:58.454Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "drone-01",
+        "image": true
+      },
+      "note": "Locate shelf gaps and tagged cargo from the elevated view.",
+      "isError": false,
+      "result": {
+        "at": 1792291017079,
+        "revision": 177,
+        "body": {
+          "id": "drone-01",
+          "kind": "drone",
+          "label": "Wisp",
+          "position": [
+            -4,
+            9,
+            -3
+          ],
+          "heading": 3.141592653589793,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": true,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291289116
+          },
+          "action": {
+            "id": "218b1c5a-8ef4-406c-bd1a-c0dbe37c7677",
+            "type": "move",
+            "status": "completed",
+            "target": [
+              -4,
+              9,
+              -3
+            ]
+          }
+        },
+        "objects": [],
+        "inspection": null,
+        "frame": {
+          "id": "40a5cbbb-e915-485e-b750-3acaac8c23fb",
+          "instanceId": "8bca290c-f094-4a5c-845a-febb9640e147",
+          "resourceId": "drone-01",
+          "revision": 177,
+          "at": 1792291017079,
+          "width": 640,
+          "height": 360,
+          "mimeType": "image/jpeg"
+        }
+      },
+      "image": {
+        "path": "frames/sensor-026-drone-01.jpg",
+        "sha256": "a8263c281e9478406f58ebcdd77d81371d4d9233c1ea9e72106f9c729d57f098",
+        "bytes": 40074
+      }
+    },
+    {
+      "index": 27,
+      "at": "2026-10-18T02:37:09.146Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "drone-01",
+        "command": {
+          "type": "move",
+          "x": -4,
+          "y": 11,
+          "z": -3
+        }
+      },
+      "note": "Gain clearance above the shelf tops before entering storage airspace.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "9e188c57-f188-4583-8f4f-d5e79c6f2af8",
+          "type": "move",
+          "status": "running",
+          "target": [
+            -4,
+            11,
+            -3
+          ]
+        },
+        "revision": 178
+      }
+    },
+    {
+      "index": 28,
+      "at": "2026-10-18T02:37:11.676Z",
+      "tool": "wait",
+      "input": {
+        "leaseRef": "drone-01"
+      },
+      "polls": 1,
+      "isError": false,
+      "result": {
+        "at": 1792291031674,
+        "revision": 195,
+        "body": {
+          "id": "drone-01",
+          "kind": "drone",
+          "label": "Wisp",
+          "position": [
+            -4,
+            11,
+            -3
+          ],
+          "heading": 3.141592653589793,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": true,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291289116
+          },
+          "action": {
+            "id": "9e188c57-f188-4583-8f4f-d5e79c6f2af8",
+            "type": "move",
+            "status": "completed",
+            "target": [
+              -4,
+              11,
+              -3
+            ]
+          }
+        },
+        "objects": [],
+        "inspection": null
+      }
+    },
+    {
+      "index": 29,
+      "at": "2026-10-18T02:37:15.333Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "drone-01",
+        "command": {
+          "type": "move",
+          "x": -4,
+          "y": 11,
+          "z": -13
+        }
+      },
+      "note": "Survey farther into storage while remaining above the shelves.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "f9a4641b-f2e3-4cc9-a839-ded245af5699",
+          "type": "move",
+          "status": "running",
+          "target": [
+            -4,
+            11,
+            -13
+          ]
+        },
+        "revision": 196
+      }
+    },
+    {
+      "index": 30,
+      "at": "2026-10-18T02:37:19.505Z",
+      "tool": "wait",
+      "input": {
+        "leaseRef": "drone-01"
+      },
+      "polls": 5,
+      "isError": false,
+      "result": {
+        "at": 1792291039496,
+        "revision": 277,
+        "body": {
+          "id": "drone-01",
+          "kind": "drone",
+          "label": "Wisp",
+          "position": [
+            -4,
+            11,
+            -13
+          ],
+          "heading": 3.141592653589793,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": true,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291289116
+          },
+          "action": {
+            "id": "f9a4641b-f2e3-4cc9-a839-ded245af5699",
+            "type": "move",
+            "status": "completed",
+            "target": [
+              -4,
+              11,
+              -13
+            ]
+          }
+        },
+        "objects": [],
+        "inspection": null
+      }
+    },
+    {
+      "index": 31,
+      "at": "2026-10-18T02:37:24.736Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "drone-01",
+        "image": true
+      },
+      "note": "Look for tagged cargo beyond the first storage row.",
+      "isError": false,
+      "result": {
+        "at": 1792291043649,
+        "revision": 277,
+        "body": {
+          "id": "drone-01",
+          "kind": "drone",
+          "label": "Wisp",
+          "position": [
+            -4,
+            11,
+            -13
+          ],
+          "heading": 3.141592653589793,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": true,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291289116
+          },
+          "action": {
+            "id": "f9a4641b-f2e3-4cc9-a839-ded245af5699",
+            "type": "move",
+            "status": "completed",
+            "target": [
+              -4,
+              11,
+              -13
+            ]
+          }
+        },
+        "objects": [],
+        "inspection": null,
+        "frame": {
+          "id": "ea4bdfc4-1aa5-41c7-afa3-aa50a6e30f65",
+          "instanceId": "8bca290c-f094-4a5c-845a-febb9640e147",
+          "resourceId": "drone-01",
+          "revision": 277,
+          "at": 1792291043649,
+          "width": 640,
+          "height": 360,
+          "mimeType": "image/jpeg"
+        }
+      },
+      "image": {
+        "path": "frames/sensor-031-drone-01.jpg",
+        "sha256": "46948c468efe6f1617cd681d12bf038acd3aca2717c91d61073b72f9309bb1af",
+        "bytes": 34024
+      }
+    },
+    {
+      "index": 32,
+      "at": "2026-10-18T02:37:43.981Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "camera-01",
+        "command": {
+          "type": "look",
+          "pan": 135,
+          "tilt": -16
+        }
+      },
+      "note": "Sweep the elevated camera toward the deeper storage bays for tagged cargo.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "abd60071-ad93-450b-a017-8d431ad68351",
+          "type": "look",
+          "status": "completed",
+          "target": null
+        },
+        "revision": 278
+      }
+    },
+    {
+      "index": 33,
+      "at": "2026-10-18T02:37:49.745Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "camera-01",
+        "image": true
+      },
+      "note": "Read the deeper storage view and cargo detections.",
+      "isError": false,
+      "result": {
+        "at": 1792291067337,
+        "revision": 278,
+        "body": {
+          "id": "camera-01",
+          "kind": "camera",
+          "label": "Sentinel",
+          "position": [
+            -30.2,
+            10,
+            8
+          ],
+          "heading": 0,
+          "pan": 135,
+          "tilt": -16,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291157146
+          },
+          "action": {
+            "id": "abd60071-ad93-450b-a017-8d431ad68351",
+            "type": "look",
+            "status": "completed",
+            "target": null
+          }
+        },
+        "objects": [
+          {
+            "id": "crate-12",
+            "label": "Storage cargo · 12",
+            "position": [
+              -8.4,
+              0.55,
+              -18
+            ],
+            "distance": 35.22
+          }
+        ],
+        "inspection": null,
+        "frame": {
+          "id": "4eca6c25-f613-4339-953e-c277d114147e",
+          "instanceId": "8bca290c-f094-4a5c-845a-febb9640e147",
+          "resourceId": "camera-01",
+          "revision": 278,
+          "at": 1792291067337,
+          "width": 640,
+          "height": 360,
+          "mimeType": "image/jpeg"
+        }
+      },
+      "image": {
+        "path": "frames/sensor-033-camera-01.jpg",
+        "sha256": "91d2d0064cb1223d7c3d0640a95280dae8ec71a110641a12abf296409d875ff5",
+        "bytes": 52215
+      }
+    },
+    {
+      "index": 34,
+      "at": "2026-10-18T02:38:23.215Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "camera-01",
+        "image": false
+      },
+      "note": "Read the deeper camera sweep telemetry after its image delivery timed out.",
+      "isError": false,
+      "result": {
+        "at": 1792291103213,
+        "revision": 278,
+        "body": {
+          "id": "camera-01",
+          "kind": "camera",
+          "label": "Sentinel",
+          "position": [
+            -30.2,
+            10,
+            8
+          ],
+          "heading": 0,
+          "pan": 135,
+          "tilt": -16,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291157146
+          },
+          "action": {
+            "id": "abd60071-ad93-450b-a017-8d431ad68351",
+            "type": "look",
+            "status": "completed",
+            "target": null
+          }
+        },
+        "objects": [
+          {
+            "id": "crate-12",
+            "label": "Storage cargo · 12",
+            "position": [
+              -8.4,
+              0.55,
+              -18
+            ],
+            "distance": 35.22
+          }
+        ],
+        "inspection": null
+      }
+    },
+    {
+      "index": 35,
+      "at": "2026-10-18T02:38:34.957Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "camera-01",
+        "command": {
+          "type": "inspect",
+          "objectId": "crate-12"
+        }
+      },
+      "note": "Inspect storage cargo 12 found in the deeper camera sweep.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "7206071c-6819-4d3d-95c5-cc3cf5fe341d",
+          "type": "inspect",
+          "status": "completed",
+          "target": null
+        },
+        "revision": 279,
+        "inspection": {
+          "objectId": "crate-12",
+          "condition": "Surface abrasion on north face. Seal intact."
+        }
+      }
+    },
+    {
+      "index": 36,
+      "at": "2026-10-18T02:38:39.629Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "camera-01",
+        "command": {
+          "type": "look",
+          "pan": 165,
+          "tilt": -16
+        }
+      },
+      "note": "Continue the camera sweep across the near-side storage aisles.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "80617e79-5b9c-4cd5-ac60-050b3089e29b",
+          "type": "look",
+          "status": "completed",
+          "target": null
+        },
+        "revision": 280
+      }
+    },
+    {
+      "index": 37,
+      "at": "2026-10-18T02:38:43.273Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "camera-01",
+        "image": false
+      },
+      "note": "Detect additional tags in the near-side camera sector.",
+      "isError": false,
+      "result": {
+        "at": 1792291123266,
+        "revision": 280,
+        "body": {
+          "id": "camera-01",
+          "kind": "camera",
+          "label": "Sentinel",
+          "position": [
+            -30.2,
+            10,
+            8
+          ],
+          "heading": 0,
+          "pan": 165,
+          "tilt": -16,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291157146
+          },
+          "action": {
+            "id": "80617e79-5b9c-4cd5-ac60-050b3089e29b",
+            "type": "look",
+            "status": "completed",
+            "target": null
+          }
+        },
+        "objects": [
+          {
+            "id": "crate-12",
+            "label": "Storage cargo · 12",
+            "position": [
+              -8.4,
+              0.55,
+              -18
+            ],
+            "distance": 35.22,
+            "condition": "Surface abrasion on north face. Seal intact."
+          }
+        ],
+        "inspection": {
+          "objectId": "crate-12",
+          "condition": "Surface abrasion on north face. Seal intact."
+        }
+      }
+    },
+    {
+      "index": 38,
+      "at": "2026-10-18T02:38:56.843Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "camera-01",
+        "command": {
+          "type": "look",
+          "pan": 115,
+          "tilt": -10
+        }
+      },
+      "note": "Sweep the far-side storage sector for any remaining tagged cargo.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "0a939522-9551-41ff-b5c1-8489716d41fe",
+          "type": "look",
+          "status": "completed",
+          "target": null
+        },
+        "revision": 281
+      }
+    },
+    {
+      "index": 39,
+      "at": "2026-10-18T02:39:00.385Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "camera-01",
+        "image": false
+      },
+      "note": "Read tags in the far-side camera sector.",
+      "isError": false,
+      "result": {
+        "at": 1792291140382,
+        "revision": 281,
+        "body": {
+          "id": "camera-01",
+          "kind": "camera",
+          "label": "Sentinel",
+          "position": [
+            -30.2,
+            10,
+            8
+          ],
+          "heading": 0,
+          "pan": 115,
+          "tilt": -10,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291157146
+          },
+          "action": {
+            "id": "0a939522-9551-41ff-b5c1-8489716d41fe",
+            "type": "look",
+            "status": "completed",
+            "target": null
+          }
+        },
+        "objects": [
+          {
+            "id": "crate-07",
+            "label": "Priority cargo · 07",
+            "position": [
+              6,
+              0.55,
+              2
+            ],
+            "distance": 37.89
+          },
+          {
+            "id": "crate-12",
+            "label": "Storage cargo · 12",
+            "position": [
+              -8.4,
+              0.55,
+              -18
+            ],
+            "distance": 35.22,
+            "condition": "Surface abrasion on north face. Seal intact."
+          }
+        ],
+        "inspection": {
+          "objectId": "crate-12",
+          "condition": "Surface abrasion on north face. Seal intact."
+        }
+      }
+    },
+    {
+      "index": 40,
+      "at": "2026-10-18T02:39:12.484Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "drone-01",
+        "command": {
+          "type": "move",
+          "x": 12,
+          "y": 11,
+          "z": -13
+        }
+      },
+      "note": "Continue the aerial survey above shelf height toward the far storage side.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "afaf6541-1351-428f-89b6-c959849eb85f",
+          "type": "move",
+          "status": "running",
+          "target": [
+            12,
+            11,
+            -13
+          ]
+        },
+        "revision": 282
+      }
+    },
+    {
+      "index": 41,
+      "at": "2026-10-18T02:39:19.240Z",
+      "tool": "wait",
+      "input": {
+        "leaseRef": "drone-01"
+      },
+      "polls": 24,
+      "isError": false,
+      "result": {
+        "at": 1792291159234,
+        "revision": 429,
+        "body": {
+          "id": "drone-01",
+          "kind": "drone",
+          "label": "Wisp",
+          "position": [
+            12,
+            11,
+            -13
+          ],
+          "heading": 1.5707963267948966,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": true,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291289116
+          },
+          "action": {
+            "id": "afaf6541-1351-428f-89b6-c959849eb85f",
+            "type": "move",
+            "status": "completed",
+            "target": [
+              12,
+              11,
+              -13
+            ]
+          }
+        },
+        "objects": [],
+        "inspection": null
+      }
+    },
+    {
+      "index": 42,
+      "at": "2026-10-18T02:39:23.813Z",
+      "tool": "observe",
+      "input": {
+        "leaseRef": "drone-01",
+        "image": true
+      },
+      "note": "Inspect the far-side storage view and any nearby tag detections.",
+      "isError": false,
+      "result": {
+        "at": 1792291162214,
+        "revision": 429,
+        "body": {
+          "id": "drone-01",
+          "kind": "drone",
+          "label": "Wisp",
+          "position": [
+            12,
+            11,
+            -13
+          ],
+          "heading": 1.5707963267948966,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": true,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291289116
+          },
+          "action": {
+            "id": "afaf6541-1351-428f-89b6-c959849eb85f",
+            "type": "move",
+            "status": "completed",
+            "target": [
+              12,
+              11,
+              -13
+            ]
+          }
+        },
+        "objects": [],
+        "inspection": null,
+        "frame": {
+          "id": "fc75968c-9776-473a-aa0d-44a8a78de3a3",
+          "instanceId": "8bca290c-f094-4a5c-845a-febb9640e147",
+          "resourceId": "drone-01",
+          "revision": 429,
+          "at": 1792291162214,
+          "width": 640,
+          "height": 360,
+          "mimeType": "image/jpeg"
+        }
+      },
+      "image": {
+        "path": "frames/sensor-042-drone-01.jpg",
+        "sha256": "418b299beb6753bd59fddd0de5010ab035e9e7ddd9dd51526d3986b74c57b3c6",
+        "bytes": 38145
+      }
+    },
+    {
+      "index": 43,
+      "at": "2026-10-18T02:39:46.554Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "drone-01",
+        "command": {
+          "type": "move",
+          "x": -4,
+          "y": 11,
+          "z": -3
+        }
+      },
+      "note": "Return above shelf height to the known open takeoff zone.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "8a37317c-cf76-4774-91b1-2f1b445f38fa",
+          "type": "move",
+          "status": "running",
+          "target": [
+            -4,
+            11,
+            -3
+          ]
+        },
+        "revision": 431
+      }
+    },
+    {
+      "index": 44,
+      "at": "2026-10-18T02:39:54.459Z",
+      "tool": "wait",
+      "input": {
+        "leaseRef": "drone-01"
+      },
+      "polls": 32,
+      "isError": false,
+      "result": {
+        "at": 1792291194455,
+        "revision": 617,
+        "body": {
+          "id": "drone-01",
+          "kind": "drone",
+          "label": "Wisp",
+          "position": [
+            -4,
+            11,
+            -3
+          ],
+          "heading": -1.0121970114513341,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": true,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291289116
+          },
+          "action": {
+            "id": "8a37317c-cf76-4774-91b1-2f1b445f38fa",
+            "type": "move",
+            "status": "completed",
+            "target": [
+              -4,
+              11,
+              -3
+            ]
+          }
+        },
+        "objects": [],
+        "inspection": null
+      }
+    },
+    {
+      "index": 45,
+      "at": "2026-10-18T02:39:57.154Z",
+      "tool": "act",
+      "input": {
+        "leaseRef": "drone-01",
+        "command": {
+          "type": "land"
+        }
+      },
+      "note": "Land vertically in the previously observed open inspection zone.",
+      "isError": false,
+      "result": {
+        "action": {
+          "id": "5bf0d3ba-003b-4af5-b51d-829afa6b63f7",
+          "type": "land",
+          "status": "running",
+          "target": [
+            -4,
+            0.4,
+            -3
+          ]
+        },
+        "revision": 618
+      }
+    },
+    {
+      "index": 46,
+      "at": "2026-10-18T02:40:01.730Z",
+      "tool": "wait",
+      "input": {
+        "leaseRef": "drone-01"
+      },
+      "polls": 13,
+      "isError": false,
+      "result": {
+        "at": 1792291201715,
+        "revision": 717,
+        "body": {
+          "id": "drone-01",
+          "kind": "drone",
+          "label": "Wisp",
+          "position": [
+            -4,
+            0.40000000000000036,
+            -3
+          ],
+          "heading": -1.0121970114513341,
+          "pan": 0,
+          "tilt": 0,
+          "preset": "home",
+          "heldObjectId": null,
+          "airborne": false,
+          "lease": {
+            "owner": "Cargo mission",
+            "expiresAt": 1792291289116
+          },
+          "action": {
+            "id": "5bf0d3ba-003b-4af5-b51d-829afa6b63f7",
+            "type": "land",
+            "status": "completed",
+            "target": [
+              -4,
+              0.4,
+              -3
+            ]
+          }
+        },
+        "objects": [],
+        "inspection": null
+      }
+    },
+    {
+      "index": 47,
+      "at": "2026-10-18T02:40:10.446Z",
+      "tool": "release",
+      "input": {
+        "leaseRef": "camera-01"
+      },
+      "note": "Session cleanup",
+      "isError": false,
+      "result": {
+        "released": true
+      }
+    },
+    {
+      "index": 48,
+      "at": "2026-10-18T02:40:10.452Z",
+      "tool": "release",
+      "input": {
+        "leaseRef": "rover-01"
+      },
+      "note": "Session cleanup",
+      "isError": false,
+      "result": {
+        "released": true
+      }
+    },
+    {
+      "index": 49,
+      "at": "2026-10-18T02:40:10.457Z",
+      "tool": "release",
+      "input": {
+        "leaseRef": "arm-01"
+      },
+      "note": "Session cleanup",
+      "isError": false,
+      "result": {
+        "released": true
+      }
+    },
+    {
+      "index": 50,
+      "at": "2026-10-18T02:40:10.461Z",
+      "tool": "release",
+      "input": {
+        "leaseRef": "drone-01"
+      },
+      "note": "Session cleanup",
+      "isError": false,
+      "result": {
+        "released": true
+      }
+    },
+    {
+      "index": 51,
+      "at": "2026-10-18T02:40:16.254Z",
+      "tool": "session_end",
+      "note": "Inspected Priority cargo 07: seal intact, label verified, cleared for dispatch. Used Atlas reach, grasp, drop, and place; verified completed placement and empty gripper by arm telemetry, CARGO 07 on the floor marker in the arm image, and independent camera telemetry at [6,0.55,2]. Returned the empty arm home. Inspected Storage cargo 12 at [-8.4,0.55,-18]: surface abrasion on north face, seal intact; left it in storage. Surveyed central and far-side shelves with drone images and telemetry without additional tag detections; this was not an exhaustive inventory. Drone returned to [-4,0.4,-3], landing completed, airborne false. Two later elevated-camera image deliveries timed out; their images were unavailable, and only successful telemetry recovery was used. Releasing remaining bodies."
+    }
+  ],
+  "browserErrors": []
+}

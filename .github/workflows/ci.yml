@@ -8,7 +8,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 16
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,6 +28,10 @@ jobs:
         run: node scripts/capture-access.mjs
       - name: Verify all body images, stdio images and the embedded MCP App
         run: node scripts/capture-sensors.mjs
+      - name: Verify agent recorder privacy and interleaved body observations
+        run: node scripts/smoke-agent-recorder.mjs
+        env:
+          GHOST_AGENT_TEST_DIR: work/captures/recorder-smoke
       - uses: actions/upload-artifact@v4
         if: always()
         with:

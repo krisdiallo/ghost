@@ -125,6 +125,8 @@ Tests cover lease contention and expiry, invalid tokens, repeated release, bound
 
 ## See what the agent sees
 
+**Real agent progress:** [A fresh Codex agent used all four bodies, staged cleared cargo and reported an exception](docs/progress/agent/README.md). It inspected two of three tagged crates and explicitly reported incomplete coverage. [Run and record agent missions](docs/agent-missions.md).
+
 **Body camera** switches the main warehouse viewer to the selected body's live optics: Sentinel's mounted lens, Scout's mast, Wisp's downward-facing camera, or Atlas's wrist camera. Switch back to **Warehouse view** to orbit, pan and zoom. Mobile bodies initially face into the hall, and cargo has physical labels on its faces.
 
 **Agent vision** displays the last captured image for that body, with its revision and UTC timestamp. This is a frozen image, not a video stream. It is the exact JPEG returned by `observe({ leaseId, image: true })`; the live world can advance after capture. Browser owners can also choose **Capture sensor frame**. Capturing in the console prepares a frame but does not send it to a model on its own.
