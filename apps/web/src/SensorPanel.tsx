@@ -17,8 +17,6 @@ export function SensorPanel({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
-    setFrame(null);
-    setError(null);
     if (!open || !live) return;
     let active = true;
     async function refresh() {
