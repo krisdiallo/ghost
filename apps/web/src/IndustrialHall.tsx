@@ -81,12 +81,7 @@ for (const [bay, [x, z]] of bays.entries()) {
       );
     }
   }
-  // Leave the fourth tier open: a solid cap shares the boxes' top plane at
-  // y=8.05 and flickers through them. Perimeter rails clear the stock footprint.
-  for (const dz of [-1.05, 1.05])
-    add(frame, [x, 7.95, z + dz], [7.6, 0.2, 0.16], steel);
-  for (const dx of [-3.65, 3.65])
-    add(frame, [x + dx, 7.95, z], [0.16, 0.2, 1.94], steel);
+  // The highest boxes are exposed; there is no shelf or cap above them.
 }
 // A high north wall, side wall, loading doors and a mezzanine establish the scale.
 add(frame, [0, 7.2, -33.9], [64, 14.4, 0.3], "#394e5a");
