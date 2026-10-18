@@ -4,7 +4,12 @@ import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { resolve, extname, sep } from "node:path";
 import { toNodeHandler } from "mcp-use/node";
-import type { ToolName, Observation, SensorFrame } from "@ghost/shared";
+import type {
+  ToolName,
+  Observation,
+  SensorFrame,
+  Snapshot,
+} from "@ghost/shared";
 import { Simulation, SimError } from "./simulation.js";
 import { createHttpMcp } from "./mcp.js";
 import { Operations } from "./operations.js";
@@ -123,17 +128,35 @@ export async function startWarehouse(
     ...(configuredOrigin ? [configuredOrigin] : []),
   ]);
   const streams = new Map<ServerResponse, IncomingMessage>();
+  const backpressured = new WeakSet<ServerResponse>();
+  const sentRevision = new WeakMap<ServerResponse, number>();
+  let changed = true;
+  let latest: Snapshot | undefined;
   const unsubscribe = sim.subscribe(() => {
-    const event = `data: ${JSON.stringify(sim.snapshot())}\n\n`;
-    for (const [res, req] of streams)
+    changed = true;
+  });
+  // Coalesce the 20Hz simulation's multiple mutations into at most 10Hz delivery.
+  // A slow socket keeps its queued frame and receives the newest state on drain.
+  const broadcast = setInterval(() => {
+    if (!streams.size) return;
+    if (changed || !latest) {
+      latest = sim.snapshot();
+      changed = false;
+    }
+    let event: string | undefined;
+    for (const [res, req] of streams) {
       if (!access.authorized(req)) {
         streams.delete(res);
         res.end();
-      } else if (!res.write(event)) {
-        streams.delete(res);
-        res.end();
+        continue;
       }
-  });
+      if (backpressured.has(res) || sentRevision.get(res) === latest.revision)
+        continue;
+      event ??= `data: ${JSON.stringify(latest)}\n\n`;
+      sentRevision.set(res, latest.revision);
+      if (!res.write(event)) backpressured.add(res);
+    }
+  }, 100);
   const timer = setInterval(() => {
     sim.tick();
     operations.tick();
@@ -144,7 +167,8 @@ export async function startWarehouse(
       if (!access.authorized(req)) {
         streams.delete(res);
         res.end();
-      } else res.write(": heartbeat\n\n");
+      } else if (!backpressured.has(res) && !res.write(": heartbeat\n\n"))
+        backpressured.add(res);
     }
   }, 10_000);
   const server = createServer(async (req, res) => {
@@ -255,9 +279,15 @@ export async function startWarehouse(
           Connection: "keep-alive",
           "X-Accel-Buffering": "no",
         });
-        res.write(`data: ${JSON.stringify(sim.snapshot())}\n\n`);
+        res.setTimeout(0);
+        res.flushHeaders();
+        const initial = sim.snapshot();
+        if (!res.write(`retry: 1000\ndata: ${JSON.stringify(initial)}\n\n`))
+          backpressured.add(res);
+        sentRevision.set(res, initial.revision);
         streams.set(res, req);
-        req.on("close", () => streams.delete(res));
+        res.on("drain", () => backpressured.delete(res));
+        res.on("close", () => streams.delete(res));
         return;
       }
       if (url.pathname.startsWith("/api/tools/") && req.method === "POST") {
@@ -353,6 +383,7 @@ export async function startWarehouse(
   server.requestTimeout = 15_000;
   server.on("close", () => {
     clearInterval(timer);
+    clearInterval(broadcast);
     clearInterval(heartbeat);
     unsubscribe();
   });
@@ -363,6 +394,7 @@ export async function startWarehouse(
     });
   } catch (error) {
     clearInterval(timer);
+    clearInterval(broadcast);
     clearInterval(heartbeat);
     unsubscribe();
     throw error;

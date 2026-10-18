@@ -206,7 +206,10 @@ export function App() {
   }, [tokens]);
   useEffect(() => {
     let alive = true;
-    let receivedStream = false;
+    let lastStreamAt = 0;
+    let lastAcceptedAt = Date.now();
+    let lastPollAt = 0;
+    let polling = false;
     const accept = (next: Snapshot) => {
       if (!alive) return;
       if (
@@ -225,6 +228,7 @@ export function App() {
       }
       instance.current = next.instanceId;
       lastSnapshot.current = next;
+      lastAcceptedAt = Date.now();
       setClockOffset(next.at - Date.now());
       setSnapshot(next);
       setConnection("live");
@@ -236,30 +240,50 @@ export function App() {
           forget(id);
       }
     };
-    void request<Snapshot>("/api/snapshot")
-      .then((next) => {
-        if (!receivedStream) accept(next);
-      })
-      .catch(() => {
-        if (alive) setConnection("disconnected");
-      });
+    // Hosting proxies can interrupt SSE while ordinary requests remain healthy.
+    // Keep authoritative snapshots flowing instead of disabling a working warehouse.
+    const poll = async () => {
+      if (polling || !alive) return;
+      polling = true;
+      lastPollAt = Date.now();
+      try {
+        accept(await request<Snapshot>("/api/snapshot", undefined, 3500));
+      } catch {
+        if (alive && Date.now() - lastAcceptedAt >= 3000)
+          setConnection("disconnected");
+      } finally {
+        polling = false;
+      }
+    };
+    void poll();
     const stream = new EventSource("/api/events");
     stream.onmessage = (event) => {
-      receivedStream = true;
       try {
         accept(JSON.parse(event.data));
+        lastStreamAt = Date.now();
       } catch {
-        if (alive) setConnection("disconnected");
+        lastStreamAt = 0;
+        void poll();
       }
     };
     stream.onerror = () => {
-      if (alive) setConnection("disconnected");
-      void request("/api/access").catch(() => {});
+      lastStreamAt = 0;
+      void poll();
     };
-    const timer = setInterval(() => setTime(Date.now()), 250);
+    const refreshVisible = () => {
+      if (!document.hidden) void poll();
+    };
+    document.addEventListener("visibilitychange", refreshVisible);
+    const timer = setInterval(() => {
+      const now = Date.now();
+      setTime(now);
+      if (now - lastStreamAt > 2000 && now - lastPollAt >= 750) void poll();
+      if (now - lastAcceptedAt > 5000) setConnection("disconnected");
+    }, 250);
     return () => {
       alive = false;
       stream.close();
+      document.removeEventListener("visibilitychange", refreshVisible);
       clearInterval(timer);
     };
   }, [forget]);
@@ -567,7 +591,9 @@ export function App() {
         <aside className="fleet panel">
           <div className="section-heading">
             <h2>Available bodies</h2>
-            <span className="count">{String(snapshot?.bodies.length ?? 4).padStart(2, "0")}</span>
+            <span className="count">
+              {String(snapshot?.bodies.length ?? 4).padStart(2, "0")}
+            </span>
           </div>
           <p className="section-description">Choose a host. Make it yours.</p>
           <div className="fleet-list" role="group" aria-label="Select a body">
